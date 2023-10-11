@@ -1,0 +1,4 @@
+Django~=4.2
+djangorestframework
+gunicorn~=21.2
+requests~=2.31
