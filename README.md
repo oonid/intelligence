@@ -11,7 +11,22 @@ This allows you to easily run the project with the following command:
 docker-compose up
 ```
 
-The `docker-compose` command will build the `basecamp_app` using the `docker build` process, with configurations defined in the `Dockerfile`.
+The `docker-compose` command will build the `basecamp_app` using the `docker build` process,
+with configurations defined in the `Dockerfile`.
+
+If you need to access `django-admin` or `manage.py` commands, make sure to navigate to the `basecamp_app` directory
+before using them.
+
+To add a new Django app named `bc`, use the `django-admin` command:
+```shell
+cd basecamp_app
+django-admin startapp bc
+```
+To apply model changes, utilize the `manage.py` script:
+```shell
+cd basecamp_app
+python manage.py migrate
+```
 
 ### Structure
 
