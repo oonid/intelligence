@@ -1,6 +1,11 @@
-# djbc: django basecamp
+# intelligence
 
 A brief exploration of a web app built with [Django](https://www.djangoproject.com/), which interacts with the [Basecamp API](https://github.com/basecamp/bc3-api).
+
+Objectives:
+* To implement OAuth, user easily login and get access token, save to db
+* To create form input, as input of API call
+* To implement webhook
 
 ## Development
 
@@ -30,7 +35,7 @@ python manage.py migrate
 
 ### Structure
 
-The Django project is located inside the `basecamp_app` directory and is named `djbc`.
+The Django project is located inside the `basecamp_app` directory and is named `intelligence`.
 
 I have placed the virtual environment within the `basecamp_app` directory, specifically in the `venv` subdirectory.
 The packages that need to be installed using `pip` are listed in the `requirements.txt` file.
