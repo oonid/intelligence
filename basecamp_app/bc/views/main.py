@@ -18,19 +18,15 @@ def basecamp_main(request):
         return HttpResponseRedirect(reverse('bc-auth'))
 
     # token still updated
-    if "identity" not in request.session:  # no identity, strip token and send blank
-        try:
-            del request.session["token"]
-        except KeyError:
-            pass
-        return HttpResponse('')
+    if "identity" not in request.session:  # no identity, strip token and redirect to auth
+        return HttpResponseRedirect(reverse('bc-auth'))
 
     # identity exists
     identity = request.session["identity"]
 
     return HttpResponse(
         f'hello, {identity["first_name"]} {identity["last_name"]}<br/>'
-        '<a href="'+reverse('app-people')+'">people</a>')
+        '<a href="'+reverse('app-people-main')+'">people</a>')
 
 
 def basecamp_auth(request):
@@ -112,8 +108,10 @@ def basecamp_redirect(request):
         "refresh_token": refresh_token,
     }
 
+    # as mentioned on docs: The id field should NOT be used for submitting data
+    # https://github.com/basecamp/api/blob/master/sections/authentication.md
     request.session["identity"] = {
-        "id": basecamp_identity["id"],
+        "id": 0,
         "email_address": basecamp_identity["email_address"],
         "first_name": basecamp_identity["first_name"],
         "last_name": basecamp_identity["last_name"],

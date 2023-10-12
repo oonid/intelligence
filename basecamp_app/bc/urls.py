@@ -7,5 +7,6 @@ urlpatterns = [
     path('auth', views.basecamp_auth, name='bc-auth'),
     path('redirect', views.basecamp_redirect, name='bc-redirect'),
     # people
-    path('people/', views.app_people_main, name='app-people'),
+    path('people/', views.app_people_main, name='app-people-main'),
+    path('people/person/', views.app_people_person, name='app-people-person')
 ]
