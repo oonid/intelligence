@@ -1,11 +1,11 @@
 # intelligence
 
-A brief exploration of a web app built with [Django](https://www.djangoproject.com/), which interacts with the [Basecamp API](https://github.com/basecamp/bc3-api).
+A brief exploration of a web app built with [Django](https://www.djangoproject.com/) that interacts with the [Basecamp API](https://github.com/basecamp/bc3-api).
 
 Objectives:
-* To implement OAuth, user easily login and get access token, save to db
-* To create form input, as input of API call
-* To implement webhook
+* Implement OAuth to allow users to log in easily and obtain an access token, which is then saved in cookie-based sessions.
+* Create a form input for user input in API calls.
+* Implement webhooks.
 
 ## Development
 
