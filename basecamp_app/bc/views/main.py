@@ -32,6 +32,13 @@ def basecamp_main(request):
 
 
 def basecamp_auth(request):
+    """
+    docs reference:
+    * https://github.com/basecamp/api/blob/master/sections/authentication.md
+
+    :param request:
+    :return:
+    """
     try:
         del request.session["token"]  # entering auth URI manually will flush the saved session
     except KeyError:
