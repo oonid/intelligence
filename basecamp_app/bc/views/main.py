@@ -2,20 +2,20 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from os import environ
 from datetime import datetime, timezone
-from requests import get, post
+from requests import get as http_get, post as http_post
 
 
 def basecamp_main(request):
-    if "token" not in request.session:  # no token, send blank
-        return HttpResponse('<a href="'+reverse('bc-auth')+'">auth</a')
+    if "token" not in request.session:  # no token, send auth link
+        return HttpResponse('<a href="'+reverse('bc-auth')+'">auth</a>')
 
     # token exists
     token = request.session["token"]
     # [:-1] to remove 'Z' at the last character in date time str
     token_expires_datetime = datetime.fromisoformat(token["expires_at"][:-1]).astimezone(timezone.utc)
 
-    if token_expires_datetime < datetime.now().astimezone(timezone.utc):  # token expired, send blank
-        return HttpResponse('')
+    if token_expires_datetime < datetime.now().astimezone(timezone.utc):  # token expired, redirect to auth
+        return HttpResponseRedirect(reverse('bc-auth'))
 
     # token still updated
     if "identity" not in request.session:  # no identity, strip token and send blank
@@ -28,7 +28,9 @@ def basecamp_main(request):
     # identity exists
     identity = request.session["identity"]
 
-    return HttpResponse(f'hello: {identity["first_name"]} {identity["last_name"]}')
+    return HttpResponse(
+        f'hello, {identity["first_name"]} {identity["last_name"]}<br/>'
+        '<a href="'+reverse('app-people')+'">people</a>')
 
 
 def basecamp_auth(request):
@@ -70,12 +72,12 @@ def basecamp_redirect(request):
     basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
 
     # request token to basecamp token URI
-    response = post(url=basecamp_token_uri,
-                    data={"type": "web_server",
-                          "client_id": basecamp_client_id,
-                          "client_secret": basecamp_client_secret,
-                          "redirect_uri": basecamp_redirect_uri,
-                          "code": response_code})
+    response = http_post(url=basecamp_token_uri,
+                         data={"type": "web_server",
+                               "client_id": basecamp_client_id,
+                               "client_secret": basecamp_client_secret,
+                               "redirect_uri": basecamp_redirect_uri,
+                               "code": response_code})
 
     if response.status_code != 200:  # not OK
         return HttpResponse('', status=response.status_code)
@@ -86,8 +88,8 @@ def basecamp_redirect(request):
     refresh_token = data['refresh_token']
 
     # request authorization details to basecamp authorization URI
-    response = get(url=basecamp_authorization_uri,
-                   headers={"Authorization": "Bearer " + access_token, "User-Agent": basecamp_user_agent})
+    response = http_get(url=basecamp_authorization_uri,
+                        headers={"Authorization": "Bearer " + access_token, "User-Agent": basecamp_user_agent})
 
     if response.status_code != 200:  # not OK
         return HttpResponse('', status=response.status_code)
