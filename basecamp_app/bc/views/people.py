@@ -1,40 +1,17 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.template import Template, RequestContext
-from os import environ
-from datetime import datetime, timezone
-from requests import get as http_get
+from ..utils import session_get_token_and_identity, bc_api_get, api_people_my_profile_uri, api_people_get_person_uri
 
 
 def app_people_main(request):
-    if "token" not in request.session:  # no token, send auth link
-        return HttpResponse('<a href="'+reverse('bc-auth')+'">auth</a>')
 
-    # token exists
-    token = request.session["token"]
-    # [:-1] to remove 'Z' at the last character in date time str
-    token_expires_datetime = datetime.fromisoformat(token["expires_at"][:-1]).astimezone(timezone.utc)
-
-    if token_expires_datetime < datetime.now().astimezone(timezone.utc):  # token expired, redirect to auth
+    token, identity = session_get_token_and_identity(request)
+    if not (token and identity):  # no token or identity, redirect to auth
         return HttpResponseRedirect(reverse('bc-auth'))
-
-    # token still updated
-    if "identity" not in request.session:  # no identity, strip token and redirect to auth
-        return HttpResponseRedirect(reverse('bc-auth'))
-
-    # identity exists
-    identity = request.session["identity"]
-
-    basecamp_api_uri = environ["BASECAMP_API_URI"]
-    basecamp_user_agent = environ["BASECAMP_USER_AGENT"]
-    basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
-    basecamp_api_people_my_profile = f'{basecamp_api_uri}/{basecamp_account_id}/my/profile.json'
-
-    access_token = token["access_token"]
 
     # request to people my profile API
-    response = http_get(url=basecamp_api_people_my_profile,
-                        headers={"Authorization": "Bearer " + access_token, "User-Agent": basecamp_user_agent})
+    response = bc_api_get(uri=api_people_my_profile_uri(), access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
         return HttpResponse('', status=response.status_code)
@@ -52,41 +29,27 @@ def app_people_main(request):
 
 
 def app_people_person(request):
-    if "token" not in request.session:  # no token, send auth link
-        return HttpResponse('<a href="'+reverse('bc-auth')+'">auth</a>')
 
-    # token exists
-    token = request.session["token"]
-    # [:-1] to remove 'Z' at the last character in date time str
-    token_expires_datetime = datetime.fromisoformat(token["expires_at"][:-1]).astimezone(timezone.utc)
-
-    if token_expires_datetime < datetime.now().astimezone(timezone.utc):  # token expired, redirect to auth
+    token, identity = session_get_token_and_identity(request)
+    if not (token and identity):  # no token or identity, redirect to auth
         return HttpResponseRedirect(reverse('bc-auth'))
-
-    # token still updated
-    if "identity" not in request.session:  # no identity, strip token and redirect to auth
-        return HttpResponseRedirect(reverse('bc-auth'))
-
-    # identity exists
-    identity = request.session["identity"]
-
-    basecamp_api_uri = environ["BASECAMP_API_URI"]
-    basecamp_user_agent = environ["BASECAMP_USER_AGENT"]
-    basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
-
-    access_token = token["access_token"]
 
     people_id = identity["id"] if identity["id"] > 0 else 0
     data = None
-    basecamp_api_people_get_person = ''
+    api_people_get_person = ''  # init, will be updated on form post
 
     if request.method == 'POST':
-        people_id = request.POST.get("people_id")
-        basecamp_api_people_get_person = f'{basecamp_api_uri}/{basecamp_account_id}/people/{people_id}.json'
+        try:
+            people_id = int(request.POST.get("people_id"))
+            if people_id <= 0:  # invalid
+                return HttpResponse('', status=400)
+
+        except ValueError:
+            return HttpResponse('', status=400)
 
         # request to people get person API
-        response = http_get(url=basecamp_api_people_get_person,
-                            headers={"Authorization": "Bearer " + access_token, "User-Agent": basecamp_user_agent})
+        api_people_get_person = api_people_get_person_uri(people_id=people_id)
+        response = bc_api_get(uri=api_people_get_person, access_token=token["access_token"])
 
         if response.status_code != 200:  # not OK
             return HttpResponse('', status=response.status_code)
@@ -109,7 +72,7 @@ def app_people_person(request):
             '{% if people_avatar_url %}<img src="{{ people_avatar_url }}" />{% endif %}<br/>')
 
     c = RequestContext(request,
-                       {'api_people_get_person': basecamp_api_people_get_person,
+                       {'api_people_get_person': api_people_get_person,
                         'people_id': people_id,
                         'people_profile': f'profile: {data["name"]} ({data["id"]})' if data else '',
                         'people_avatar_url': f'{data["avatar_url"]}' if data else ''})
