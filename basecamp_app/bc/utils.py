@@ -29,6 +29,12 @@ def api_project_get_all_projects_uri():
     return f'{basecamp_api_uri}/{basecamp_account_id}/projects.json'
 
 
+def api_project_get_project_uri(project_id):
+    basecamp_api_uri = environ["BASECAMP_API_URI"]
+    basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
+    return f'{basecamp_api_uri}/{basecamp_account_id}/projects/{project_id}.json'
+
+
 def session_get_token_and_identity(request):
     """
 

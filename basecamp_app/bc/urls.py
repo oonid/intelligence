@@ -11,4 +11,5 @@ urlpatterns = [
     path('people/person/', views.app_people_person, name='app-people-person'),
     # project
     path('project/', views.app_project_main, name='app-project-main'),
+    path('project/<int:project_id>', views.app_project_detail, name='app-project-detail'),
 ]
