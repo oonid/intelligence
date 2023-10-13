@@ -26,6 +26,7 @@ def basecamp_main(request):
 
     return HttpResponse(
         f'hello, {identity["first_name"]} {identity["last_name"]}<br/>'
+        f'your <a href="#'+token["access_token"]+'">token</a>.<br/>'
         '<a href="'+reverse('app-people-main')+'">people</a>')
 
 

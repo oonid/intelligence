@@ -60,7 +60,7 @@ def app_people_person(request):
     # all methods (GET, POST, etc.)
 
     t = Template(
-            '<a href="' + reverse('app-people-main') + '">back to main</a><br/>'
+            '<a href="' + reverse('app-people-main') + '">back</a><br/>'
             '<form action="' + reverse('app-people-person') + '" method="post">'
             '{% csrf_token %}'
             '<label for="people_id">People ID: </label>'
