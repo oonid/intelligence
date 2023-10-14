@@ -1,17 +1,17 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.template import Template, RequestContext
-from ..utils import session_get_token_and_identity, bc_api_get, api_people_my_profile_uri, api_people_get_person_uri
+import bc.utils
 
 
 def app_people_main(request):
 
-    token, identity = session_get_token_and_identity(request)
+    token, identity = bc.utils.session_get_token_and_identity(request)
     if not (token and identity):  # no token or identity, redirect to auth
         return HttpResponseRedirect(reverse('bc-auth'))
 
     # request to people my profile API
-    response = bc_api_get(uri=api_people_my_profile_uri(), access_token=token["access_token"])
+    response = bc.utils.bc_api_get(uri=bc.utils.api_people_my_profile_uri(), access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
         return HttpResponse('', status=response.status_code)
@@ -30,7 +30,7 @@ def app_people_main(request):
 
 def app_people_person(request):
 
-    token, identity = session_get_token_and_identity(request)
+    token, identity = bc.utils.session_get_token_and_identity(request)
     if not (token and identity):  # no token or identity, redirect to auth
         return HttpResponseRedirect(reverse('bc-auth'))
 
@@ -48,8 +48,8 @@ def app_people_person(request):
             return HttpResponse('', status=400)
 
         # request to people get person API
-        api_people_get_person = api_people_get_person_uri(people_id=people_id)
-        response = bc_api_get(uri=api_people_get_person, access_token=token["access_token"])
+        api_people_get_person = bc.utils.api_people_get_person_uri(people_id=people_id)
+        response = bc.utils.bc_api_get(uri=api_people_get_person, access_token=token["access_token"])
 
         if response.status_code != 200:  # not OK
             return HttpResponse('', status=response.status_code)

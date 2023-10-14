@@ -1,5 +1,5 @@
 from django.db import models
-from basecamp_app.bc.models import BcCompany
+from .company import BcCompany  # not using "from bc.models" which triggered circular import
 
 
 class BcPeople(models.Model):
