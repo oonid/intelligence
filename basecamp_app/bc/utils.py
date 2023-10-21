@@ -23,6 +23,12 @@ def api_people_get_person_uri(people_id):
     return f'{basecamp_api_uri}/{basecamp_account_id}/people/{people_id}.json'
 
 
+def api_people_get_all_people_uri():
+    basecamp_api_uri = environ["BASECAMP_API_URI"]
+    basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
+    return f'{basecamp_api_uri}/{basecamp_account_id}/people.json'
+
+
 def api_project_get_all_projects_uri():
     basecamp_api_uri = environ["BASECAMP_API_URI"]
     basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization

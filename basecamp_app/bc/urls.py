@@ -9,6 +9,7 @@ urlpatterns = [
     # people
     path('people/', views.app_people_main, name='app-people-main'),
     path('people/person/', views.app_people_person, name='app-people-person'),
+    path('people/load/all/to/db', views.app_people_load_all_to_db, name='app-people-load-all-to-db'),
     # project
     path('project/', views.app_project_main, name='app-project-main'),
     path('project/<int:project_id>', views.app_project_detail, name='app-project-detail'),

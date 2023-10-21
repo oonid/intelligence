@@ -1,6 +1,8 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.template import Template, RequestContext
+
+from bc.models import BcCompany, BcPeople
 import bc.utils
 
 
@@ -78,3 +80,108 @@ def app_people_person(request):
                         'people_avatar_url': f'{data["avatar_url"]}' if data else ''})
 
     return HttpResponse(t.render(c))
+
+
+def app_people_load_all_to_db(request):
+    """
+    load manually all people data from API to db, access the URL directly (refer to the urls.py)
+    :param request:
+    :return:
+    """
+
+    token, identity = bc.utils.session_get_token_and_identity(request)
+    if not (token and identity):  # no token or identity, redirect to auth
+        return HttpResponseRedirect(reverse('bc-auth'))
+
+    # request to get all projects APIa
+    response = bc.utils.bc_api_get(uri=bc.utils.api_people_get_all_people_uri(), access_token=token["access_token"])
+
+    if response.status_code != 200:  # not OK
+        return HttpResponse('', status=response.status_code)
+
+    # if OK
+    data = response.json()
+    # print(f'X-Total-Count: {response.headers["X-Total-Count"]}')
+
+    for person in data:
+        if person["personable_type"] not in ['DummyUser', 'Tombstone']:
+            if not person["employee"] or 'bot' in person["name"]:
+                print(person)
+            # process company
+            if "company" in person and "id" in person["company"]:
+                try:
+                    company = BcCompany.objects.get(id=person["company"]["id"])
+                except BcCompany.DoesNotExist:  # entry if not exists
+                    company = BcCompany.objects.create(**person["company"])  # ** will create model from dict kwargs
+                    company.save()
+                    print(f'company {company} saved.')
+
+                # remove 'company' key from person, will use model instance company instead
+                person.pop('company')
+
+                person.pop('can_ping', None)  # this is example of we currently did not use can_ping field
+
+                # process person
+                try:
+                    people = BcPeople.objects.get(id=person["id"])
+                except BcPeople.DoesNotExist:  # entry if not exists
+                    people = BcPeople.objects.create(company=company, **person)  # using company instance and kwargs
+                    people.save()
+                    print(f'person {people} saved.')
+
+            else:
+                print(f'person {person["name"]} <{person["email_address"]}> has no company information.')
+
+    total_data = len(data)  # initial total
+
+    if 'next' in response.links and 'url' in response.links["next"]:
+        next_url = response.links["next"]["url"]
+    else:
+        next_url = None
+
+    while next_url:  # as long as next url exists
+        response = bc.utils.bc_api_get(uri=next_url, access_token=token["access_token"])
+
+        if response.status_code != 200:  # not OK
+            return HttpResponse('', status=response.status_code)
+
+        # if OK
+        data = response.json()
+
+        for person in data:
+            if person["personable_type"] not in ['DummyUser', 'Tombstone']:
+                if not person["employee"] or 'bot' in person["name"]:
+                    print(person)
+                # process company
+                if "company" in person and "id" in person["company"]:
+                    try:
+                        company = BcCompany.objects.get(id=person["company"]["id"])
+                    except BcCompany.DoesNotExist:  # entry if not exists
+                        company = BcCompany.objects.create(**person["company"])  # ** will create model from dict kwargs
+                        company.save()
+                        print(f'company {company} saved.')
+
+                    # remove 'company' key from person, will use model instance company instead
+                    person.pop('company')
+
+                    person.pop('can_ping', None)  # this is example of we currently did not use can_ping field
+
+                    # process person
+                    try:
+                        people = BcPeople.objects.get(id=person["id"])
+                    except BcPeople.DoesNotExist:  # entry if not exists
+                        people = BcPeople.objects.create(company=company, **person)  # using company instance and kwargs
+                        people.save()
+                        print(f'person {people} saved.')
+
+                else:
+                    print(f'person {person["name"]} <{person["email_address"]}> has no company information.')
+
+        total_data += len(data)
+
+        if 'next' in response.links and 'url' in response.links["next"]:
+            next_url = response.links["next"]["url"]
+        else:
+            next_url = None
+
+    return HttpResponse(f'load people to db: {total_data}')
