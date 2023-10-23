@@ -3,17 +3,18 @@ from django.urls import reverse
 from django.template import Template, RequestContext
 
 from bc.models import BcCompany, BcPeople
-import bc.utils
+from bc.utils import (session_get_token_and_identity, bc_api_get, api_people_my_profile_uri, api_people_get_person_uri,
+                      api_people_get_all_people_uri)
 
 
 def app_people_main(request):
 
-    token, identity = bc.utils.session_get_token_and_identity(request)
+    token, identity = session_get_token_and_identity(request)
     if not (token and identity):  # no token or identity, redirect to auth
         return HttpResponseRedirect(reverse('bc-auth'))
 
     # request to people my profile API
-    response = bc.utils.bc_api_get(uri=bc.utils.api_people_my_profile_uri(), access_token=token["access_token"])
+    response = bc_api_get(uri=api_people_my_profile_uri(), access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
         return HttpResponse('', status=response.status_code)
@@ -32,7 +33,7 @@ def app_people_main(request):
 
 def app_people_person(request):
 
-    token, identity = bc.utils.session_get_token_and_identity(request)
+    token, identity = session_get_token_and_identity(request)
     if not (token and identity):  # no token or identity, redirect to auth
         return HttpResponseRedirect(reverse('bc-auth'))
 
@@ -50,8 +51,8 @@ def app_people_person(request):
             return HttpResponse('', status=400)
 
         # request to people get person API
-        api_people_get_person = bc.utils.api_people_get_person_uri(people_id=people_id)
-        response = bc.utils.bc_api_get(uri=api_people_get_person, access_token=token["access_token"])
+        api_people_get_person = api_people_get_person_uri(people_id=people_id)
+        response = bc_api_get(uri=api_people_get_person, access_token=token["access_token"])
 
         if response.status_code != 200:  # not OK
             return HttpResponse('', status=response.status_code)
@@ -89,12 +90,12 @@ def app_people_load_all_to_db(request):
     :return:
     """
 
-    token, identity = bc.utils.session_get_token_and_identity(request)
+    token, identity = session_get_token_and_identity(request)
     if not (token and identity):  # no token or identity, redirect to auth
         return HttpResponseRedirect(reverse('bc-auth'))
 
     # request to get all projects APIa
-    response = bc.utils.bc_api_get(uri=bc.utils.api_people_get_all_people_uri(), access_token=token["access_token"])
+    response = bc_api_get(uri=api_people_get_all_people_uri(), access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
         return HttpResponse('', status=response.status_code)
@@ -129,6 +130,8 @@ def app_people_load_all_to_db(request):
                     people.save()
                     print(f'person {people} saved.')
 
+                print(f'person {people} loaded.')
+
             else:
                 print(f'person {person["name"]} <{person["email_address"]}> has no company information.')
 
@@ -140,7 +143,7 @@ def app_people_load_all_to_db(request):
         next_url = None
 
     while next_url:  # as long as next url exists
-        response = bc.utils.bc_api_get(uri=next_url, access_token=token["access_token"])
+        response = bc_api_get(uri=next_url, access_token=token["access_token"])
 
         if response.status_code != 200:  # not OK
             return HttpResponse('', status=response.status_code)
@@ -173,6 +176,8 @@ def app_people_load_all_to_db(request):
                         people = BcPeople.objects.create(company=company, **person)  # using company instance and kwargs
                         people.save()
                         print(f'person {people} saved.')
+
+                    print(f'person {people} loaded.')
 
                 else:
                     print(f'person {person["name"]} <{person["email_address"]}> has no company information.')

@@ -1,16 +1,17 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
-import bc.utils
+from bc.utils import (session_get_token_and_identity, bc_api_get, api_project_get_all_projects_uri,
+                      api_project_get_project_uri)
 
 
 def app_project_main(request):
 
-    token, identity = bc.utils.session_get_token_and_identity(request)
+    token, identity = session_get_token_and_identity(request)
     if not (token and identity):  # no token or identity, redirect to auth
         return HttpResponseRedirect(reverse('bc-auth'))
 
     # request to get all projects API
-    response = bc.utils.bc_api_get(uri=bc.utils.api_project_get_all_projects_uri(), access_token=token["access_token"])
+    response = bc_api_get(uri=api_project_get_all_projects_uri(), access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
         return HttpResponse('', status=response.status_code)
@@ -39,13 +40,13 @@ def app_project_main(request):
 
 
 def app_project_detail(request, project_id):
-    token, identity = bc.utils.session_get_token_and_identity(request)
+    token, identity = session_get_token_and_identity(request)
     if not (token and identity):  # no token or identity, redirect to auth
         return HttpResponseRedirect(reverse('bc-auth'))
 
     # request to get project API
-    api_project_get_project = bc.utils.api_project_get_project_uri(project_id=project_id)
-    response = bc.utils.bc_api_get(uri=api_project_get_project, access_token=token["access_token"])
+    api_project_get_project = api_project_get_project_uri(project_id=project_id)
+    response = bc_api_get(uri=api_project_get_project, access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
         return HttpResponse('', status=response.status_code)
