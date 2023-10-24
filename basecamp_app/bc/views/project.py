@@ -24,8 +24,8 @@ def app_project_main(request):
         course_list += ('<li><a href="' + reverse('app-project-detail', kwargs={'project_id': project["id"]}) +
                         f'">{project["id"]}</a> {project["name"]}</li>')
 
-    if "Link" in response.headers:
-        print(response.headers["Link"])
+    if 'next' in response.links and 'url' in response.links["next"]:
+        print(response.links["next"]["url"])
 
     total_count = 0
     if "X-Total-Count" in response.headers:
