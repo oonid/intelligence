@@ -2,7 +2,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from django.template import Template, RequestContext
 
-from bc.models import BcCompany, BcPeople
+from bc.serializers import BcPeopleSerializer
 from bc.utils import (session_get_token_and_identity, bc_api_get, api_people_my_profile_uri, api_people_get_person_uri,
                       api_people_get_all_people_uri)
 
@@ -110,27 +110,12 @@ def app_people_load_all_to_db(request):
                 print(person)
             # process company
             if "company" in person and "id" in person["company"]:
-                try:
-                    company = BcCompany.objects.get(id=person["company"]["id"])
-                except BcCompany.DoesNotExist:  # entry if not exists
-                    company = BcCompany.objects.create(**person["company"])  # ** will create model from dict kwargs
-                    company.save()
-                    print(f'company {company} saved.')
-
-                # remove 'company' key from person, will use model instance company instead
-                person.pop('company')
-
-                person.pop('can_ping', None)  # this is example of we currently did not use can_ping field
-
-                # process person
-                try:
-                    people = BcPeople.objects.get(id=person["id"])
-                except BcPeople.DoesNotExist:  # entry if not exists
-                    people = BcPeople.objects.create(company=company, **person)  # using company instance and kwargs
-                    people.save()
-                    print(f'person {people} saved.')
-
-                print(f'person {people} loaded.')
+                serializer = BcPeopleSerializer(data=person)
+                if serializer.is_valid():
+                    people = serializer.save()
+                    print(f'person {people} loaded.')
+                else:  # invalid serializer
+                    print(serializer.errors)
 
             else:
                 print(f'person {person["name"]} <{person["email_address"]}> has no company information.')
@@ -157,27 +142,12 @@ def app_people_load_all_to_db(request):
                     print(person)
                 # process company
                 if "company" in person and "id" in person["company"]:
-                    try:
-                        company = BcCompany.objects.get(id=person["company"]["id"])
-                    except BcCompany.DoesNotExist:  # entry if not exists
-                        company = BcCompany.objects.create(**person["company"])  # ** will create model from dict kwargs
-                        company.save()
-                        print(f'company {company} saved.')
-
-                    # remove 'company' key from person, will use model instance company instead
-                    person.pop('company')
-
-                    person.pop('can_ping', None)  # this is example of we currently did not use can_ping field
-
-                    # process person
-                    try:
-                        people = BcPeople.objects.get(id=person["id"])
-                    except BcPeople.DoesNotExist:  # entry if not exists
-                        people = BcPeople.objects.create(company=company, **person)  # using company instance and kwargs
-                        people.save()
-                        print(f'person {people} saved.')
-
-                    print(f'person {people} loaded.')
+                    serializer = BcPeopleSerializer(data=person)
+                    if serializer.is_valid():
+                        people = serializer.save()
+                        print(f'person {people} loaded.')
+                    else:  # invalid serializer
+                        print(serializer.errors)
 
                 else:
                     print(f'person {person["name"]} <{person["email_address"]}> has no company information.')
