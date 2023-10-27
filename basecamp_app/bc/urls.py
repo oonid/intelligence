@@ -13,4 +13,6 @@ urlpatterns = [
     # project
     path('project/', views.app_project_main, name='app-project-main'),
     path('project/<int:project_id>', views.app_project_detail, name='app-project-detail'),
+    path('project/<int:project_id>/update-db', views.app_project_detail, kwargs={'update_db': True},
+         name='app-project-detail-update-db')
 ]
