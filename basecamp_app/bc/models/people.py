@@ -5,6 +5,7 @@ from .company import BcCompany  # not using "from bc.models" which triggered cir
 class BcPeople(models.Model):
     """
     https://github.com/basecamp/bc3-api/blob/master/sections/people.md
+    excluded field(s): can_ping
     """
     id = models.BigIntegerField(primary_key=True)  # Basecamp User ID
     attachable_sgid = models.TextField(null=True, blank=True)  # attachment sgid (eg: mention user)
