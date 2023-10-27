@@ -1,2 +1,3 @@
-from .people import *
 from .company import *
+from .people import *
+from .project import *
