@@ -61,32 +61,30 @@ def app_project_detail(request, project_id, update_db=False):
             tools += f'<li>{tool["title"]} ({tool["name"]})</li>'
 
     if update_db:
-        print('update_db')
         # let's try to remove the m2m dock first
         project_dock = data.pop('dock')
 
+        # load project or create new project from data
         try:
             project = BcProject.objects.get(id=project_id)
-            print(project)
-
         except BcProject.DoesNotExist:
-
             project = BcProject.objects.create(**data)
-            print(project)
-            print(data)
 
-        # push the dock back
-        # make sure all the tools exist
-
+        # process tools in the dock, make sure all tools exist
         for tool in project_dock:
-            print(tool)
 
             try:
                 tool = BcProjectTool.objects.get(id=tool["id"])
-                print(tool.id)
             except BcProjectTool.DoesNotExist:
                 tool = BcProjectTool.objects.create(**tool)
-                print(tool)
+
+            # make sure tool in the project exist
+            if not project.dock.filter(id=tool.id).exists():
+                project.dock.add(tool)
+
+        print(f'project: {project.name} '
+              f'dock: {project.dock.count()} '
+              f'enabled: {project.dock.filter(enabled=True).count()}')
 
     return HttpResponse(
         '<a href="' + reverse('app-project-main') + '">back</a><br/>'
