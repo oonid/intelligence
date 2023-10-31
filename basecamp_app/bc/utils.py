@@ -62,6 +62,11 @@ def api_recording_get_recordings(recording_type, bucket=None):
     return api_uri
 
 
+def static_get_recording_types():
+    return ['Comment', 'Document', 'Message', 'Question::Answer', 'Schedule::Entry', 'Todo', 'Todolist', 'Upload',
+            'Vault']
+
+
 def session_get_token_and_identity(request):
     """
 

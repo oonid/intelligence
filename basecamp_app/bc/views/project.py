@@ -1,7 +1,7 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from bc.utils import (session_get_token_and_identity, bc_api_get, api_project_get_all_projects_uri,
-                      api_project_get_project_uri)
+                      api_project_get_project_uri, static_get_recording_types)
 from bc.models import BcProject, BcProjectTool
 
 
@@ -60,6 +60,13 @@ def app_project_detail(request, project_id, update_db=False):
         if tool["enabled"]:
             tools += f'<li>{tool["title"]} ({tool["name"]})</li>'
 
+    recording_type_list = ""
+    for recording_type in static_get_recording_types():
+        recording_type_list += ('<li><a href="' +
+                                reverse('app-project-recording-by-type',
+                                        kwargs={'project_id': project_id, 'recording_type': recording_type}) +
+                                f'">{recording_type}</a></li>')
+
     if update_db:
         # let's try to remove the m2m dock first
         project_dock = data.pop('dock')
@@ -93,4 +100,6 @@ def app_project_detail(request, project_id, update_db=False):
         f'name: {data["name"]}<br/>'
         f'purpose: {data["purpose"]}<br/>'
         f'created_at: {data["created_at"]}<br/>'
-        f'enabled tools: <br/>{tools}')
+        f'enabled tools: <br/>{tools}<br/>'
+        f'recording types: <br/>{recording_type_list}<br/>'
+    )

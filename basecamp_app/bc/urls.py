@@ -15,6 +15,9 @@ urlpatterns = [
     path('project/<int:project_id>', views.app_project_detail, name='app-project-detail'),
     path('project/<int:project_id>/update-db', views.app_project_detail, kwargs={'update_db': True},
          name='app-project-detail-update-db'),
+    # project-recording
+    path('project/<int:project_id>/recording/type/<recording_type>', views.app_project_recording_by_type,
+         name='app-project-recording-by-type'),
     # recording
     path('recording/', views.app_recording_main, name='app-recording-main'),
     path('recording/type/<recording_type>', views.app_recording_by_type, name='app-recording-by-type'),
