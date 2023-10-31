@@ -30,6 +30,7 @@ def basecamp_main(request):
         '<ul>'
         '<li><a href="'+reverse('app-people-main')+'">people</a></li>'
         '<li><a href="'+reverse('app-project-main')+'">project</a></li>'
+        '<li><a href="'+reverse('app-recording-main')+'">recording</a></li>'
         '</ul>')
 
 

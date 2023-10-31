@@ -41,6 +41,27 @@ def api_project_get_project_uri(project_id):
     return f'{basecamp_api_uri}/{basecamp_account_id}/projects/{project_id}.json'
 
 
+def api_recording_get_recordings(recording_type, bucket=None):
+    """
+    https://github.com/basecamp/bc3-api/blob/master/sections/recordings.md#get-recordings
+    :param recording_type: Required parameters.
+        which must be Comment, Document, Message, Question::Answer, Schedule::Entry, Todo, Todolist, Upload, or Vault.
+    :param bucket: Single/comma separated list of project IDs. Default: All active projects visible to the current user.
+    :return:
+    """
+    basecamp_api_uri = environ["BASECAMP_API_URI"]
+    basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
+    if not recording_type:  # undefined recording_type
+        raise ValueError('undefined recording_type')
+    # recording_type defined
+    api_uri = f'{basecamp_api_uri}/{basecamp_account_id}/projects/recordings.json?type={recording_type}'
+
+    if bucket:  # defined bucket
+        api_uri += f'&bucket={bucket}'
+
+    return api_uri
+
+
 def session_get_token_and_identity(request):
     """
 
