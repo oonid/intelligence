@@ -58,7 +58,13 @@ def app_project_detail(request, project_id, update_db=False):
     tools = ""
     for tool in data["dock"]:
         if tool["enabled"]:
-            tools += f'<li>{tool["title"]} ({tool["name"]})</li>'
+            if tool["name"] in ['todoset']:
+                tools += (f'<li>{tool["title"]} ({tool["name"]}): <a href="' +
+                          reverse('app-todoset-detail',
+                                  kwargs={'bucket_id': project_id, 'todoset_id': tool["id"]}) +
+                          f'">{tool["id"]}</a></li>')
+            else:  # other tools
+                tools += f'<li>{tool["title"]} ({tool["name"]})</li>'
 
     recording_type_list = ""
     for recording_type in static_get_recording_types():
@@ -95,7 +101,6 @@ def app_project_detail(request, project_id, update_db=False):
 
     return HttpResponse(
         '<a href="' + reverse('app-project-main') + '">back</a><br/>'
-        f'{api_project_get_project}<br/>'
         f'project: {data["id"]}<br/>'
         f'name: {data["name"]}<br/>'
         f'purpose: {data["purpose"]}<br/>'

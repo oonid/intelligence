@@ -41,6 +41,12 @@ def api_project_get_project_uri(project_id):
     return f'{basecamp_api_uri}/{basecamp_account_id}/projects/{project_id}.json'
 
 
+def api_todoset_get_bucket_todoset_uri(bucket_id, todoset_id):
+    basecamp_api_uri = environ["BASECAMP_API_URI"]
+    basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
+    return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/todosets/{todoset_id}.json'
+
+
 def api_recording_get_recordings(recording_type, bucket=None):
     """
     https://github.com/basecamp/bc3-api/blob/master/sections/recordings.md#get-recordings
@@ -65,6 +71,12 @@ def api_recording_get_recordings(recording_type, bucket=None):
 def static_get_recording_types():
     return ['Comment', 'Document', 'Message', 'Question::Answer', 'Schedule::Entry', 'Todo', 'Todolist', 'Upload',
             'Vault']
+
+
+def static_get_webhook_types():
+    return ['Comment', 'Document', 'Message', 'Question::Answer', 'Schedule::Entry', 'Todo', 'Todolist', 'Upload',
+            'Vault', 'Client::Approval::Response', 'Client::Forward', 'Client::Reply', 'CloudFile', 'GoogleDocument',
+            'Inbox::Forward', 'Question']
 
 
 def session_get_token_and_identity(request):

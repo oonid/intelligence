@@ -15,6 +15,8 @@ urlpatterns = [
     path('project/<int:project_id>', views.app_project_detail, name='app-project-detail'),
     path('project/<int:project_id>/update-db', views.app_project_detail, kwargs={'update_db': True},
          name='app-project-detail-update-db'),
+    # todoset
+    path('project/<int:bucket_id>/todoset/<int:todoset_id>', views.app_todoset_detail, name='app-todoset-detail'),
     # project-recording
     path('project/<int:project_id>/recording/type/<recording_type>', views.app_project_recording_by_type,
          name='app-project-recording-by-type'),
