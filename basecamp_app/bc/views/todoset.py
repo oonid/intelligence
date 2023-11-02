@@ -24,7 +24,9 @@ def app_todoset_detail(request, bucket_id, todoset_id):
         f'title: {data["title"]}<br/>'
         f'name: {data["name"]}<br/>'
         f'type: {data["type"]}<br/>'
-        f'todolists_count: {data["todolists_count"]}<br/>'
+        f'todolists_count: <a href="'+reverse('app-todolist-main',
+                                              kwargs={'bucket_id': bucket_id, 'todoset_id': todoset_id}) +
+        f'">{data["todolists_count"]}</a><br/>'
         f'completed: {data["completed"]}<br/>'
         f'completed_ratio: {data["completed_ratio"]}<br/>'
     )
