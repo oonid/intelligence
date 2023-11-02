@@ -20,6 +20,7 @@ urlpatterns = [
     # todolist
     path('project/<int:bucket_id>/todoset/<int:todoset_id>/todolist', views.app_todolist_main,
          name='app-todolist-main'),
+    path('project/<int:bucket_id>/todolist/<int:todolist_id>', views.app_todolist_detail, name='app-todolist-detail'),
     # project-recording
     path('project/<int:project_id>/recording/type/<recording_type>', views.app_project_recording_by_type,
          name='app-project-recording-by-type'),
