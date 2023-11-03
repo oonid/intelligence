@@ -59,10 +59,10 @@ def app_project_detail(request, project_id, update_db=False):
     for tool in data["dock"]:
         if tool["enabled"]:
             if tool["name"] in ['todoset']:
-                tools += (f'<li>{tool["title"]} ({tool["name"]}): <a href="' +
+                tools += (f'<li><a href="' +
                           reverse('app-todoset-detail',
-                                  kwargs={'bucket_id': project_id, 'todoset_id': tool["id"]}) +
-                          f'">{tool["id"]}</a></li>')
+                                  kwargs={'bucket_id': project_id, 'todoset_id': tool["id"]}) + f'">{tool["id"]}</a> '
+                          f'{tool["title"]} ({tool["name"]})</li>')
             else:  # other tools
                 tools += f'<li>{tool["title"]} ({tool["name"]})</li>'
 

@@ -21,6 +21,12 @@ urlpatterns = [
     path('project/<int:bucket_id>/todoset/<int:todoset_id>/todolist', views.app_todolist_main,
          name='app-todolist-main'),
     path('project/<int:bucket_id>/todolist/<int:todolist_id>', views.app_todolist_detail, name='app-todolist-detail'),
+    # todolist_group
+    path('project/<int:bucket_id>/todolist/<int:todolist_id>/group', views.app_todolist_group_main,
+         name='app-todolist_group-main'),
+    # todo
+    path('project/<int:bucket_id>/todolist/<int:todolist_id>/todo', views.app_todo_main, name='app-todo-main'),
+    path('project/<int:bucket_id>/todo/<int:todo_id>', views.app_todo_detail, name='app-todo-detail'),
     # project-recording
     path('project/<int:project_id>/recording/type/<recording_type>', views.app_project_recording_by_type,
          name='app-project-recording-by-type'),

@@ -59,6 +59,24 @@ def api_todolist_get_bucket_todolist_uri(bucket_id, todolist_id):
     return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/todolists/{todolist_id}.json'
 
 
+def api_todolist_group_get_todolist_group_uri(bucket_id, todolist_id):
+    basecamp_api_uri = environ["BASECAMP_API_URI"]
+    basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
+    return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/todolists/{todolist_id}/groups.json'
+
+
+def api_todo_get_todos_uri(bucket_id, todolist_id):
+    basecamp_api_uri = environ["BASECAMP_API_URI"]
+    basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
+    return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/todolists/{todolist_id}/todos.json'
+
+
+def api_todo_get_todo_uri(bucket_id, todo_id):
+    basecamp_api_uri = environ["BASECAMP_API_URI"]
+    basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
+    return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/todos/{todo_id}.json'
+
+
 def api_recording_get_recordings(recording_type, bucket=None):
     """
     https://github.com/basecamp/bc3-api/blob/master/sections/recordings.md#get-recordings
