@@ -1,7 +1,7 @@
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.urls import reverse
-from bc.utils import (session_get_token_and_identity, bc_api_get, api_todo_get_todos_uri,
-                      api_todolist_group_get_todolist_group_uri)
+from bc.utils import (session_get_token_and_identity, bc_api_get, api_todolist_group_get_todolist_group_uri)
+from bc.models import BcTodolist
 
 
 def app_todolist_group_main(request, bucket_id, todolist_id):
@@ -19,20 +19,39 @@ def app_todolist_group_main(request, bucket_id, todolist_id):
 
     # if OK
     data = response.json()
-    count = 0
 
+    count = 0
     todolist_group_list = ""
     for todolist_group in data:
-        print(todolist_group)
+
+        if ('parent' in todolist_group and todolist_group["parent"]["type"] in ["Todoset", "Todolist"] and
+                'bucket' in todolist_group and todolist_group["bucket"]["type"] == "Project" and
+                'creator' in todolist_group):
+
+            # process todolist_group as todolist
+            try:
+                _todolist_group = BcTodolist.objects.get(id=todolist_group["id"])
+            except BcTodolist.DoesNotExist:
+                # save todolist_group only at app_todolist_group_detail
+                _todolist_group = None
+
+        else:
+            return HttpResponseBadRequest(
+                f'todolist {todolist_group["title"]} '
+                f'has no creator or bucket type Project or parent type Todoset/Todolist')
+
+        _todolist_group_title = _todolist_group.title if _todolist_group else todolist_group["title"]
+        _saved_on_db = " (db)" if _todolist_group else ""
+
         # process todolist_group as todolist
         todolist_group_list += (f'<li><a href="' +
                                 reverse('app-todolist-detail',
                                         kwargs={'bucket_id': bucket_id, 'todolist_id': todolist_group["id"]}) +
                                 f'">{todolist_group["id"]}</a> '
-                                f'{todolist_group["title"]} ' +
+                                f'{_todolist_group_title} ' +
                                 ('(completed) ' if todolist_group["completed"] else
                                  f'({todolist_group["completed_ratio"]}) ') +
-                                f'{todolist_group["comments_count"]} comments</li>')
+                                f'{todolist_group["comments_count"]} comments {_saved_on_db}</li>')
         count += 1
 
     if 'next' in response.links and 'url' in response.links["next"]:
