@@ -11,6 +11,12 @@ def bc_api_get(uri, access_token):
                     headers={"Authorization": "Bearer " + access_token, "User-Agent": basecamp_user_agent})
 
 
+def api_message_get_message_types_uri(bucket_id):
+    basecamp_api_uri = environ["BASECAMP_API_URI"]
+    basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
+    return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/categories.json'
+
+
 def api_people_my_profile_uri():
     basecamp_api_uri = environ["BASECAMP_API_URI"]
     basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization

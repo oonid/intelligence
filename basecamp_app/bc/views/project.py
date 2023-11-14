@@ -106,5 +106,6 @@ def app_project_detail(request, project_id, update_db=False):
         f'purpose: {data["purpose"]}<br/>'
         f'created_at: {data["created_at"]}<br/>'
         f'enabled tools: <br/>{tools}<br/>'
+        '<a href="'+reverse('app-message-type', kwargs={'bucket_id': project_id})+'">message types</a><br/>'
         f'recording types: <br/>{recording_type_list}<br/>'
     )
