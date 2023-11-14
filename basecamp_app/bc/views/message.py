@@ -1,7 +1,8 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
 from bc.utils import (session_get_token_and_identity, bc_api_get, api_message_get_bucket_message_types_uri,
-                      api_message_get_bucket_message_board_uri, api_message_get_bucket_message_board_message_uri)
+                      api_message_get_bucket_message_board_uri, api_message_get_bucket_message_board_message_uri,
+                      api_message_get_bucket_message_uri)
 
 
 def app_message_type(request, bucket_id):
@@ -44,7 +45,7 @@ def app_message_board_detail(request, bucket_id, message_board_id):
     if not (token and identity):  # no token or identity, redirect to auth
         return HttpResponseRedirect(reverse('bc-auth'))
 
-    # request to get message board
+    # request to get message board API
     api_message_get_bucket_message_board = api_message_get_bucket_message_board_uri(bucket_id=bucket_id,
                                                                                     message_board_id=message_board_id)
     response = bc_api_get(uri=api_message_get_bucket_message_board, access_token=token["access_token"])
@@ -86,7 +87,9 @@ def app_message_board_message(request, bucket_id, message_board_id):
     for message in data:
         print(message)
         print(message.keys())
-        message_list += f'<li><a href="#"">{message["id"]}</a> {message["title"]}</li>'
+        message_list += (f'<li><a href="' + reverse('app-message-detail',
+                                                    kwargs={'bucket_id': bucket_id, 'message_id': message["id"]}) +
+                         f'">{message["id"]}</a> {message["title"]}</li>')
 
     if 'next' in response.links and 'url' in response.links["next"]:
         print(response.links["next"]["url"])
@@ -102,3 +105,30 @@ def app_message_board_message(request, bucket_id, message_board_id):
                               kwargs={'bucket_id': bucket_id, 'message_board_id': message_board_id}) + '">back</a><br/>'
         f'{total_count_str}'
         f'{message_list}')
+
+
+def app_message_detail(request, bucket_id, message_id):
+    token, identity = session_get_token_and_identity(request)
+    if not (token and identity):  # no token or identity, redirect to auth
+        return HttpResponseRedirect(reverse('bc-auth'))
+
+    # request to get message API
+    api_message_get_bucket_message = api_message_get_bucket_message_uri(bucket_id=bucket_id, message_id=message_id)
+    response = bc_api_get(uri=api_message_get_bucket_message, access_token=token["access_token"])
+
+    if response.status_code != 200:  # not OK
+        return HttpResponse('', status=response.status_code)
+
+    # if OK
+    message = response.json()
+    print(message)
+    print(message.keys())
+
+    return HttpResponse(
+        '<a href="' + reverse('app-project-detail', kwargs={'project_id': bucket_id}) + '">back</a><br/>'
+        f'title: {message["title"]}<br/>'
+        f'type: {message["type"]}<br/>'
+        f'comments_count: {message["comments_count"]}<br/>'
+        f'parent: {message["parent"]}<br/>'
+        f'category: {message["category"]}<br/>'
+    )

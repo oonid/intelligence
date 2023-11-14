@@ -30,6 +30,12 @@ def api_message_get_bucket_message_board_message_uri(bucket_id, message_board_id
             f'messages.json')
 
 
+def api_message_get_bucket_message_uri(bucket_id, message_id):
+    basecamp_api_uri = environ["BASECAMP_API_URI"]
+    basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
+    return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/messages/{message_id}.json'
+
+
 def api_people_my_profile_uri():
     basecamp_api_uri = environ["BASECAMP_API_URI"]
     basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
