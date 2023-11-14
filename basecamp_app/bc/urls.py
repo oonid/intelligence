@@ -17,6 +17,8 @@ urlpatterns = [
          name='app-project-detail-update-db'),
     # message_type
     path('project/<int:bucket_id>/message/type', views.app_message_type, name='app-message-type'),
+    path('project/<int:bucket_id>/message/board/<int:message_board_id>', views.app_message_board_detail,
+         name='app-message-board-detail'),
     # todoset
     path('project/<int:bucket_id>/todoset/<int:todoset_id>', views.app_todoset_detail, name='app-todoset-detail'),
     # todolist

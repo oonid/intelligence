@@ -1,5 +1,5 @@
 from .main import *
-from .message_type import *
+from .message import *
 from .people import *
 from .project import *
 from .recording import *

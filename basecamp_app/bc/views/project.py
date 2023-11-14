@@ -63,6 +63,12 @@ def app_project_detail(request, project_id, update_db=False):
                           reverse('app-todoset-detail',
                                   kwargs={'bucket_id': project_id, 'todoset_id': tool["id"]}) + f'">{tool["id"]}</a> '
                           f'{tool["title"]} ({tool["name"]})</li>')
+            elif tool["name"] in ['message_board']:
+                tools += (f'<li><a href="' +
+                          reverse('app-message-board-detail',
+                                  kwargs={'bucket_id': project_id, 'message_board_id': tool["id"]}) +
+                          f'">{tool["id"]}</a> '
+                          f'{tool["title"]} ({tool["name"]})</li>')
             else:  # other tools
                 tools += f'<li>{tool["title"]} ({tool["name"]})</li>'
 
