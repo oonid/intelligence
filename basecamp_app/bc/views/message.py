@@ -1,8 +1,10 @@
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.urls import reverse
 from bc.utils import (session_get_token_and_identity, bc_api_get, api_message_get_bucket_message_types_uri,
                       api_message_get_bucket_message_board_uri, api_message_get_bucket_message_board_message_uri,
                       api_message_get_bucket_message_uri)
+from bc.models import BcMessageCategory, BcMessageBoard, BcPeople, BcProject, BcMessage
+from bc.serializers import BcPeopleSerializer
 
 
 def app_message_type(request, bucket_id):
@@ -23,7 +25,16 @@ def app_message_type(request, bucket_id):
 
     message_type_list = ""
     for message_type in data:
-        message_type_list += f'<li>{message_type["icon"]} {message_type["name"]}</li>'
+
+        # process message_type
+        try:
+            _message_category = BcMessageCategory.objects.get(id=message_type["id"])
+        except BcMessageCategory.DoesNotExist:
+            # save message_category
+            _message_category = BcMessageCategory.objects.create(**message_type)
+            _message_category.save()
+
+        message_type_list += f'<li>{_message_category.icon} {_message_category.name}</li>'
 
     if 'next' in response.links and 'url' in response.links["next"]:
         print(response.links["next"]["url"])
@@ -55,16 +66,50 @@ def app_message_board_detail(request, bucket_id, message_board_id):
 
     # if OK
     message_board = response.json()
-    print(message_board)
+
+    # process bucket
+    try:
+        bucket = BcProject.objects.get(id=message_board["bucket"]["id"])
+    except BcProject.DoesNotExist:
+        # can not insert new Project with limited data of todolist["bucket"]
+        return HttpResponseBadRequest(
+            f'bucket not found: {message_board["bucket"]}<br/>'
+            '<a href="' + reverse('app-project-detail-update-db',
+                                  kwargs={'project_id': message_board["bucket"]["id"]}) +
+            '">save project to db</a> first.'
+        )
+
+    # remove 'bucket' key from message_board, will use model instance bucket instead
+    message_board.pop('bucket')
+
+    # process creator
+    try:
+        creator = BcPeople.objects.get(id=message_board["creator"]["id"])
+    except BcPeople.DoesNotExist:
+        serializer = BcPeopleSerializer(data=message_board["creator"])
+        if serializer.is_valid():
+            creator = serializer.save()
+        else:  # invalid serializer
+            return HttpResponseBadRequest(f'creator serializer error: {serializer.errors}')
+
+    # remove 'creator' key from message_board, will use model instance creator instead
+    message_board.pop('creator')
+
+    # process message_board
+    try:
+        _message_board = BcMessageBoard.objects.get(id=message_board["id"])
+    except BcMessageBoard.DoesNotExist:
+        # save message_board
+        _message_board = BcMessageBoard.objects.create(bucket=bucket, creator=creator, **message_board)
+        _message_board.save()
 
     return HttpResponse(
         '<a href="' + reverse('app-project-detail', kwargs={'project_id': bucket_id}) + '">back</a><br/>'
-        f'title: {message_board["title"]}<br/>'
+        f'title: {_message_board.title}<br/>'
         f'type: {message_board["type"]}<br/>'
-        f'message_count: {message_board["messages_count"]}<br/>'
         '<a href="' + reverse('app-message-board-message',
                               kwargs={'bucket_id': bucket_id, 'message_board_id': message_board_id}) +
-        '">messages</a><br/>')
+        f'">{message_board["messages_count"]} messages</a><br/>')
 
 
 def app_message_board_message(request, bucket_id, message_board_id):
@@ -85,8 +130,27 @@ def app_message_board_message(request, bucket_id, message_board_id):
 
     message_list = ""
     for message in data:
-        print(message)
-        print(message.keys())
+
+        # check message_board, if not exist on db, save via message_board_detail
+        try:
+            _message_board = BcMessageBoard.objects.get(id=message_board_id)
+        except BcMessageBoard.DoesNotExist:
+            # message board save only at message_board_detail
+            return HttpResponseBadRequest(
+                f'message board not found, id: {message_board_id}<br/>'
+                '<a href="' + reverse('app-message-board-detail',
+                                      kwargs={'bucket_id': bucket_id,
+                                              'message_board_id': message_board_id}) +
+                '">try to open message board</a> first.'
+            )
+
+        # process message
+        try:
+            _message = BcMessage.objects.get(id=message["id"])
+        except BcMessage.DoesNotExist:
+            # save message only at message_detail
+            _message = None
+
         message_list += (f'<li><a href="' + reverse('app-message-detail',
                                                     kwargs={'bucket_id': bucket_id, 'message_id': message["id"]}) +
                          f'">{message["id"]}</a> {message["title"]}</li>')
@@ -121,14 +185,93 @@ def app_message_detail(request, bucket_id, message_id):
 
     # if OK
     message = response.json()
-    print(message)
-    print(message.keys())
+
+    if ('parent' in message and message["parent"]["type"] in ["Message::Board"] and
+            'bucket' in message and message["bucket"]["type"] == "Project" and 'creator' in message):
+
+        # process parent message_board
+        if message["parent"]["type"] == "Message::Board":
+            try:
+                parent = BcMessageBoard.objects.get(id=message["parent"]["id"])
+            except BcMessageBoard.DoesNotExist:
+                # can not insert new BcMessageBoard with limited data of message["parent"]
+                return HttpResponseBadRequest(
+                    f'message board not found: {message["parent"]}<br/>'
+                    '<a href="' + reverse('app-message-board-detail',
+                                          kwargs={'bucket_id': message["bucket"]["id"],
+                                                  'message_board_id': message["parent"]["id"]}) +
+                    '">try to open message board</a> first.'
+                )
+
+        else:  # condition above has filter the type as Message::Board, should never be here
+            parent = None
+
+        # remove 'parent' key from message, will use model instance parent instead
+        message.pop('parent')
+
+        # process bucket
+        try:
+            bucket = BcProject.objects.get(id=message["bucket"]["id"])
+        except BcProject.DoesNotExist:
+            # can not insert new Project with limited data of message["bucket"]
+            return HttpResponseBadRequest(
+                f'bucket not found: {message["bucket"]}<br/>'
+                '<a href="' + reverse('app-project-detail-update-db',
+                                      kwargs={'project_id': message["bucket"]["id"]}) +
+                '">save project to db</a> first.'
+            )
+
+        # remove 'bucket' key from message, will use model instance bucket instead
+        message.pop('bucket')
+
+        # process creator
+        try:
+            creator = BcPeople.objects.get(id=message["creator"]["id"])
+        except BcPeople.DoesNotExist:
+            serializer = BcPeopleSerializer(data=message["creator"])
+            if serializer.is_valid():
+                creator = serializer.save()
+            else:  # invalid serializer
+                return HttpResponseBadRequest(f'creator serializer error: {serializer.errors}')
+
+        # remove 'creator' key from message, will use model instance creator instead
+        message.pop('creator')
+
+        # process message_category
+        if 'category' in message:  # category is optional, so do not need else on this if
+            try:
+                category = BcMessageCategory.objects.get(id=message["category"]["id"])
+            except BcMessageCategory.DoesNotExist:
+                # can not insert new Message Category with limited data of message["category"]
+                return HttpResponseBadRequest(
+                    f'message category not found: {message["category"]}<br/>'
+                    '<a href="' + reverse('app-message-type',
+                                          kwargs={'bucket_id': bucket_id}) +
+                    '">save message types to db</a> first.'
+                )
+
+            # remove 'category' key from message, will use model instance of category instead
+            message.pop('category')
+
+        else:  # category is optional, if key 'category' not found, set category as None
+            category = None
+
+        # process message
+        try:
+            _message = BcMessage.objects.get(id=message["id"])
+        except BcMessage.DoesNotExist:
+            # save message
+            _message = BcMessage.objects.create(parent=parent, bucket=bucket, creator=creator,
+                                                category=category, **message)
+            _message.save()
+
+    else:
+        return HttpResponseBadRequest(
+            f'message {message["title"]} has no creator or bucket type Project or parent type Message::Board')
 
     return HttpResponse(
         '<a href="' + reverse('app-project-detail', kwargs={'project_id': bucket_id}) + '">back</a><br/>'
-        f'title: {message["title"]}<br/>'
+        f'title: {_message.title}<br/>'
         f'type: {message["type"]}<br/>'
         f'comments_count: {message["comments_count"]}<br/>'
-        f'parent: {message["parent"]}<br/>'
-        f'category: {message["category"]}<br/>'
     )

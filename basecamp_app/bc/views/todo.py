@@ -197,7 +197,7 @@ def app_todo_detail(request, bucket_id, todo_id):
 
     else:
         return HttpResponseBadRequest(
-            f'todolist {todo["title"]} has no creator or bucket type Project or parent type Todoset/Todolist')
+            f'todo {todo["title"]} has no creator or bucket type Project or parent type Todoset/Todolist')
 
     assignees_str = [assignee.name for assignee in assignees]
     completion_subscribers_str = [subscriber.name for subscriber in completion_subscribers]
