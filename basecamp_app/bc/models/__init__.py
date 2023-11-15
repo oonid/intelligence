@@ -1,6 +1,7 @@
 from .company import *
 from .people import *
 from .project import *
+from .message import *  # using people and project, set below both
 from .todobase import *
 from .todoset import *
 from .todolist import *

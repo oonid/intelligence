@@ -12,7 +12,7 @@ class BcTodoBase(models.Model):
 
     can not use "abstract", because ForeignKey can not refer to abstract model.
     """
-    id = models.BigIntegerField(primary_key=True)  # Basecamp Todoset ID
+    id = models.BigIntegerField(primary_key=True)  # Basecamp Todo (base) ID
     status = models.CharField(max_length=30)
     visible_to_clients = models.BooleanField()
     created_at = models.DateTimeField(db_index=True)
