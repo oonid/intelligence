@@ -1,6 +1,6 @@
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.urls import reverse
-from bc.utils import (session_get_token_and_identity, bc_api_get, api_todolist_group_get_todolist_group_uri)
+from bc.utils import (session_get_token_and_identity, bc_api_get, api_todolist_group_get_todolist_groups_uri)
 from bc.models import BcTodolist
 
 
@@ -10,8 +10,8 @@ def app_todolist_group_main(request, bucket_id, todolist_id):
         return HttpResponseRedirect(reverse('bc-auth'))
 
     # request to get todolist_group API
-    api_todolist_group_get_todolist_group = api_todolist_group_get_todolist_group_uri(bucket_id=bucket_id,
-                                                                                      todolist_id=todolist_id)
+    api_todolist_group_get_todolist_group = api_todolist_group_get_todolist_groups_uri(bucket_id=bucket_id,
+                                                                                       todolist_id=todolist_id)
     response = bc_api_get(uri=api_todolist_group_get_todolist_group, access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK

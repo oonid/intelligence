@@ -1,7 +1,7 @@
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.urls import reverse
 from bc.utils import (session_get_token_and_identity, bc_api_get, api_message_get_bucket_message_types_uri,
-                      api_message_get_bucket_message_board_uri, api_message_get_bucket_message_board_message_uri,
+                      api_message_get_bucket_message_board_uri, api_message_get_bucket_message_board_messages_uri,
                       api_message_get_bucket_message_uri)
 from bc.models import BcMessageCategory, BcMessageBoard, BcPeople, BcProject, BcMessage
 from bc.serializers import BcPeopleSerializer
@@ -119,7 +119,7 @@ def app_message_board_message(request, bucket_id, message_board_id):
 
     # request to get message-board messages API
     api_message_get_bucket_message_board_message = (
-        api_message_get_bucket_message_board_message_uri(bucket_id=bucket_id, message_board_id=message_board_id))
+        api_message_get_bucket_message_board_messages_uri(bucket_id=bucket_id, message_board_id=message_board_id))
     response = bc_api_get(uri=api_message_get_bucket_message_board_message, access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK

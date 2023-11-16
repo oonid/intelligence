@@ -23,7 +23,7 @@ def api_message_get_bucket_message_board_uri(bucket_id, message_board_id):
     return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/message_boards/{message_board_id}.json'
 
 
-def api_message_get_bucket_message_board_message_uri(bucket_id, message_board_id):
+def api_message_get_bucket_message_board_messages_uri(bucket_id, message_board_id):
     basecamp_api_uri = environ["BASECAMP_API_URI"]
     basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
     return (f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/message_boards/{message_board_id}/'
@@ -84,19 +84,19 @@ def api_todolist_get_bucket_todolist_uri(bucket_id, todolist_id):
     return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/todolists/{todolist_id}.json'
 
 
-def api_todolist_group_get_todolist_group_uri(bucket_id, todolist_id):
+def api_todolist_group_get_todolist_groups_uri(bucket_id, todolist_id):
     basecamp_api_uri = environ["BASECAMP_API_URI"]
     basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
     return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/todolists/{todolist_id}/groups.json'
 
 
-def api_todo_get_todos_uri(bucket_id, todolist_id):
+def api_todo_get_bucket_todolist_todos_uri(bucket_id, todolist_id):
     basecamp_api_uri = environ["BASECAMP_API_URI"]
     basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
     return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/todolists/{todolist_id}/todos.json'
 
 
-def api_todo_get_todo_uri(bucket_id, todo_id):
+def api_todo_get_bucket_todo_uri(bucket_id, todo_id):
     basecamp_api_uri = environ["BASECAMP_API_URI"]
     basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
     return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/todos/{todo_id}.json'

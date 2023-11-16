@@ -1,6 +1,7 @@
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.urls import reverse
-from bc.utils import (session_get_token_and_identity, bc_api_get, api_todo_get_todos_uri, api_todo_get_todo_uri)
+from bc.utils import (session_get_token_and_identity, bc_api_get, api_todo_get_bucket_todolist_todos_uri,
+                      api_todo_get_bucket_todo_uri)
 from bc.models import BcTodoset, BcProject, BcPeople, BcTodolist, BcTodo
 from bc.serializers import BcPeopleSerializer
 
@@ -11,7 +12,7 @@ def app_todo_main(request, bucket_id, todolist_id):
         return HttpResponseRedirect(reverse('bc-auth'))
 
     # request to get todos API
-    api_todo_get_todos = api_todo_get_todos_uri(bucket_id=bucket_id, todolist_id=todolist_id)
+    api_todo_get_todos = api_todo_get_bucket_todolist_todos_uri(bucket_id=bucket_id, todolist_id=todolist_id)
     response = bc_api_get(uri=api_todo_get_todos, access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
@@ -71,7 +72,7 @@ def app_todo_detail(request, bucket_id, todo_id):
         return HttpResponseRedirect(reverse('bc-auth'))
 
     # request to get todoset API
-    api_todo_get_todo = api_todo_get_todo_uri(bucket_id=bucket_id, todo_id=todo_id)
+    api_todo_get_todo = api_todo_get_bucket_todo_uri(bucket_id=bucket_id, todo_id=todo_id)
     response = bc_api_get(uri=api_todo_get_todo, access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
