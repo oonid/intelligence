@@ -66,6 +66,37 @@ def api_project_get_project_uri(project_id):
     return f'{basecamp_api_uri}/{basecamp_account_id}/projects/{project_id}.json'
 
 
+def api_questionnaire_get_bucket_questionnaire_uri(bucket_id, questionnaire_id):
+    basecamp_api_uri = environ["BASECAMP_API_URI"]
+    basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
+    return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/questionnaires/{questionnaire_id}.json'
+
+
+def api_questionnaire_get_bucket_questionnaire_questions_uri(bucket_id, questionnaire_id):
+    basecamp_api_uri = environ["BASECAMP_API_URI"]
+    basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
+    return (f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/questionnaires/{questionnaire_id}/'
+            f'questions.json')
+
+
+def api_questionnaire_get_bucket_question_uri(bucket_id, question_id):
+    basecamp_api_uri = environ["BASECAMP_API_URI"]
+    basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
+    return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/questions/{question_id}.json'
+
+
+def api_questionnaire_get_bucket_question_answers_uri(bucket_id, question_id):
+    basecamp_api_uri = environ["BASECAMP_API_URI"]
+    basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
+    return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/questions/{question_id}/answers.json'
+
+
+def api_questionnaire_get_bucket_question_answer_uri(bucket_id, question_answer_id):
+    basecamp_api_uri = environ["BASECAMP_API_URI"]
+    basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
+    return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/question_answers/{question_answer_id}.json'
+
+
 def api_todoset_get_bucket_todoset_uri(bucket_id, todoset_id):
     basecamp_api_uri = environ["BASECAMP_API_URI"]
     basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization

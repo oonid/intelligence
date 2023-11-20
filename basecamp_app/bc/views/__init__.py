@@ -2,6 +2,7 @@ from .main import *
 from .message import *
 from .people import *
 from .project import *
+from .questionnaire import *
 from .recording import *
 from .todo import *
 from .todolist import *

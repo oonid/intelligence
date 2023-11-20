@@ -17,11 +17,21 @@ urlpatterns = [
          name='app-project-detail-update-db'),
     # message_type
     path('project/<int:bucket_id>/message/type', views.app_message_type, name='app-message-type'),
-    path('project/<int:bucket_id>/message/board/<int:message_board_id>', views.app_message_board_detail,
+    path('project/<int:bucket_id>/message_board/<int:message_board_id>', views.app_message_board_detail,
          name='app-message-board-detail'),
-    path('project/<int:bucket_id>/message/board/<int:message_board_id>/message', views.app_message_board_message,
+    path('project/<int:bucket_id>/message_board/<int:message_board_id>/message', views.app_message_board_message,
          name='app-message-board-message'),
     path('project/<int:bucket_id>/message/<int:message_id>', views.app_message_detail, name='app-message-detail'),
+    # questionnaire
+    path('project/<int:bucket_id>/questionnaire/<int:questionnaire_id>', views.app_questionnaire_detail,
+         name='app-questionnaire-detail'),
+    path('project/<int:bucket_id>/questionnaire/<int:questionnaire_id>/question', views.app_questionnaire_question,
+         name='app-questionnaire-question'),
+    path('project/<int:bucket_id>/question/<int:question_id>', views.app_question_detail, name='app-question-detail'),
+    path('project/<int:bucket_id>/question/<int:question_id>/answer', views.app_question_answer,
+         name='app-question-answer'),
+    path('project/<int:bucket_id>/question_answer/<int:question_answer_id>', views.app_question_answer_detail,
+         name='app-question-answer-detail'),
     # todoset
     path('project/<int:bucket_id>/todoset/<int:todoset_id>', views.app_todoset_detail, name='app-todoset-detail'),
     # todolist

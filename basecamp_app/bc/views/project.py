@@ -69,6 +69,12 @@ def app_project_detail(request, project_id, update_db=False):
                                   kwargs={'bucket_id': project_id, 'message_board_id': tool["id"]}) +
                           f'">{tool["id"]}</a> '
                           f'{tool["title"]} ({tool["name"]})</li>')
+            elif tool["name"] in ['questionnaire']:
+                tools += (f'<li><a href="' +
+                          reverse('app-questionnaire-detail',
+                                  kwargs={'bucket_id': project_id, 'questionnaire_id': tool["id"]}) +
+                          f'">{tool["id"]}</a> '
+                          f'{tool["title"]} ({tool["name"]})</li>')
             else:  # other tools
                 tools += f'<li>{tool["title"]} ({tool["name"]})</li>'
 
