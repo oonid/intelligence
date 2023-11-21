@@ -4,6 +4,7 @@ from .people import *
 from .project import *
 from .questionnaire import *
 from .recording import *
+from .schedule import *
 from .todo import *
 from .todolist import *
 from .todolist_group import *

@@ -32,6 +32,12 @@ urlpatterns = [
          name='app-question-answer'),
     path('project/<int:bucket_id>/question_answer/<int:question_answer_id>', views.app_question_answer_detail,
          name='app-question-answer-detail'),
+    # schedule
+    path('project/<int:bucket_id>/schedule/<int:schedule_id>', views.app_schedule_detail, name='app-schedule-detail'),
+    path('project/<int:bucket_id>/schedule/<int:schedule_id>/entry', views.app_schedule_entry,
+         name='app-schedule-entry'),
+    path('project/<int:bucket_id>/schedule_entry/<int:schedule_entry_id>', views.app_schedule_entry_detail,
+         name='app-schedule-entry-detail'),
     # todoset
     path('project/<int:bucket_id>/todoset/<int:todoset_id>', views.app_todoset_detail, name='app-todoset-detail'),
     # todolist

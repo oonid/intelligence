@@ -97,6 +97,24 @@ def api_questionnaire_get_bucket_question_answer_uri(bucket_id, question_answer_
     return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/question_answers/{question_answer_id}.json'
 
 
+def api_schedule_get_bucket_schedule_uri(bucket_id, schedule_id):
+    basecamp_api_uri = environ["BASECAMP_API_URI"]
+    basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
+    return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/schedules/{schedule_id}.json'
+
+
+def api_schedule_get_bucket_schedule_entries_uri(bucket_id, schedule_id):
+    basecamp_api_uri = environ["BASECAMP_API_URI"]
+    basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
+    return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/schedules/{schedule_id}/entries.json'
+
+
+def api_schedule_get_bucket_schedule_entry_uri(bucket_id, schedule_entry_id):
+    basecamp_api_uri = environ["BASECAMP_API_URI"]
+    basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
+    return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/schedule_entries/{schedule_entry_id}.json'
+
+
 def api_todoset_get_bucket_todoset_uri(bucket_id, todoset_id):
     basecamp_api_uri = environ["BASECAMP_API_URI"]
     basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization

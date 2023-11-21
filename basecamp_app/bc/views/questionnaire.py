@@ -14,7 +14,7 @@ def app_questionnaire_detail(request, bucket_id, questionnaire_id):
     if not (token and identity):  # no token or identity, redirect to auth
         return HttpResponseRedirect(reverse('bc-auth'))
 
-    # request to get message board API
+    # request to get questionnaire API
     api_questionnaire_get_questionnaire = (
         api_questionnaire_get_bucket_questionnaire_uri(bucket_id=bucket_id, questionnaire_id=questionnaire_id))
     response = bc_api_get(uri=api_questionnaire_get_questionnaire, access_token=token["access_token"])
@@ -24,8 +24,6 @@ def app_questionnaire_detail(request, bucket_id, questionnaire_id):
 
     # if OK
     questionnaire = response.json()
-    print(questionnaire)
-    print(questionnaire.keys())
 
     if 'bucket' in questionnaire and questionnaire["bucket"]["type"] == "Project" and 'creator' in questionnaire:
 
@@ -84,7 +82,7 @@ def app_questionnaire_question(request, bucket_id, questionnaire_id):
     if not (token and identity):  # no token or identity, redirect to auth
         return HttpResponseRedirect(reverse('bc-auth'))
 
-    # request to get message board API
+    # request to get questionnaire question API
     api_questionnaire_get_bucket_questionnaire_question = (
         api_questionnaire_get_bucket_questionnaire_questions_uri(bucket_id=bucket_id,
                                                                  questionnaire_id=questionnaire_id))
@@ -133,7 +131,7 @@ def app_question_detail(request, bucket_id, question_id):
     if not (token and identity):  # no token or identity, redirect to auth
         return HttpResponseRedirect(reverse('bc-auth'))
 
-    # request to get message API
+    # request to get questionnaire question API
     api_questionnaire_get_bucket_question = (
         api_questionnaire_get_bucket_question_uri(bucket_id=bucket_id, question_id=question_id))
     response = bc_api_get(uri=api_questionnaire_get_bucket_question, access_token=token["access_token"])
@@ -233,7 +231,7 @@ def app_question_answer(request, bucket_id, question_id):
     if not (token and identity):  # no token or identity, redirect to auth
         return HttpResponseRedirect(reverse('bc-auth'))
 
-    # request to get message board API
+    # request to get questionnaire question answer API
     api_questionnaire_get_bucket_question_answer = (
         api_questionnaire_get_bucket_question_answers_uri(bucket_id=bucket_id, question_id=question_id))
     response = bc_api_get(uri=api_questionnaire_get_bucket_question_answer, access_token=token["access_token"])
@@ -246,8 +244,6 @@ def app_question_answer(request, bucket_id, question_id):
 
     answer_list = ""
     for answer in data:
-        print(answer)
-        print(answer.keys())
 
         # process question
         try:
@@ -284,7 +280,7 @@ def app_question_answer_detail(request, bucket_id, question_answer_id):
     if not (token and identity):  # no token or identity, redirect to auth
         return HttpResponseRedirect(reverse('bc-auth'))
 
-    # request to get message API
+    # request to get questionnaire question answer API
     api_questionnaire_get_bucket_question_answer = (
         api_questionnaire_get_bucket_question_answer_uri(bucket_id=bucket_id, question_answer_id=question_answer_id))
     response = bc_api_get(uri=api_questionnaire_get_bucket_question_answer, access_token=token["access_token"])
@@ -294,8 +290,6 @@ def app_question_answer_detail(request, bucket_id, question_answer_id):
 
     # if OK
     answer = response.json()
-    print(answer)
-    print(answer.keys())
 
     if ('parent' in answer and answer["parent"]["type"] in ["Question"] and
             'bucket' in answer and answer["bucket"]["type"] == "Project" and 'creator' in answer):
