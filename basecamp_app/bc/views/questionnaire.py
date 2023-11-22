@@ -4,7 +4,7 @@ from bc.utils import (session_get_token_and_identity, bc_api_get, api_questionna
                       api_questionnaire_get_bucket_questionnaire_questions_uri,
                       api_questionnaire_get_bucket_question_uri, api_questionnaire_get_bucket_question_answers_uri,
                       api_questionnaire_get_bucket_question_answer_uri)
-from bc.models import BcProject, BcPeople, BcQuestionnaire, BcQuestion, BcQuestionSchedule, BcQuestionAnswer
+from bc.models import BcProject, BcPeople, BcQuestionnaire, BcQuestion, BcQuestionAnswer, BcRecurrenceSchedule
 from bc.serializers import BcPeopleSerializer
 from json import dumps as json_dumps
 
@@ -31,7 +31,7 @@ def app_questionnaire_detail(request, bucket_id, questionnaire_id):
         try:
             bucket = BcProject.objects.get(id=questionnaire["bucket"]["id"])
         except BcProject.DoesNotExist:
-            # can not insert new Project with limited data of todolist["bucket"]
+            # can not insert new Project with limited data of questionnaire["bucket"]
             return HttpResponseBadRequest(
                 f'bucket not found: {questionnaire["bucket"]}<br/>'
                 '<a href="' + reverse('app-project-detail-update-db',
@@ -101,7 +101,7 @@ def app_questionnaire_question(request, bucket_id, questionnaire_id):
         try:
             _question = BcQuestion.objects.get(id=question["id"])
         except BcQuestion.DoesNotExist:
-            # save todolist only at app_todolist_detail
+            # save question only at app_question_detail
             _question = None
 
         _saved_on_db = " (db)" if _question else ""
@@ -202,7 +202,7 @@ def app_question_detail(request, bucket_id, question_id):
 
             json_days = json_dumps(question["schedule"]["days"])
             question["schedule"].pop('days')
-            schedule = BcQuestionSchedule.objects.create(days=json_days, **question["schedule"])
+            schedule = BcRecurrenceSchedule.objects.create(days=json_days, **question["schedule"])
             schedule.save()
             # remove 'schedule' key from question, will use model instance question instead
             question.pop('schedule')
