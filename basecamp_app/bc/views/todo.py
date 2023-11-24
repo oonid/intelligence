@@ -2,7 +2,7 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadReque
 from django.urls import reverse
 from bc.utils import (session_get_token_and_identity, bc_api_get, api_todo_get_bucket_todolist_todos_uri,
                       api_todo_get_bucket_todo_uri)
-from bc.models import BcTodoset, BcProject, BcPeople, BcTodolist, BcTodo
+from bc.models import BcTodoset, BcProject, BcPeople, BcTodolist, BcTodo, BcTodoCompletion
 from bc.serializers import BcPeopleSerializer
 
 
@@ -80,11 +80,22 @@ def app_todo_detail(request, bucket_id, todo_id):
 
     # if OK
     todo = response.json()
-    print(todo)
 
     if ('parent' in todo and todo["parent"]["type"] in ["Todoset", "Todolist"] and
             'bucket' in todo and todo["bucket"]["type"] == "Project" and
             'creator' in todo and 'assignees' in todo and 'completion_subscribers' in todo):
+
+        # process bucket
+        try:
+            bucket = BcProject.objects.get(id=todo["bucket"]["id"])
+        except BcProject.DoesNotExist:
+            # can not insert new Project with limited data of todolist["bucket"]
+            return HttpResponseBadRequest(
+                f'bucket not found: {todo["bucket"]}<br/>'
+                '<a href="' + reverse('app-project-detail-update-db',
+                                      kwargs={'project_id': todo["bucket"]["id"]}) +
+                '">save project to db</a> first.'
+            )
 
         if todo["parent"]["type"] == "Todoset":
             # process parent BcTodoset
@@ -103,7 +114,6 @@ def app_todo_detail(request, bucket_id, todo_id):
         elif todo["parent"]["type"] == "Todolist":
             # process parent BcTodolist
             try:
-                print(f'parent: {todo["parent"]}')
                 parent = BcTodolist.objects.get(id=todo["parent"]["id"])
             except BcTodolist.DoesNotExist:
                 # can not insert new Todolist with limited data of todolist["parent"]
@@ -118,24 +128,6 @@ def app_todo_detail(request, bucket_id, todo_id):
         else:  # condition above has filter the type in to Todoset or Todolist, should never be here
             parent = None
 
-        # remove 'parent' key from todo, will use model instance parent instead
-        todo.pop('parent')
-
-        # process bucket
-        try:
-            bucket = BcProject.objects.get(id=todo["bucket"]["id"])
-        except BcProject.DoesNotExist:
-            # can not insert new Project with limited data of todolist["bucket"]
-            return HttpResponseBadRequest(
-                f'bucket not found: {todo["bucket"]}<br/>'
-                '<a href="' + reverse('app-project-detail-update-db',
-                                      kwargs={'project_id': todo["bucket"]["id"]}) +
-                '">save project to db</a> first.'
-            )
-
-        # remove 'bucket' key from todo, will use model instance bucket instead
-        todo.pop('bucket')
-
         # process creator
         try:
             creator = BcPeople.objects.get(id=todo["creator"]["id"])
@@ -146,8 +138,37 @@ def app_todo_detail(request, bucket_id, todo_id):
             else:  # invalid serializer
                 return HttpResponseBadRequest(f'creator serializer error: {serializer.errors}')
 
+        # remove 'bucket' key from todo. key 'bucket' still used in processing parent
+        todo.pop('bucket')
+
+        # remove 'parent' key from todo, will use model instance parent instead
+        todo.pop('parent')
+
         # remove 'creator' key from todo, will use model instance creator instead
         todo.pop('creator')
+
+        # process completion if any
+        completion = None
+        if 'completion' in todo:
+            # process completion creator
+            try:
+                completion_creator = BcPeople.objects.get(id=todo["completion"]["creator"]["id"])
+            except BcPeople.DoesNotExist:
+                serializer = BcPeopleSerializer(data=todo["completion"]["creator"])
+                if serializer.is_valid():
+                    completion_creator = serializer.save()
+                else:  # invalid serializer
+                    return HttpResponseBadRequest(f'creator serializer error: {serializer.errors}')
+
+            # remove 'creator' key from completion, will use model instance creator instead
+            todo["completion"].pop('creator')
+
+            # process completion
+            completion = BcTodoCompletion.objects.create(creator=completion_creator, **todo["completion"])
+            completion.save()
+
+            # remove 'completion' key from todo
+            todo.pop('completion')
 
         # process assignees
         assignees = []
@@ -189,7 +210,13 @@ def app_todo_detail(request, bucket_id, todo_id):
         try:
             _todo = BcTodo.objects.get(id=todo["id"])
         except BcTodo.DoesNotExist:
-            _todo = BcTodo.objects.create(parent=parent, bucket=bucket, creator=creator, **todo)
+            if completion:  # completion exists
+                _todo = BcTodo.objects.create(parent=parent, bucket=bucket, creator=creator, completion=completion,
+                                              **todo)
+            else:  # undefined completion
+                _todo = BcTodo.objects.create(parent=parent, bucket=bucket, creator=creator, **todo)
+
+            # save todo model
             _todo.save()
 
         # set assignees and completion_subscribers
