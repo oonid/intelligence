@@ -26,6 +26,9 @@ class BcPeopleSerializer(serializers.ModelSerializer):
         # exclude 'can_ping' field from data, as we currently did not use the field
         data.pop('can_ping')
 
+        if 'out_of_office' in data:  # exclude 'out_of_office' field from data, as we currently did not use the field
+            data.pop('out_of_office')
+
         return data  # return data without the company field
 
     class Meta:
