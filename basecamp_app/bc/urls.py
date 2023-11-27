@@ -15,6 +15,16 @@ urlpatterns = [
     path('project/<int:project_id>', views.app_project_detail, name='app-project-detail'),
     path('project/<int:project_id>/update-db', views.app_project_detail, kwargs={'update_db': True},
          name='app-project-detail-update-db'),
+    # project-recording
+    path('project/<int:bucket_id>/recording/type/<recording_type>', views.app_project_recording_by_type,
+         name='app-project-recording-by-type'),
+    path('project/<int:bucket_id>/recording/parent/<int:parent_id>/comment', views.app_project_recording_parent_comment,
+         name='app-project-recording-parent-comment'),
+    # recording
+    path('recording/', views.app_recording_main, name='app-recording-main'),
+    path('recording/type/<recording_type>', views.app_recording_by_type, name='app-recording-by-type'),
+    # comment
+    path('project/<int:bucket_id>/comment/<int:comment_id>', views.app_comment_detail, name='app-comment-detail'),
     # message_type
     path('project/<int:bucket_id>/message/type', views.app_message_type, name='app-message-type'),
     path('project/<int:bucket_id>/message_board/<int:message_board_id>', views.app_message_board_detail,
@@ -50,10 +60,4 @@ urlpatterns = [
     # todo
     path('project/<int:bucket_id>/todolist/<int:todolist_id>/todo', views.app_todo_main, name='app-todo-main'),
     path('project/<int:bucket_id>/todo/<int:todo_id>', views.app_todo_detail, name='app-todo-detail'),
-    # project-recording
-    path('project/<int:project_id>/recording/type/<recording_type>', views.app_project_recording_by_type,
-         name='app-project-recording-by-type'),
-    # recording
-    path('recording/', views.app_recording_main, name='app-recording-main'),
-    path('recording/type/<recording_type>', views.app_recording_by_type, name='app-recording-by-type'),
 ]

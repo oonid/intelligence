@@ -88,7 +88,7 @@ def app_project_detail(request, project_id, update_db=False):
     for recording_type in static_get_recording_types():
         recording_type_list += ('<li><a href="' +
                                 reverse('app-project-recording-by-type',
-                                        kwargs={'project_id': project_id, 'recording_type': recording_type}) +
+                                        kwargs={'bucket_id': project_id, 'recording_type': recording_type}) +
                                 f'">{recording_type}</a></li>')
 
     if update_db:

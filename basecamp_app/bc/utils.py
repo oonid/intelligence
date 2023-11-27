@@ -1,3 +1,4 @@
+from django.urls import reverse
 from datetime import datetime, timezone
 from os import environ
 from requests import get as http_get
@@ -151,7 +152,7 @@ def api_todo_get_bucket_todo_uri(bucket_id, todo_id):
     return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/todos/{todo_id}.json'
 
 
-def api_recording_get_recordings(recording_type, bucket=None):
+def api_recording_get_recordings_uri(recording_type, bucket=None):
     """
     https://github.com/basecamp/bc3-api/blob/master/sections/recordings.md#get-recordings
     :param recording_type: Required parameters.
@@ -170,6 +171,44 @@ def api_recording_get_recordings(recording_type, bucket=None):
         api_uri += f'&bucket={bucket}'
 
     return api_uri
+
+
+def api_recording_get_bucket_recording_parent_comment_uri(bucket_id, parent_id):
+    """
+    https://github.com/basecamp/bc3-api/blob/master/sections/comments.md#get-comments
+    the documentation said the ID is recording ID, but the API always response with empty list [].
+    replace the ID with parent ID and the response as expected, list of comments.
+    :param bucket_id:
+    :param parent_id:
+    :return:
+    """
+    basecamp_api_uri = environ["BASECAMP_API_URI"]
+    basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
+    return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/recordings/{parent_id}/comments.json'
+
+
+def api_comment_get_bucket_comment_uri(bucket_id, comment_id):
+    basecamp_api_uri = environ["BASECAMP_API_URI"]
+    basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
+    return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/comments/{comment_id}.json'
+
+
+def static_get_recording_parent_types():
+    return ['Todo', 'Todolist']
+
+
+def static_get_recording_parent_uri(parent, bucket):
+    if ('type' in parent and parent["type"] in static_get_recording_parent_types() and
+            'type' in bucket and bucket["type"] == "Project"):
+        if parent["type"] == 'Todo':
+            return reverse('app-todo-detail', kwargs={'bucket_id': bucket["id"], 'todo_id': parent["id"]})
+        elif parent["type"] == 'Todolist':
+            return reverse('app-todolist-detail',
+                           kwargs={'bucket_id': bucket["id"], 'todolist_id': parent["id"]})
+        else:
+            return '#'  # uri is None
+    else:
+        return '#'  # uri is None
 
 
 def static_get_recording_types():

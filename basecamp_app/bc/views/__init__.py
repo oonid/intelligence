@@ -1,3 +1,4 @@
+from .comment import *
 from .main import *
 from .message import *
 from .people import *
