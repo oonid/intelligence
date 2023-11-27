@@ -236,4 +236,5 @@ def app_todo_detail(request, bucket_id, todo_id):
         f'due_on: {todo["due_on"]}<br/>'
         f'assignees: {assignees_str}<br/>'
         f'completion_subscribers: {completion_subscribers_str}<br/>'
+        f'{todo["comments_count"]} comment(s)<br/>'
     )

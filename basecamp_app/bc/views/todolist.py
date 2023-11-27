@@ -193,10 +193,10 @@ def app_todolist_detail(request, bucket_id, todolist_id):
     return HttpResponse(
         '<a href="' + reverse('app-project-detail', kwargs={'project_id': bucket_id}) + '">back</a><br/>'
         f'title: {todolist["title"]}<br/>'
-        f'comments_count: {todolist["comments_count"]}<br/>'
         f'completed: {todolist["completed"]}<br/>'
         f'completed_ratio: {todolist["completed_ratio"]}<br/>'
         f'{todolist_group_str}'
         '<a href="'+reverse('app-todo-main',
                             kwargs={'bucket_id': bucket_id, 'todolist_id': todolist_id})+'">todos</a><br/>'
+        f'{todolist["comments_count"]} comment(s)<br/>'
     )
