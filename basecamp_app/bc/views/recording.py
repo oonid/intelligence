@@ -3,8 +3,7 @@ from django.urls import reverse
 from bc.utils import (session_get_token_and_identity, bc_api_get, api_recording_get_recordings_uri,
                       api_recording_get_bucket_recording_parent_comment_uri,
                       static_get_recording_types, static_get_recording_parent_types)
-from bc.models import BcProject, BcPeople, BcTodo, BcTodolist, BcComment
-from bc.serializers import BcPeopleSerializer
+from bc.models import BcProject, BcTodo, BcTodolist
 
 
 def app_recording_main(request):
@@ -141,41 +140,18 @@ def app_project_recording_by_type(request, bucket_id, recording_type):
                 else:  # condition above has filter the type in to get_recording_parent_types, should never be here
                     parent = None
 
-                # process creator
-                try:
-                    creator = BcPeople.objects.get(id=recording["creator"]["id"])
-                except BcPeople.DoesNotExist:
-                    serializer = BcPeopleSerializer(data=recording["creator"])
-                    if serializer.is_valid():
-                        creator = serializer.save()
-                    else:  # invalid serializer
-                        return HttpResponseBadRequest(f'creator serializer error: {serializer.errors}')
-
                 # remove 'bucket' key from recording. key 'bucket' still used in processing parent
                 recording.pop('bucket')
 
                 # remove 'parent' key from recording, will use model instance parent instead
                 recording.pop('parent')
 
-                # remove 'creator' key from recording, will use model instance creator instead
-                recording.pop('creator')
-
-                # process comment
-                try:
-                    _comment = BcComment.objects.get(id=recording["id"])
-                except BcComment.DoesNotExist:
-                    _comment = BcComment.objects.create(bucket=bucket, parent=parent, creator=creator, **recording)
-                    _comment.save()
-
-                _comment_title = _comment.title if _comment else recording["title"]
-                _saved_on_db = " (db)" if _comment else ""
                 _parent_comment_uri = reverse('app-project-recording-parent-comment',
                                               kwargs={'bucket_id': bucket.id,
                                                       'parent_id': parent.id})
 
                 recording_list += (f'<li>{recording["id"]} '
-                                   f'<a href="{_parent_comment_uri}">parent_comment</a> '
-                                   f'{_comment_title} {_saved_on_db}</li>')
+                                   f'<a href="{_parent_comment_uri}">parent_comment</a> {recording["title"]}</li>')
 
             else:
                 return HttpResponseBadRequest(
@@ -197,8 +173,8 @@ def app_project_recording_by_type(request, bucket_id, recording_type):
 
     return HttpResponse(
         '<a href="' + reverse('app-project-detail', kwargs={'project_id': project.id}) + '">back</a><br/>'
-        f'{recording_type}: got {recording_total} of {total_count} recordings (with {len(recording_keys)} keys)<br/>'
-        f'{recording_keys}<br/>'
+        f'recording {recording_type}: {recording_total}/{total_count} recordings<br/>'
+        f'with {len(recording_keys)} keys: {recording_keys}<br/>'
         f'{recording_list}<br/>'
     )
 
