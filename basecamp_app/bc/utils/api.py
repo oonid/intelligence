@@ -1,9 +1,7 @@
-from django.urls import reverse
-from datetime import datetime, timezone
 from os import environ
 from requests import get as http_get
 
-# utilities to process environment variables, sessions, and APIs
+# utilities to process environment variables and APIs
 
 
 def bc_api_get(uri, access_token):
@@ -191,73 +189,3 @@ def api_comment_get_bucket_comment_uri(bucket_id, comment_id):
     basecamp_api_uri = environ["BASECAMP_API_URI"]
     basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
     return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/comments/{comment_id}.json'
-
-
-def static_get_recording_parent_types():
-    return ['Todo', 'Todolist']
-
-
-def static_get_recording_parent_uri(parent, bucket):
-    if ('type' in parent and parent["type"] in static_get_recording_parent_types() and
-            'type' in bucket and bucket["type"] == "Project"):
-        if parent["type"] == 'Todo':
-            return reverse('app-todo-detail', kwargs={'bucket_id': bucket["id"], 'todo_id': parent["id"]})
-        elif parent["type"] == 'Todolist':
-            return reverse('app-todolist-detail',
-                           kwargs={'bucket_id': bucket["id"], 'todolist_id': parent["id"]})
-        else:
-            return '#'  # uri is None
-    else:
-        return '#'  # uri is None
-
-
-def static_get_recording_types():
-    return ['Comment', 'Document', 'Message', 'Question::Answer', 'Schedule::Entry', 'Todo', 'Todolist', 'Upload',
-            'Vault']
-
-
-def static_get_webhook_types():
-    return ['Comment', 'Document', 'Message', 'Question::Answer', 'Schedule::Entry', 'Todo', 'Todolist', 'Upload',
-            'Vault', 'Client::Approval::Response', 'Client::Forward', 'Client::Reply', 'CloudFile', 'GoogleDocument',
-            'Inbox::Forward', 'Question']
-
-
-def session_get_token_and_identity(request):
-    """
-
-    :param request:
-    :return: tuple of dicts: token, identity
-    """
-    token = None
-    identity = None
-
-    if "token" not in request.session:  # no token in session, return None
-        return token, identity  # None
-
-    # token exists
-    token = request.session["token"]
-    # [:-1] to remove 'Z' at the last character in date time str
-    token_expires_datetime = datetime.fromisoformat(token["expires_at"][:-1]).astimezone(timezone.utc)
-
-    if token_expires_datetime < datetime.now().astimezone(timezone.utc):  # token expired, strip token, return None
-        try:
-            del request.session["token"]
-        except KeyError:
-            pass
-
-        return token, identity  # None
-
-    # token still updated
-    if "identity" not in request.session:  # no identity, strip token and return None
-        try:
-            del request.session["token"]
-        except KeyError:
-            pass
-
-        return token, identity  # None
-
-    # identity exists
-    identity = request.session["identity"]
-
-    # return token and identity
-    return token, identity
