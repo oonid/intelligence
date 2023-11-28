@@ -1,8 +1,8 @@
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.urls import reverse
-from bc.utils import (session_get_token_and_identity, bc_api_get, api_todo_get_bucket_todolist_todos_uri,
+from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, api_todo_get_bucket_todolist_todos_uri,
                       api_todo_get_bucket_todo_uri)
-from bc.models import BcTodoset, BcProject, BcPeople, BcTodolist, BcTodo, BcTodoCompletion
+from bc.models import BcTodoset, BcPeople, BcTodolist, BcTodo, BcTodoCompletion
 from bc.serializers import BcPeopleSerializer
 
 
@@ -85,17 +85,10 @@ def app_todo_detail(request, bucket_id, todo_id):
             'bucket' in todo and todo["bucket"]["type"] == "Project" and
             'creator' in todo and 'assignees' in todo and 'completion_subscribers' in todo):
 
-        # process bucket
-        try:
-            bucket = BcProject.objects.get(id=todo["bucket"]["id"])
-        except BcProject.DoesNotExist:
-            # can not insert new Project with limited data of todolist["bucket"]
-            return HttpResponseBadRequest(
-                f'bucket not found: {todo["bucket"]}<br/>'
-                '<a href="' + reverse('app-project-detail-update-db',
-                                      kwargs={'project_id': todo["bucket"]["id"]}) +
-                '">save project to db</a> first.'
-            )
+        # process bucket first, because at processing parent still need a valid bucket
+        bucket, message = db_get_bucket(bucket_id=todo["bucket"]["id"])
+        if not bucket:  # not exists
+            return HttpResponseBadRequest(message)
 
         if todo["parent"]["type"] == "Todoset":
             # process parent BcTodoset

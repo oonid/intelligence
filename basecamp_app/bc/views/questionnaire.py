@@ -1,10 +1,11 @@
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.urls import reverse
-from bc.utils import (session_get_token_and_identity, bc_api_get, api_questionnaire_get_bucket_questionnaire_uri,
+from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket,
+                      api_questionnaire_get_bucket_questionnaire_uri,
                       api_questionnaire_get_bucket_questionnaire_questions_uri,
                       api_questionnaire_get_bucket_question_uri, api_questionnaire_get_bucket_question_answers_uri,
                       api_questionnaire_get_bucket_question_answer_uri)
-from bc.models import BcProject, BcPeople, BcQuestionnaire, BcQuestion, BcQuestionAnswer, BcRecurrenceSchedule
+from bc.models import BcPeople, BcQuestionnaire, BcQuestion, BcQuestionAnswer, BcRecurrenceSchedule
 from bc.serializers import BcPeopleSerializer
 from json import dumps as json_dumps
 
@@ -28,16 +29,9 @@ def app_questionnaire_detail(request, bucket_id, questionnaire_id):
     if 'bucket' in questionnaire and questionnaire["bucket"]["type"] == "Project" and 'creator' in questionnaire:
 
         # process bucket
-        try:
-            bucket = BcProject.objects.get(id=questionnaire["bucket"]["id"])
-        except BcProject.DoesNotExist:
-            # can not insert new Project with limited data of questionnaire["bucket"]
-            return HttpResponseBadRequest(
-                f'bucket not found: {questionnaire["bucket"]}<br/>'
-                '<a href="' + reverse('app-project-detail-update-db',
-                                      kwargs={'project_id': questionnaire["bucket"]["id"]}) +
-                '">save project to db</a> first.'
-            )
+        bucket, message = db_get_bucket(bucket_id=questionnaire["bucket"]["id"])
+        if not bucket:  # not exists
+            return HttpResponseBadRequest(message)
 
         # remove 'bucket' key from questionnaire, will use model instance bucket instead
         questionnaire.pop('bucket')
@@ -146,6 +140,11 @@ def app_question_detail(request, bucket_id, question_id):
             'bucket' in question and question["bucket"]["type"] == "Project" and
             'creator' in question and 'schedule' in question):
 
+        # process bucket first, because at processing parent still need a valid bucket
+        bucket, message = db_get_bucket(bucket_id=question["bucket"]["id"])
+        if not bucket:  # not exists
+            return HttpResponseBadRequest(message)
+
         if question["parent"]["type"] == "Questionnaire":
             # process parent BcQuestionnaire
             try:
@@ -165,18 +164,6 @@ def app_question_detail(request, bucket_id, question_id):
 
         # remove 'parent' key from question, will use model instance parent instead
         question.pop('parent')
-
-        # process bucket
-        try:
-            bucket = BcProject.objects.get(id=question["bucket"]["id"])
-        except BcProject.DoesNotExist:
-            # can not insert new Project with limited data of question["bucket"]
-            return HttpResponseBadRequest(
-                f'bucket not found: {question["bucket"]}<br/>'
-                '<a href="' + reverse('app-project-detail-update-db',
-                                      kwargs={'project_id': question["bucket"]["id"]}) +
-                '">save project to db</a> first.'
-            )
 
         # remove 'bucket' key from question, will use model instance bucket instead
         question.pop('bucket')
@@ -294,6 +281,11 @@ def app_question_answer_detail(request, bucket_id, question_answer_id):
     if ('parent' in answer and answer["parent"]["type"] in ["Question"] and
             'bucket' in answer and answer["bucket"]["type"] == "Project" and 'creator' in answer):
 
+        # process bucket first, because at processing parent still need a valid bucket
+        bucket, message = db_get_bucket(bucket_id=answer["bucket"]["id"])
+        if not bucket:  # not exists
+            return HttpResponseBadRequest(message)
+
         if answer["parent"]["type"] == "Question":
             # process parent BcQuestion
             try:
@@ -313,18 +305,6 @@ def app_question_answer_detail(request, bucket_id, question_answer_id):
 
         # remove 'parent' key from question, will use model instance parent instead
         answer.pop('parent')
-
-        # process bucket
-        try:
-            bucket = BcProject.objects.get(id=answer["bucket"]["id"])
-        except BcProject.DoesNotExist:
-            # can not insert new Project with limited data of answer["bucket"]
-            return HttpResponseBadRequest(
-                f'bucket not found: {answer["bucket"]}<br/>'
-                '<a href="' + reverse('app-project-detail-update-db',
-                                      kwargs={'project_id': answer["bucket"]["id"]}) +
-                '">save project to db</a> first.'
-            )
 
         # remove 'bucket' key from answer, will use model instance bucket instead
         answer.pop('bucket')

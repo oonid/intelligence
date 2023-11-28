@@ -1,8 +1,8 @@
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.urls import reverse
-from bc.utils import (session_get_token_and_identity, bc_api_get, api_todolist_get_bucket_todoset_todolists_uri,
-                      api_todolist_get_bucket_todolist_uri)
-from bc.models import BcTodoset, BcProject, BcPeople, BcTodolist
+from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket,
+                      api_todolist_get_bucket_todoset_todolists_uri, api_todolist_get_bucket_todolist_uri)
+from bc.models import BcTodoset, BcPeople, BcTodolist
 from bc.serializers import BcPeopleSerializer
 
 
@@ -101,6 +101,11 @@ def app_todolist_detail(request, bucket_id, todolist_id):
     if ('parent' in todolist and todolist["parent"]["type"] in ["Todoset", "Todolist"] and
             'bucket' in todolist and todolist["bucket"]["type"] == "Project" and 'creator' in todolist):
 
+        # process bucket first, because at processing parent still need a valid bucket
+        bucket, message = db_get_bucket(bucket_id=todolist["bucket"]["id"])
+        if not bucket:  # not exists
+            return HttpResponseBadRequest(message)
+
         if todolist["parent"]["type"] == "Todoset":
             # process parent BcTodoset
             try:
@@ -134,18 +139,6 @@ def app_todolist_detail(request, bucket_id, todolist_id):
 
         # remove 'parent' key from todolist, will use model instance parent instead
         todolist.pop('parent')
-
-        # process bucket
-        try:
-            bucket = BcProject.objects.get(id=todolist["bucket"]["id"])
-        except BcProject.DoesNotExist:
-            # can not insert new Project with limited data of todolist["bucket"]
-            return HttpResponseBadRequest(
-                f'bucket not found: {todolist["bucket"]}<br/>'
-                '<a href="' + reverse('app-project-detail-update-db',
-                                      kwargs={'project_id': todolist["bucket"]["id"]}) +
-                '">save project to db</a> first.'
-            )
 
         # remove 'bucket' key from todolist, will use model instance bucket instead
         todolist.pop('bucket')

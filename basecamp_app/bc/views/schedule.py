@@ -1,8 +1,8 @@
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.urls import reverse
-from bc.utils import (session_get_token_and_identity, bc_api_get, api_schedule_get_bucket_schedule_uri,
+from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, api_schedule_get_bucket_schedule_uri,
                       api_schedule_get_bucket_schedule_entries_uri, api_schedule_get_bucket_schedule_entry_uri)
-from bc.models import BcProject, BcPeople, BcSchedule, BcScheduleEntry, BcRecurrenceSchedule
+from bc.models import BcPeople, BcSchedule, BcScheduleEntry, BcRecurrenceSchedule
 from bc.serializers import BcPeopleSerializer
 from json import dumps as json_dumps
 
@@ -26,16 +26,9 @@ def app_schedule_detail(request, bucket_id, schedule_id):
     if 'bucket' in schedule and schedule["bucket"]["type"] == "Project" and 'creator' in schedule:
 
         # process bucket
-        try:
-            bucket = BcProject.objects.get(id=schedule["bucket"]["id"])
-        except BcProject.DoesNotExist:
-            # can not insert new Project with limited data of schedule["bucket"]
-            return HttpResponseBadRequest(
-                f'bucket not found: {schedule["bucket"]}<br/>'
-                '<a href="' + reverse('app-project-detail-update-db',
-                                      kwargs={'project_id': schedule["bucket"]["id"]}) +
-                '">save project to db</a> first.'
-            )
+        bucket, message = db_get_bucket(bucket_id=schedule["bucket"]["id"])
+        if not bucket:  # not exists
+            return HttpResponseBadRequest(message)
 
         # remove 'bucket' key from schedule, will use model instance bucket instead
         schedule.pop('bucket')
@@ -145,6 +138,11 @@ def app_schedule_entry_detail(request, bucket_id, schedule_entry_id):
             'bucket' in schedule_entry and schedule_entry["bucket"]["type"] == "Project" and
             'creator' in schedule_entry and 'participants' in schedule_entry):
 
+        # process bucket first, because at processing parent still need a valid bucket
+        bucket, message = db_get_bucket(bucket_id=schedule_entry["bucket"]["id"])
+        if not bucket:  # not exists
+            return HttpResponseBadRequest(message)
+
         if schedule_entry["parent"]["type"] == "Schedule":
             # process parent BcSchedule
             try:
@@ -164,18 +162,6 @@ def app_schedule_entry_detail(request, bucket_id, schedule_entry_id):
 
         # remove 'parent' key from schedule entry, will use model instance parent instead
         schedule_entry.pop('parent')
-
-        # process bucket
-        try:
-            bucket = BcProject.objects.get(id=schedule_entry["bucket"]["id"])
-        except BcProject.DoesNotExist:
-            # can not insert new Project with limited data of schedule_entry["bucket"]
-            return HttpResponseBadRequest(
-                f'bucket not found: {schedule_entry["bucket"]}<br/>'
-                '<a href="' + reverse('app-project-detail-update-db',
-                                      kwargs={'project_id': schedule_entry["bucket"]["id"]}) +
-                '">save project to db</a> first.'
-            )
 
         # remove 'bucket' key from schedule entry, will use model instance bucket instead
         schedule_entry.pop('bucket')

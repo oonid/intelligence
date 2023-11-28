@@ -1,9 +1,9 @@
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.urls import reverse
-from bc.utils import (session_get_token_and_identity, bc_api_get, api_recording_get_recordings_uri,
+from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, api_recording_get_recordings_uri,
                       api_recording_get_bucket_recording_parent_comment_uri,
                       static_get_recording_types, static_get_recording_parent_types)
-from bc.models import BcProject, BcTodo, BcTodolist
+from bc.models import BcTodo, BcTodolist
 
 
 def app_recording_main(request):
@@ -65,13 +65,9 @@ def app_project_recording_by_type(request, bucket_id, recording_type):
         return HttpResponse('')
 
     # load project from db or give recommendation link to save to db first
-    try:
-        project = BcProject.objects.get(id=bucket_id)
-    except BcProject.DoesNotExist:
-        return HttpResponse(
-            '<a href="' + reverse('app-project-detail-update-db',
-                                  kwargs={'project_id': bucket_id}) +
-            '">save project to db</a> first.')
+    bucket, message = db_get_bucket(bucket_id=bucket_id)
+    if not bucket:  # not exists
+        return HttpResponseBadRequest(message)
 
     # project exist on db
     token, identity = session_get_token_and_identity(request)
@@ -98,16 +94,9 @@ def app_project_recording_by_type(request, bucket_id, recording_type):
                     'bucket' in recording and recording["bucket"]["type"] == "Project" and 'creator' in recording):
 
                 # process bucket first, because at processing parent still need a valid bucket
-                try:
-                    bucket = BcProject.objects.get(id=recording["bucket"]["id"])
-                except BcProject.DoesNotExist:
-                    # can not insert new Project with limited data of recording["bucket"]
-                    return HttpResponseBadRequest(
-                        f'bucket not found: {recording["bucket"]}<br/>'
-                        '<a href="' + reverse('app-project-detail-update-db',
-                                              kwargs={'project_id': recording["bucket"]["id"]}) +
-                        '">save project to db</a> first.'
-                    )
+                bucket, message = db_get_bucket(bucket_id=recording["bucket"]["id"])
+                if not bucket:  # not exists
+                    return HttpResponseBadRequest(message)
 
                 if recording['parent']['type'] == 'Todo':
                     # process parent BcTodo
@@ -172,7 +161,7 @@ def app_project_recording_by_type(request, bucket_id, recording_type):
         total_count = int(response.headers["X-Total-Count"])
 
     return HttpResponse(
-        '<a href="' + reverse('app-project-detail', kwargs={'project_id': project.id}) + '">back</a><br/>'
+        '<a href="' + reverse('app-project-detail', kwargs={'project_id': bucket.id}) + '">back</a><br/>'
         f'recording {recording_type}: {recording_total}/{total_count} recordings<br/>'
         f'with {len(recording_keys)} keys: {recording_keys}<br/>'
         f'{recording_list}<br/>'

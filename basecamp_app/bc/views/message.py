@@ -1,9 +1,9 @@
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.urls import reverse
-from bc.utils import (session_get_token_and_identity, bc_api_get, api_message_get_bucket_message_types_uri,
-                      api_message_get_bucket_message_board_uri, api_message_get_bucket_message_board_messages_uri,
-                      api_message_get_bucket_message_uri)
-from bc.models import BcMessageCategory, BcMessageBoard, BcPeople, BcProject, BcMessage
+from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket,
+                      api_message_get_bucket_message_types_uri, api_message_get_bucket_message_board_uri,
+                      api_message_get_bucket_message_board_messages_uri, api_message_get_bucket_message_uri)
+from bc.models import BcMessageCategory, BcMessageBoard, BcPeople, BcMessage
 from bc.serializers import BcPeopleSerializer
 
 
@@ -67,17 +67,10 @@ def app_message_board_detail(request, bucket_id, message_board_id):
     # if OK
     message_board = response.json()
 
-    # process bucket
-    try:
-        bucket = BcProject.objects.get(id=message_board["bucket"]["id"])
-    except BcProject.DoesNotExist:
-        # can not insert new Project with limited data of todolist["bucket"]
-        return HttpResponseBadRequest(
-            f'bucket not found: {message_board["bucket"]}<br/>'
-            '<a href="' + reverse('app-project-detail-update-db',
-                                  kwargs={'project_id': message_board["bucket"]["id"]}) +
-            '">save project to db</a> first.'
-        )
+    # process bucket first, because at processing parent still need a valid bucket
+    bucket, message = db_get_bucket(bucket_id=message_board["bucket"]["id"])
+    if not bucket:  # not exists
+        return HttpResponseBadRequest(message)
 
     # remove 'bucket' key from message_board, will use model instance bucket instead
     message_board.pop('bucket')
@@ -189,6 +182,11 @@ def app_message_detail(request, bucket_id, message_id):
     if ('parent' in message and message["parent"]["type"] in ["Message::Board"] and
             'bucket' in message and message["bucket"]["type"] == "Project" and 'creator' in message):
 
+        # process bucket first, because at processing parent still need a valid bucket
+        bucket, message = db_get_bucket(bucket_id=message["bucket"]["id"])
+        if not bucket:  # not exists
+            return HttpResponseBadRequest(message)
+
         # process parent message_board
         if message["parent"]["type"] == "Message::Board":
             try:
@@ -208,18 +206,6 @@ def app_message_detail(request, bucket_id, message_id):
 
         # remove 'parent' key from message, will use model instance parent instead
         message.pop('parent')
-
-        # process bucket
-        try:
-            bucket = BcProject.objects.get(id=message["bucket"]["id"])
-        except BcProject.DoesNotExist:
-            # can not insert new Project with limited data of message["bucket"]
-            return HttpResponseBadRequest(
-                f'bucket not found: {message["bucket"]}<br/>'
-                '<a href="' + reverse('app-project-detail-update-db',
-                                      kwargs={'project_id': message["bucket"]["id"]}) +
-                '">save project to db</a> first.'
-            )
 
         # remove 'bucket' key from message, will use model instance bucket instead
         message.pop('bucket')

@@ -1,7 +1,7 @@
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.urls import reverse
-from bc.utils import (session_get_token_and_identity, bc_api_get, api_todoset_get_bucket_todoset_uri)
-from bc.models import BcProject, BcPeople, BcTodoset
+from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, api_todoset_get_bucket_todoset_uri)
+from bc.models import BcPeople, BcTodoset
 from bc.serializers import BcPeopleSerializer
 
 
@@ -23,16 +23,9 @@ def app_todoset_detail(request, bucket_id, todoset_id):
     if 'bucket' in todoset and todoset["bucket"]["type"] == "Project" and 'creator' in todoset:
 
         # process bucket
-        try:
-            bucket = BcProject.objects.get(id=todoset["bucket"]["id"])
-        except BcProject.DoesNotExist:
-            # can not insert new Project with limited data of todoset["bucket"]
-            return HttpResponseBadRequest(
-                f'bucket not found: {todoset["bucket"]}<br/>'
-                '<a href="' + reverse('app-project-detail-update-db',
-                                      kwargs={'project_id': todoset["bucket"]["id"]}) +
-                '">save project to db</a> first.'
-            )
+        bucket, message = db_get_bucket(bucket_id=todoset["bucket"]["id"])
+        if not bucket:  # not exists
+            return HttpResponseBadRequest(message)
 
         # remove 'bucket' key from todoset, will use model instance bucket instead
         todoset.pop('bucket')

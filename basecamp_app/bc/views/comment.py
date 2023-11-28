@@ -1,8 +1,8 @@
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.urls import reverse
-from bc.utils import (session_get_token_and_identity, bc_api_get, api_comment_get_bucket_comment_uri,
+from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, api_comment_get_bucket_comment_uri,
                       static_get_recording_parent_uri, static_get_recording_parent_types)
-from bc.models import BcProject, BcTodo, BcTodolist, BcPeople, BcComment
+from bc.models import BcTodo, BcTodolist, BcPeople, BcComment
 from bc.serializers import BcPeopleSerializer
 
 
@@ -30,16 +30,9 @@ def app_comment_detail(request, bucket_id, comment_id):
                       f'{comment["parent"]["id"]}</a>')
 
         # process bucket first, because at processing parent still need a valid bucket
-        try:
-            bucket = BcProject.objects.get(id=comment["bucket"]["id"])
-        except BcProject.DoesNotExist:
-            # can not insert new Project with limited data of recording["bucket"]
-            return HttpResponseBadRequest(
-                f'bucket not found: {comment["bucket"]}<br/>'
-                '<a href="' + reverse('app-project-detail-update-db',
-                                      kwargs={'project_id': comment["bucket"]["id"]}) +
-                '">save project to db</a> first.'
-            )
+        bucket, message = db_get_bucket(bucket_id=comment["bucket"]["id"])
+        if not bucket:  # not exists
+            return HttpResponseBadRequest(message)
 
         if comment['parent']['type'] == 'Todo':
             # process parent BcTodo
