@@ -1,8 +1,9 @@
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.urls import reverse
-from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, api_comment_get_bucket_comment_uri,
-                      static_get_recording_parent_uri, static_get_recording_parent_types)
-from bc.models import BcTodo, BcTodolist, BcPeople, BcComment
+from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, db_get_comment_parent,
+                      api_comment_get_bucket_comment_uri,
+                      static_get_comment_parent_uri, static_get_comment_parent_types)
+from bc.models import BcPeople, BcComment
 from bc.serializers import BcPeopleSerializer
 
 
@@ -22,10 +23,10 @@ def app_comment_detail(request, bucket_id, comment_id):
     comment = response.json()
     print(comment)
 
-    if ('parent' in comment and comment["parent"]["type"] in static_get_recording_parent_types() and
+    if ('parent' in comment and comment["parent"]["type"] in static_get_comment_parent_types() and
             'bucket' in comment and comment["bucket"]["type"] == "Project" and 'creator' in comment):
 
-        parent_uri = static_get_recording_parent_uri(parent=comment["parent"], bucket=comment["bucket"])
+        parent_uri = static_get_comment_parent_uri(parent=comment["parent"], bucket=comment["bucket"])
         parent_str = (f'parent: <a href="{parent_uri}" target="_black">{comment["parent"]["type"]} '
                       f'{comment["parent"]["id"]}</a>')
 
@@ -34,36 +35,10 @@ def app_comment_detail(request, bucket_id, comment_id):
         if not bucket:  # not exists
             return HttpResponseBadRequest(message)
 
-        if comment['parent']['type'] == 'Todo':
-            # process parent BcTodo
-            try:
-                parent = BcTodo.objects.get(id=comment["parent"]["id"])
-            except BcTodo.DoesNotExist:
-                # can not insert new Todo with limited data of recording["parent"]
-                return HttpResponseBadRequest(
-                    f'todo not found: {comment["parent"]}<br/>'
-                    '<a href="' + reverse('app-todo-detail',
-                                          kwargs={'bucket_id': comment["bucket"]["id"],
-                                                  'todo_id': comment["parent"]["id"]}) +
-                    '">try to open todo</a> first.'
-                )
-        elif comment['parent']['type'] == 'Todolist':
-            # process parent BcTodolist
-            try:
-                parent = BcTodolist.objects.get(id=comment["parent"]["id"])
-            except BcTodolist.DoesNotExist:
-                # can not insert new Todolist with limited data of recording["parent"]
-                return HttpResponseBadRequest(
-                    f'todolist not found: {comment["parent"]}<br/>'
-                    '<a href="' + reverse('app-todolist-detail',
-                                          kwargs={'bucket_id': comment["bucket"]["id"],
-                                                  'todolist_id': comment["parent"]["id"]}) +
-                    '">try to open todolist</a> first.'
-                )
-
-
-        else:  # condition above has filter the type in to get_recording_parent_types, should never be here
-            parent = None
+        # process parent with type listed in static_get_recording_parent_types
+        parent, message = db_get_comment_parent(parent=comment["parent"], bucket_id=comment["bucket"]["id"])
+        if not parent:  # not exists
+            return HttpResponseBadRequest(message)
 
         # process creator
         try:
@@ -94,7 +69,7 @@ def app_comment_detail(request, bucket_id, comment_id):
     else:
         return HttpResponseBadRequest(
             f'comment {comment["title"]} has no creator or bucket type Project or parent type in '
-            f'{static_get_recording_parent_types()}')
+            f'{static_get_comment_parent_types()}')
 
     _comment_title = _comment.title if _comment else comment["title"]
 

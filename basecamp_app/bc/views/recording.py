@@ -1,9 +1,8 @@
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.urls import reverse
-from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, api_recording_get_recordings_uri,
-                      api_recording_get_bucket_recording_parent_comment_uri,
-                      static_get_recording_types, static_get_recording_parent_types)
-from bc.models import BcTodo, BcTodolist
+from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, db_get_comment_parent,
+                      api_recording_get_recordings_uri, api_recording_get_bucket_recording_parent_comment_uri,
+                      static_get_recording_types, static_get_comment_parent_types)
 
 
 def app_recording_main(request):
@@ -90,7 +89,7 @@ def app_project_recording_by_type(request, bucket_id, recording_type):
 
         if recording_type in ['Comment']:
 
-            if ('parent' in recording and recording["parent"]["type"] in static_get_recording_parent_types() and
+            if ('parent' in recording and recording["parent"]["type"] in static_get_comment_parent_types() and
                     'bucket' in recording and recording["bucket"]["type"] == "Project" and 'creator' in recording):
 
                 # process bucket first, because at processing parent still need a valid bucket
@@ -98,36 +97,10 @@ def app_project_recording_by_type(request, bucket_id, recording_type):
                 if not bucket:  # not exists
                     return HttpResponseBadRequest(message)
 
-                if recording['parent']['type'] == 'Todo':
-                    # process parent BcTodo
-                    try:
-                        parent = BcTodo.objects.get(id=recording["parent"]["id"])
-                    except BcTodo.DoesNotExist:
-                        # can not insert new Todo with limited data of recording["parent"]
-                        return HttpResponseBadRequest(
-                            f'todo not found: {recording["parent"]}<br/>'
-                            '<a href="' + reverse('app-todo-detail',
-                                                  kwargs={'bucket_id': recording["bucket"]["id"],
-                                                          'todo_id': recording["parent"]["id"]}) +
-                            '">try to open todo</a> first.'
-                        )
-                elif recording['parent']['type'] == 'Todolist':
-                    # process parent BcTodolist
-                    try:
-                        parent = BcTodolist.objects.get(id=recording["parent"]["id"])
-                    except BcTodolist.DoesNotExist:
-                        # can not insert new Todolist with limited data of recording["parent"]
-                        return HttpResponseBadRequest(
-                            f'todolist not found: {recording["parent"]}<br/>'
-                            '<a href="' + reverse('app-todolist-detail',
-                                                  kwargs={'bucket_id': recording["bucket"]["id"],
-                                                          'todolist_id': recording["parent"]["id"]}) +
-                            '">try to open todolist</a> first.'
-                        )
-
-
-                else:  # condition above has filter the type in to get_recording_parent_types, should never be here
-                    parent = None
+                # process parent with type listed in static_get_recording_parent_types
+                parent, message = db_get_comment_parent(parent=recording["parent"], bucket_id=recording["bucket"]["id"])
+                if not parent:  # not exists
+                    return HttpResponseBadRequest(message)
 
                 # remove 'bucket' key from recording. key 'bucket' still used in processing parent
                 recording.pop('bucket')
@@ -145,7 +118,7 @@ def app_project_recording_by_type(request, bucket_id, recording_type):
             else:
                 return HttpResponseBadRequest(
                     f'recording {recording["title"]} has no creator or bucket type Project or parent type in '
-                    f'{static_get_recording_parent_types()}')
+                    f'{static_get_comment_parent_types()}')
 
         # others recording type
         else:
