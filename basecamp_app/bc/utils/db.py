@@ -1,6 +1,6 @@
 from django.urls import reverse
-from bc.models import BcProject, BcTodo, BcTodolist, BcScheduleEntry, BcQuestionAnswer, BcMessage
-from bc.utils import static_get_comment_parent_types
+from bc.models import BcProject, BcTodo, BcTodolist, BcScheduleEntry, BcQuestionAnswer, BcMessage, BcVault
+from bc.utils import static_get_comment_parent_types, static_get_vault_parent_types
 
 
 def db_get_bucket(bucket_id):
@@ -94,5 +94,34 @@ def db_get_comment_parent(parent, bucket_id):
     else:  # condition above has filter the type in to get_recording_parent_types, should never be here
         _parent = None
         _message = f'parent {parent["id"]} type {parent["type"]} not in {static_get_comment_parent_types()}.'
+
+    return _parent, _message
+
+
+def db_get_vault_parent(parent, bucket_id):
+    """
+    as mention in static_get_vault_parent_types(), parent types should be in ['Vault']
+
+    :param parent:
+    :param bucket_id:
+    :return:
+    """
+
+    if parent['type'] == 'Vault':
+        # process parent BcVault
+        try:
+            _parent = BcVault.objects.get(id=parent["id"])
+            _message = None
+        except BcVault.DoesNotExist:
+            _parent = None
+            _message = (f'vault {parent["id"]} not found<br/>'
+                        '<a href="' + reverse('app-vault-detail',
+                                              kwargs={'bucket_id': bucket_id,
+                                                      'vault_id': parent["id"]}) +
+                        '">try to open vault</a> first.')
+
+    else:  # condition above has filter the type in to get_vault_parent_types, should never be here
+        _parent = None
+        _message = f'parent {parent["id"]} type {parent["type"]} not in {static_get_vault_parent_types()}.'
 
     return _parent, _message

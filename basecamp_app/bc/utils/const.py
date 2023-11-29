@@ -7,6 +7,10 @@ def static_get_recording_parent_types():
     return ['Todo', 'Todolist']
 
 
+def static_get_vault_parent_types():
+    return ['Vault']
+
+
 def static_get_recording_types():
     return ['Comment', 'Document', 'Message', 'Question::Answer', 'Schedule::Entry', 'Todo', 'Todolist', 'Upload',
             'Vault']

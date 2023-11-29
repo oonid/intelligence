@@ -1,9 +1,12 @@
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.urls import reverse
-from bc.utils import (session_get_token_and_identity, bc_api_get,
+from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, db_get_vault_parent,
                       api_vault_get_bucket_vault_uri, api_vault_get_bucket_vault_vaults_uri,
                       api_vault_get_bucket_vault_documents_uri, api_document_get_bucket_document_uri,
-                      api_vault_get_bucket_vault_uploads_uri, api_document_get_bucket_upload_uri)
+                      api_vault_get_bucket_vault_uploads_uri, api_document_get_bucket_upload_uri,
+                      static_get_vault_parent_types)
+from bc.models import BcPeople, BcVault, BcDocument, BcUpload
+from bc.serializers import BcPeopleSerializer
 
 
 def app_vault_detail(request, bucket_id, vault_id):
@@ -20,12 +23,58 @@ def app_vault_detail(request, bucket_id, vault_id):
 
     # if OK
     vault = response.json()
-    print(vault)
-    print(vault.keys())
+
+    if 'bucket' in vault and vault["bucket"]["type"] == "Project" and 'creator' in vault:
+
+        # process bucket first, because at processing parent still need a valid bucket
+        bucket, message = db_get_bucket(bucket_id=vault["bucket"]["id"])
+        if not bucket:  # not exists
+            return HttpResponseBadRequest(message)
+
+        if 'parent' in vault and vault["parent"]["type"] in static_get_vault_parent_types():
+            # process parent with type listed in static_get_vault_parent_types
+            parent, message = db_get_vault_parent(parent=vault["parent"], bucket_id=vault["bucket"]["id"])
+            if not parent:  # not exists
+                return HttpResponseBadRequest(message)
+
+            # remove 'parent' key from vault, will use model instance parent instead
+            vault.pop('parent')
+
+        else:  # no parent, as root vault has no parent
+            parent = None
+
+        # process creator
+        try:
+            creator = BcPeople.objects.get(id=vault["creator"]["id"])
+        except BcPeople.DoesNotExist:
+            serializer = BcPeopleSerializer(data=vault["creator"])
+            if serializer.is_valid():
+                creator = serializer.save()
+            else:  # invalid serializer
+                return HttpResponseBadRequest(f'creator serializer error: {serializer.errors}')
+
+        # remove 'bucket' key from vault. key 'bucket' still used in processing parent
+        vault.pop('bucket')
+
+        # remove 'creator' key from vault, will use model instance creator instead
+        vault.pop('creator')
+
+        # process vault
+        try:
+            _vault = BcVault.objects.get(id=vault["id"])
+        except BcVault.DoesNotExist:
+            _vault = BcVault.objects.create(bucket=bucket, parent=parent, creator=creator, **vault)
+            _vault.save()
+
+    else:
+        return HttpResponseBadRequest(
+            f'vault {vault["title"]} has no creator or bucket type Project')
+
+    _vault_title = _vault.title if _vault else vault["title"]
 
     return HttpResponse(
         '<a href="' + reverse('app-project-detail', kwargs={'project_id': bucket_id}) + '">back</a><br/>'
-        f'title: {vault["title"]}<br/>'
+        f'title: {_vault_title}<br/>'
         f'<a href="' + reverse('app-vault-documents',
                                kwargs={'bucket_id': bucket_id, 'vault_id': vault_id}) +
         f'">{vault["documents_count"]} documents</a><br/>'
@@ -106,11 +155,57 @@ def app_document_detail(request, bucket_id, document_id):
 
     # if OK
     document = response.json()
-    print(document)
+
+    # parent of document same with parent of vault: Vault
+    if ('parent' in document and document["parent"]["type"] in static_get_vault_parent_types() and
+            'bucket' in document and document["bucket"]["type"] == "Project" and 'creator' in document):
+
+        # process bucket first, because at processing parent still need a valid bucket
+        bucket, message = db_get_bucket(bucket_id=document["bucket"]["id"])
+        if not bucket:  # not exists
+            return HttpResponseBadRequest(message)
+
+        # process parent with type listed in static_get_vault_parent_types (same with document parent)
+        parent, message = db_get_vault_parent(parent=document["parent"], bucket_id=document["bucket"]["id"])
+        if not parent:  # not exists
+            return HttpResponseBadRequest(message)
+
+        # process creator
+        try:
+            creator = BcPeople.objects.get(id=document["creator"]["id"])
+        except BcPeople.DoesNotExist:
+            serializer = BcPeopleSerializer(data=document["creator"])
+            if serializer.is_valid():
+                creator = serializer.save()
+            else:  # invalid serializer
+                return HttpResponseBadRequest(f'creator serializer error: {serializer.errors}')
+
+        # remove 'bucket' key from document. key 'bucket' still used in processing parent
+        document.pop('bucket')
+
+        # remove 'parent' key from document, will use model instance parent instead
+        document.pop('parent')
+
+        # remove 'creator' key from document, will use model instance creator instead
+        document.pop('creator')
+
+        # process document
+        try:
+            _document = BcDocument.objects.get(id=document["id"])
+        except BcDocument.DoesNotExist:
+            _document = BcDocument.objects.create(bucket=bucket, parent=parent, creator=creator, **document)
+            _document.save()
+
+    else:
+        return HttpResponseBadRequest(
+            f'document {document["title"]} has no creator or bucket type Project or parent type in '
+            f'{static_get_vault_parent_types()}')
+
+    _document_title = _document.title if _document else document["title"]
 
     return HttpResponse(
         '<a href="' + reverse('app-project-detail', kwargs={'project_id': bucket_id}) + '">back</a><br/>'
-        f'title: {document["title"]}<br/>'
+        f'title: {_document_title}<br/>'
     )
 
 
@@ -190,11 +285,57 @@ def app_upload_detail(request, bucket_id, upload_id):
 
     # if OK
     upload = response.json()
-    print(upload)
+
+    # parent of upload same with parent of vault: Vault
+    if ('parent' in upload and upload["parent"]["type"] in static_get_vault_parent_types() and
+            'bucket' in upload and upload["bucket"]["type"] == "Project" and 'creator' in upload):
+
+        # process bucket first, because at processing parent still need a valid bucket
+        bucket, message = db_get_bucket(bucket_id=upload["bucket"]["id"])
+        if not bucket:  # not exists
+            return HttpResponseBadRequest(message)
+
+        # process parent with type listed in static_get_vault_parent_types (same with upload parent)
+        parent, message = db_get_vault_parent(parent=upload["parent"], bucket_id=upload["bucket"]["id"])
+        if not parent:  # not exists
+            return HttpResponseBadRequest(message)
+
+        # process creator
+        try:
+            creator = BcPeople.objects.get(id=upload["creator"]["id"])
+        except BcPeople.DoesNotExist:
+            serializer = BcPeopleSerializer(data=upload["creator"])
+            if serializer.is_valid():
+                creator = serializer.save()
+            else:  # invalid serializer
+                return HttpResponseBadRequest(f'creator serializer error: {serializer.errors}')
+
+        # remove 'bucket' key from document. key 'bucket' still used in processing parent
+        upload.pop('bucket')
+
+        # remove 'parent' key from document, will use model instance parent instead
+        upload.pop('parent')
+
+        # remove 'creator' key from document, will use model instance creator instead
+        upload.pop('creator')
+
+        # process document
+        try:
+            _upload = BcUpload.objects.get(id=upload["id"])
+        except BcUpload.DoesNotExist:
+            _upload = BcUpload.objects.create(bucket=bucket, parent=parent, creator=creator, **upload)
+            _upload.save()
+
+    else:
+        return HttpResponseBadRequest(
+            f'upload {upload["title"]} has no creator or bucket type Project or parent type in '
+            f'{static_get_vault_parent_types()}')
+
+    _upload_title = _upload.title if _upload else upload["title"]
 
     return HttpResponse(
         '<a href="' + reverse('app-project-detail', kwargs={'project_id': bucket_id}) + '">back</a><br/>'
-        f'title: {upload["title"]}<br/>'
+        f'title: {_upload_title}<br/>'
     )
 
 
