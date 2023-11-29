@@ -60,4 +60,12 @@ urlpatterns = [
     # todo
     path('project/<int:bucket_id>/todolist/<int:todolist_id>/todo', views.app_todo_main, name='app-todo-main'),
     path('project/<int:bucket_id>/todo/<int:todo_id>', views.app_todo_detail, name='app-todo-detail'),
+    # vault, document, upload (different from CloudFile and GoogleDocument)
+    path('project/<int:bucket_id>/vault/<int:vault_id>', views.app_vault_detail, name='app-vault-detail'),
+    path('project/<int:bucket_id>/vault/<int:vault_id>/vaults', views.app_vault_vaults, name='app-vault-vaults'),
+    path('project/<int:bucket_id>/vault/<int:vault_id>/documents', views.app_vault_documents,
+         name='app-vault-documents'),
+    path('project/<int:bucket_id>/vault/<int:vault_id>/uploads', views.app_vault_uploads, name='app-vault-uploads'),
+    path('project/<int:bucket_id>/document/<int:document_id>', views.app_document_detail, name='app-document-detail'),
+    path('project/<int:bucket_id>/upload/<int:upload_id>', views.app_upload_detail, name='app-upload-detail'),
 ]

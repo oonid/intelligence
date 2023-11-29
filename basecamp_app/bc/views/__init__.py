@@ -10,3 +10,4 @@ from .todo import *
 from .todolist import *
 from .todolist_group import *
 from .todoset import *
+from .vault import *

@@ -189,3 +189,39 @@ def api_comment_get_bucket_comment_uri(bucket_id, comment_id):
     basecamp_api_uri = environ["BASECAMP_API_URI"]
     basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
     return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/comments/{comment_id}.json'
+
+
+def api_vault_get_bucket_vault_uri(bucket_id, vault_id):
+    basecamp_api_uri = environ["BASECAMP_API_URI"]
+    basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
+    return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/vaults/{vault_id}.json'
+
+
+def api_vault_get_bucket_vault_vaults_uri(bucket_id, vault_id):
+    basecamp_api_uri = environ["BASECAMP_API_URI"]
+    basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
+    return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/vaults/{vault_id}/vaults.json'
+
+
+def api_vault_get_bucket_vault_documents_uri(bucket_id, vault_id):
+    basecamp_api_uri = environ["BASECAMP_API_URI"]
+    basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
+    return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/vaults/{vault_id}/documents.json'
+
+
+def api_vault_get_bucket_vault_uploads_uri(bucket_id, vault_id):
+    basecamp_api_uri = environ["BASECAMP_API_URI"]
+    basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
+    return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/vaults/{vault_id}/uploads.json'
+
+
+def api_document_get_bucket_document_uri(bucket_id, document_id):
+    basecamp_api_uri = environ["BASECAMP_API_URI"]
+    basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
+    return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/documents/{document_id}.json'
+
+
+def api_document_get_bucket_upload_uri(bucket_id, upload_id):
+    basecamp_api_uri = environ["BASECAMP_API_URI"]
+    basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
+    return f'{basecamp_api_uri}/{basecamp_account_id}/buckets/{bucket_id}/uploads/{upload_id}.json'
