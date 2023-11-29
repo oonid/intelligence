@@ -26,7 +26,7 @@ class BcComment(models.Model):
     parent = GenericForeignKey("content_type", "object_id")
     bucket = models.ForeignKey(to=BcProject, on_delete=models.CASCADE)
     creator = models.ForeignKey(to=BcPeople, on_delete=models.CASCADE)
-    content = models.CharField(max_length=100)
+    content = models.TextField()
 
     def __str__(self):
         return f'{self.type} {self.id} {self.title} ({self.status})'

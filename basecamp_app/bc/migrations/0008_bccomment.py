@@ -27,7 +27,7 @@ class Migration(migrations.Migration):
                 ('app_url', models.URLField()),
                 ('bookmark_url', models.URLField()),
                 ('object_id', models.PositiveIntegerField()),
-                ('content', models.CharField(max_length=100)),
+                ('content', models.TextField()),
                 ('bucket', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='bc.bcproject')),
                 ('content_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='contenttypes.contenttype')),
                 ('creator', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='bc.bcpeople')),
