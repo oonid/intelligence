@@ -9,3 +9,4 @@ from .todobase import *
 from .todoset import *
 from .todolist import *
 from .todo import *
+from .vault import *
