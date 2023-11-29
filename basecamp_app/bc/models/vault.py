@@ -104,3 +104,6 @@ class BcUpload(models.Model):
     app_download_url = models.URLField()
     width = models.IntegerField()
     height = models.IntegerField()
+
+    def __str__(self):
+        return f'{self.type} {self.id} {self.title} ({self.status})'
