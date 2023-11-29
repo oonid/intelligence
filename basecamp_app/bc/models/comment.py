@@ -19,7 +19,7 @@ class BcComment(models.Model):
     url = models.URLField()
     app_url = models.URLField()
     bookmark_url = models.URLField()
-    # parent in ["Message", "Question::Answer", "Schedule::Entry", "Todolist", "Todo"]
+    # parent defined in static_get_comment_parent_types()
     parent_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
     parent_object_id = models.PositiveIntegerField()
     # https://docs.djangoproject.com/en/4.2/ref/contrib/contenttypes/#generic-relations

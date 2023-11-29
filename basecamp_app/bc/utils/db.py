@@ -1,5 +1,6 @@
 from django.urls import reverse
-from bc.models import BcProject, BcTodo, BcTodolist, BcScheduleEntry, BcQuestionAnswer, BcMessage, BcVault
+from bc.models import (BcProject, BcTodo, BcTodolist, BcScheduleEntry, BcQuestionAnswer, BcMessage, BcVault, BcUpload,
+                       BcDocument)
 from bc.utils import static_get_comment_parent_types, static_get_vault_parent_types
 
 
@@ -19,14 +20,27 @@ def db_get_bucket(bucket_id):
 
 def db_get_comment_parent(parent, bucket_id):
     """
-    as mention in static_get_comment_parent_types(), parent types should be in
-    ['Message', 'Question::Answer', 'Schedule::Entry', 'Todolist', 'Todo']
+    as mentioned in static_get_comment_parent_types()
+
     :param parent:
     :param bucket_id:
     :return:
     """
 
-    if parent['type'] == 'Todo':
+    if parent['type'] == 'Upload':
+        # process parent BcUpload
+        try:
+            _parent = BcUpload.objects.get(id=parent["id"])
+            _message = None
+        except BcUpload.DoesNotExist:
+            _parent = None
+            _message = (f'upload {parent["id"]} not found<br/>'
+                        '<a href="' + reverse('app-upload-detail',
+                                              kwargs={'bucket_id': bucket_id,
+                                                      'upload_id': parent["id"]}) +
+                        '">try to open upload</a> first.')
+
+    elif parent['type'] == 'Todo':
         # process parent BcTodo
         try:
             _parent = BcTodo.objects.get(id=parent["id"])
@@ -91,6 +105,19 @@ def db_get_comment_parent(parent, bucket_id):
                                                       'message_id': parent["id"]}) +
                         '">try to open message</a> first.')
 
+    elif parent['type'] == 'Document':
+        # process parent BcDocument
+        try:
+            _parent = BcDocument.objects.get(id=parent["id"])
+            _message = None
+        except BcDocument.DoesNotExist:
+            _parent = None
+            _message = (f'document {parent["id"]} not found<br/>'
+                        '<a href="' + reverse('app-document-detail',
+                                              kwargs={'bucket_id': bucket_id,
+                                                      'document_id': parent["id"]}) +
+                        '">try to open document</a> first.')
+
     else:  # condition above has filter the type in to get_recording_parent_types, should never be here
         _parent = None
         _message = f'parent {parent["id"]} type {parent["type"]} not in {static_get_comment_parent_types()}.'
@@ -100,7 +127,7 @@ def db_get_comment_parent(parent, bucket_id):
 
 def db_get_vault_parent(parent, bucket_id):
     """
-    as mention in static_get_vault_parent_types(), parent types should be in ['Vault']
+    as mentioned in static_get_vault_parent_types()
 
     :param parent:
     :param bucket_id:

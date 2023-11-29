@@ -1,6 +1,6 @@
 
 def static_get_comment_parent_types():
-    return ['Message', 'Question::Answer', 'Schedule::Entry', 'Todolist', 'Todo']
+    return ['Document', 'Message', 'Question::Answer', 'Schedule::Entry', 'Todolist', 'Todo', 'Upload']
 
 
 def static_get_recording_parent_types():
