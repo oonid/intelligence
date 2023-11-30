@@ -3,8 +3,8 @@ def static_get_comment_parent_types():
     return ['Document', 'Message', 'Question::Answer', 'Schedule::Entry', 'Todolist', 'Todo', 'Upload']
 
 
-def static_get_recording_parent_types():
-    return ['Todo', 'Todolist']
+def static_get_message_parent_types():
+    return ['Message::Board']
 
 
 def static_get_vault_parent_types():

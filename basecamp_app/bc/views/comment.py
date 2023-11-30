@@ -36,7 +36,7 @@ def app_comment_detail(request, bucket_id, comment_id):
         if not bucket:  # not exists
             return HttpResponseBadRequest(message)
 
-        # process parent with type listed in static_get_recording_parent_types
+        # process parent with type listed in static_get_comment_parent_types
         parent, message = db_get_comment_parent(parent=comment["parent"], bucket_id=comment["bucket"]["id"])
         if not parent:  # not exists
             return HttpResponseBadRequest(message)
