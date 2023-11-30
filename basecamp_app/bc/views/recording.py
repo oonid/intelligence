@@ -1,10 +1,11 @@
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.urls import reverse
 
-from bc.utils import (session_get_token_and_identity, bc_api_get,
+from bc.utils import (session_get_token_and_identity, bc_api_get, repr_message_detail,
                       db_get_bucket, db_get_comment_parent, db_get_or_create_person,
+                      db_get_message, db_get_message_parent,
                       api_recording_get_recordings_uri, api_recording_get_bucket_recording_parent_comment_uri,
-                      static_get_recording_types, static_get_comment_parent_types)
+                      static_get_recording_types, static_get_comment_parent_types, static_get_message_parent_types)
 
 
 def app_recording_main(request):
@@ -66,9 +67,9 @@ def app_project_recording_by_type(request, bucket_id, recording_type):
         return HttpResponse('')
 
     # load project from db or give recommendation link to save to db first
-    bucket, message = db_get_bucket(bucket_id=bucket_id)
+    bucket, exception = db_get_bucket(bucket_id=bucket_id)
     if not bucket:  # not exists
-        return HttpResponseBadRequest(message)
+        return HttpResponseBadRequest(exception)
 
     # project exist on db
     token, identity = session_get_token_and_identity(request)
@@ -89,25 +90,26 @@ def app_project_recording_by_type(request, bucket_id, recording_type):
     recording_list = ""
     for recording in data:
 
-        if recording_type in ['Comment']:
+        if recording["type"] in ['Comment']:
 
             if ('parent' in recording and recording["parent"]["type"] in static_get_comment_parent_types() and
                     'bucket' in recording and recording["bucket"]["type"] == "Project" and 'creator' in recording):
 
                 # process bucket first, because at processing parent still need a valid bucket
-                bucket, message = db_get_bucket(bucket_id=recording["bucket"]["id"])
+                bucket, exception = db_get_bucket(bucket_id=recording["bucket"]["id"])
                 if not bucket:  # not exists
-                    return HttpResponseBadRequest(message)
+                    return HttpResponseBadRequest(exception)
 
-                # process parent with type listed in static_get_recording_parent_types
-                parent, message = db_get_comment_parent(parent=recording["parent"], bucket_id=recording["bucket"]["id"])
+                # process parent with type listed in static_get_comment_parent_types
+                parent, exception = db_get_comment_parent(parent=recording["parent"],
+                                                          bucket_id=recording["bucket"]["id"])
                 if not parent:  # not exists
-                    return HttpResponseBadRequest(message)
+                    return HttpResponseBadRequest(exception)
 
                 # process creator
-                creator, message = db_get_or_create_person(person=recording["creator"])
+                creator, exception = db_get_or_create_person(person=recording["creator"])
                 if not creator:  # create person error
-                    return HttpResponseBadRequest(message)
+                    return HttpResponseBadRequest(exception)
 
                 # remove 'bucket' key from recording. key 'bucket' still used in processing parent
                 recording.pop('bucket')
@@ -130,9 +132,49 @@ def app_project_recording_by_type(request, bucket_id, recording_type):
                     f'recording {recording["title"]} has no creator or bucket type Project or parent type in '
                     f'{static_get_comment_parent_types()}')
 
-        # others recording type
-        else:
-            print(recording.keys())
+        elif recording["type"] in ['Message']:
+            if ('parent' in recording and recording["parent"]["type"] in static_get_message_parent_types() and
+                    'bucket' in recording and recording["bucket"]["type"] == "Project" and 'creator' in recording):
+
+                # process bucket first, because at processing parent still need a valid bucket
+                bucket, exception = db_get_bucket(bucket_id=recording["bucket"]["id"])
+                if not bucket:  # not exists
+                    return HttpResponseBadRequest(exception)
+
+                # process parent with type listed in static_get_message_parent_types
+                parent, exception = db_get_message_parent(parent=recording["parent"],
+                                                          bucket_id=recording["bucket"]["id"])
+                if not parent:  # not exists
+                    return HttpResponseBadRequest(exception)
+
+                # process creator
+                creator, exception = db_get_or_create_person(person=recording["creator"])
+                if not creator:  # create person error
+                    return HttpResponseBadRequest(exception)
+
+                # remove 'bucket' key from recording. key 'bucket' still used in processing parent
+                recording.pop('bucket')
+
+                # remove 'parent' key from recording, will use model instance parent instead
+                recording.pop('parent')
+
+                # remove 'creator' key from recording, will use model instance creator instead
+                recording.pop('creator')
+
+                # process Message
+                message, exception = db_get_message(message=recording, bucket_id=bucket.id)
+                # returned message can be None, currently ignore the exception as we only show the list
+
+                recording_list += (
+                    repr_message_detail(message=recording, bucket_id=bucket.id, message_obj=message, as_list=True))
+
+            else:
+                return HttpResponseBadRequest(
+                    f'recording {recording["title"]} has no creator or bucket type Project or parent type in '
+                    f'{static_get_message_parent_types()}')
+
+        else:  # others recording type
+            print(f'{recording_type}: {recording.keys()}')
 
         recording_keys = recording.keys()
 

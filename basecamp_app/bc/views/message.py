@@ -2,7 +2,8 @@ from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadReque
 from django.urls import reverse
 
 from bc.models import BcMessageCategory, BcMessageBoard, BcMessage
-from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, db_get_or_create_person,
+from bc.utils import (session_get_token_and_identity, bc_api_get, repr_message_detail,
+                      db_get_bucket, db_get_message, db_get_or_create_person,
                       api_message_get_bucket_message_types_uri, api_message_get_bucket_message_board_uri,
                       api_message_get_bucket_message_board_messages_uri, api_message_get_bucket_message_uri)
 
@@ -119,6 +120,11 @@ def app_message_board_message(request, bucket_id, message_board_id):
     message_list = ""
     for message in data:
 
+        # process bucket first, because at processing parent still need a valid bucket
+        bucket, exception = db_get_bucket(bucket_id=message["bucket"]["id"])
+        if not bucket:  # not exists
+            return HttpResponseBadRequest(exception)
+
         # check message_board, if not exist on db, save via message_board_detail
         try:
             _message_board = BcMessageBoard.objects.get(id=message_board_id)
@@ -133,15 +139,10 @@ def app_message_board_message(request, bucket_id, message_board_id):
             )
 
         # process message
-        try:
-            _message = BcMessage.objects.get(id=message["id"])
-        except BcMessage.DoesNotExist:
-            # save message only at message_detail
-            _message = None
+        _message, exception = db_get_message(message=message, bucket_id=bucket.id)
+        # returned _message can be None, currently ignore the exception as we only show the list
 
-        message_list += (f'<li><a href="' + reverse('app-message-detail',
-                                                    kwargs={'bucket_id': bucket_id, 'message_id': message["id"]}) +
-                         f'">{message["id"]}</a> {message["title"]}</li>')
+        message_list += repr_message_detail(message=message, bucket_id=bucket.id, message_obj=_message, as_list=True)
 
     if 'next' in response.links and 'url' in response.links["next"]:
         print(response.links["next"]["url"])
