@@ -1,8 +1,9 @@
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.urls import reverse
-from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, api_todoset_get_bucket_todoset_uri)
-from bc.models import BcPeople, BcTodoset
-from bc.serializers import BcPeopleSerializer
+
+from bc.models import BcTodoset
+from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, db_get_or_create_person,
+                      api_todoset_get_bucket_todoset_uri)
 
 
 def app_todoset_detail(request, bucket_id, todoset_id):
@@ -31,14 +32,9 @@ def app_todoset_detail(request, bucket_id, todoset_id):
         todoset.pop('bucket')
 
         # process creator
-        try:
-            creator = BcPeople.objects.get(id=todoset["creator"]["id"])
-        except BcPeople.DoesNotExist:
-            serializer = BcPeopleSerializer(data=todoset["creator"])
-            if serializer.is_valid():
-                creator = serializer.save()
-            else:  # invalid serializer
-                return HttpResponseBadRequest(f'creator serializer error: {serializer.errors}')
+        creator, message = db_get_or_create_person(person=todoset["creator"])
+        if not creator:  # create person error
+            return HttpResponseBadRequest(message)
 
         # remove 'creator' key from todoset, will use model instance creator instead
         todoset.pop('creator')

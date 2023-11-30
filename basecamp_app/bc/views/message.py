@@ -1,10 +1,10 @@
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.urls import reverse
-from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket,
+
+from bc.models import BcMessageCategory, BcMessageBoard, BcMessage
+from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, db_get_or_create_person,
                       api_message_get_bucket_message_types_uri, api_message_get_bucket_message_board_uri,
                       api_message_get_bucket_message_board_messages_uri, api_message_get_bucket_message_uri)
-from bc.models import BcMessageCategory, BcMessageBoard, BcPeople, BcMessage
-from bc.serializers import BcPeopleSerializer
 
 
 def app_message_type(request, bucket_id):
@@ -76,14 +76,9 @@ def app_message_board_detail(request, bucket_id, message_board_id):
     message_board.pop('bucket')
 
     # process creator
-    try:
-        creator = BcPeople.objects.get(id=message_board["creator"]["id"])
-    except BcPeople.DoesNotExist:
-        serializer = BcPeopleSerializer(data=message_board["creator"])
-        if serializer.is_valid():
-            creator = serializer.save()
-        else:  # invalid serializer
-            return HttpResponseBadRequest(f'creator serializer error: {serializer.errors}')
+    creator, message = db_get_or_create_person(person=message_board["creator"])
+    if not creator:  # create person error
+        return HttpResponseBadRequest(message)
 
     # remove 'creator' key from message_board, will use model instance creator instead
     message_board.pop('creator')
@@ -211,14 +206,9 @@ def app_message_detail(request, bucket_id, message_id):
         message.pop('bucket')
 
         # process creator
-        try:
-            creator = BcPeople.objects.get(id=message["creator"]["id"])
-        except BcPeople.DoesNotExist:
-            serializer = BcPeopleSerializer(data=message["creator"])
-            if serializer.is_valid():
-                creator = serializer.save()
-            else:  # invalid serializer
-                return HttpResponseBadRequest(f'creator serializer error: {serializer.errors}')
+        creator, message = db_get_or_create_person(person=message["creator"])
+        if not creator:  # create person error
+            return HttpResponseBadRequest(message)
 
         # remove 'creator' key from message, will use model instance creator instead
         message.pop('creator')

@@ -1,9 +1,9 @@
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.urls import reverse
-from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, api_todo_get_bucket_todolist_todos_uri,
-                      api_todo_get_bucket_todo_uri)
-from bc.models import BcTodoset, BcPeople, BcTodolist, BcTodo, BcTodoCompletion
-from bc.serializers import BcPeopleSerializer
+
+from bc.models import BcTodoset, BcTodolist, BcTodo, BcTodoCompletion
+from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, db_get_or_create_person,
+                      api_todo_get_bucket_todolist_todos_uri, api_todo_get_bucket_todo_uri)
 
 
 def app_todo_main(request, bucket_id, todolist_id):
@@ -122,14 +122,9 @@ def app_todo_detail(request, bucket_id, todo_id):
             parent = None
 
         # process creator
-        try:
-            creator = BcPeople.objects.get(id=todo["creator"]["id"])
-        except BcPeople.DoesNotExist:
-            serializer = BcPeopleSerializer(data=todo["creator"])
-            if serializer.is_valid():
-                creator = serializer.save()
-            else:  # invalid serializer
-                return HttpResponseBadRequest(f'creator serializer error: {serializer.errors}')
+        creator, message = db_get_or_create_person(person=todo["creator"])
+        if not creator:  # create person error
+            return HttpResponseBadRequest(message)
 
         # remove 'bucket' key from todo. key 'bucket' still used in processing parent
         todo.pop('bucket')
@@ -144,14 +139,9 @@ def app_todo_detail(request, bucket_id, todo_id):
         completion = None
         if 'completion' in todo:
             # process completion creator
-            try:
-                completion_creator = BcPeople.objects.get(id=todo["completion"]["creator"]["id"])
-            except BcPeople.DoesNotExist:
-                serializer = BcPeopleSerializer(data=todo["completion"]["creator"])
-                if serializer.is_valid():
-                    completion_creator = serializer.save()
-                else:  # invalid serializer
-                    return HttpResponseBadRequest(f'creator serializer error: {serializer.errors}')
+            completion_creator, message = db_get_or_create_person(person=todo["completion"]["creator"])
+            if not completion_creator:  # create person error
+                return HttpResponseBadRequest(message)
 
             # remove 'creator' key from completion, will use model instance creator instead
             todo["completion"].pop('creator')
@@ -166,14 +156,9 @@ def app_todo_detail(request, bucket_id, todo_id):
         # process assignees
         assignees = []
         for assignee in todo["assignees"]:
-            try:
-                _assignee = BcPeople.objects.get(id=assignee["id"])
-            except BcPeople.DoesNotExist:
-                serializer = BcPeopleSerializer(data=assignee)
-                if serializer.is_valid():
-                    _assignee = serializer.save()
-                else:  # invalid serializer
-                    return HttpResponseBadRequest(f'creator serializer error: {serializer.errors}')
+            _assignee, message = db_get_or_create_person(person=assignee)
+            if not _assignee:  # create person error
+                return HttpResponseBadRequest(message)
 
             # list of assignee objects, will be appended later as many-to-many
             assignees.append(_assignee)
@@ -184,14 +169,9 @@ def app_todo_detail(request, bucket_id, todo_id):
         # process completion_subscribers
         completion_subscribers = []
         for subscriber in todo["completion_subscribers"]:
-            try:
-                _subscriber = BcPeople.objects.get(id=subscriber["id"])
-            except BcPeople.DoesNotExist:
-                serializer = BcPeopleSerializer(data=subscriber)
-                if serializer.is_valid():
-                    _subscriber = serializer.save()
-                else:  # invalid serializer
-                    return HttpResponseBadRequest(f'creator serializer error: {serializer.errors}')
+            _subscriber, message = db_get_or_create_person(person=subscriber)
+            if not _subscriber:  # create person error
+                return HttpResponseBadRequest(message)
 
             # list of subscriber objects, will be appended later as many-to-many
             completion_subscribers.append(_subscriber)

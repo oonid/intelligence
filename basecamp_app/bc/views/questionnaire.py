@@ -1,13 +1,13 @@
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.urls import reverse
-from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket,
+from json import dumps as json_dumps
+
+from bc.models import BcQuestionnaire, BcQuestion, BcQuestionAnswer, BcRecurrenceSchedule
+from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, db_get_or_create_person,
                       api_questionnaire_get_bucket_questionnaire_uri,
                       api_questionnaire_get_bucket_questionnaire_questions_uri,
                       api_questionnaire_get_bucket_question_uri, api_questionnaire_get_bucket_question_answers_uri,
                       api_questionnaire_get_bucket_question_answer_uri)
-from bc.models import BcPeople, BcQuestionnaire, BcQuestion, BcQuestionAnswer, BcRecurrenceSchedule
-from bc.serializers import BcPeopleSerializer
-from json import dumps as json_dumps
 
 
 def app_questionnaire_detail(request, bucket_id, questionnaire_id):
@@ -37,14 +37,9 @@ def app_questionnaire_detail(request, bucket_id, questionnaire_id):
         questionnaire.pop('bucket')
 
         # process creator
-        try:
-            creator = BcPeople.objects.get(id=questionnaire["creator"]["id"])
-        except BcPeople.DoesNotExist:
-            serializer = BcPeopleSerializer(data=questionnaire["creator"])
-            if serializer.is_valid():
-                creator = serializer.save()
-            else:  # invalid serializer
-                return HttpResponseBadRequest(f'creator serializer error: {serializer.errors}')
+        creator, message = db_get_or_create_person(person=questionnaire["creator"])
+        if not creator:  # create person error
+            return HttpResponseBadRequest(message)
 
         # remove 'creator' key from questionnaire, will use model instance creator instead
         questionnaire.pop('creator')
@@ -169,14 +164,9 @@ def app_question_detail(request, bucket_id, question_id):
         question.pop('bucket')
 
         # process creator
-        try:
-            creator = BcPeople.objects.get(id=question["creator"]["id"])
-        except BcPeople.DoesNotExist:
-            serializer = BcPeopleSerializer(data=question["creator"])
-            if serializer.is_valid():
-                creator = serializer.save()
-            else:  # invalid serializer
-                return HttpResponseBadRequest(f'creator serializer error: {serializer.errors}')
+        creator, message = db_get_or_create_person(person=question["creator"])
+        if not creator:  # create person error
+            return HttpResponseBadRequest(message)
 
         # remove 'creator' key from question, will use model instance creator instead
         question.pop('creator')
@@ -310,14 +300,9 @@ def app_question_answer_detail(request, bucket_id, question_answer_id):
         answer.pop('bucket')
 
         # process creator
-        try:
-            creator = BcPeople.objects.get(id=answer["creator"]["id"])
-        except BcPeople.DoesNotExist:
-            serializer = BcPeopleSerializer(data=answer["creator"])
-            if serializer.is_valid():
-                creator = serializer.save()
-            else:  # invalid serializer
-                return HttpResponseBadRequest(f'creator serializer error: {serializer.errors}')
+        creator, message = db_get_or_create_person(person=answer["creator"])
+        if not creator:  # create person error
+            return HttpResponseBadRequest(message)
 
         # remove 'creator' key from question, will use model instance creator instead
         answer.pop('creator')

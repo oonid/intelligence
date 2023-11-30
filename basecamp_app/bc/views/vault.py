@@ -1,12 +1,13 @@
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.urls import reverse
-from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, db_get_vault_parent,
+
+from bc.models import BcVault, BcDocument, BcUpload
+from bc.utils import (session_get_token_and_identity, bc_api_get,
+                      db_get_bucket, db_get_vault_parent, db_get_or_create_person,
                       api_vault_get_bucket_vault_uri, api_vault_get_bucket_vault_vaults_uri,
                       api_vault_get_bucket_vault_documents_uri, api_document_get_bucket_document_uri,
                       api_vault_get_bucket_vault_uploads_uri, api_document_get_bucket_upload_uri,
                       static_get_vault_parent_types)
-from bc.models import BcPeople, BcVault, BcDocument, BcUpload
-from bc.serializers import BcPeopleSerializer
 
 
 def app_vault_detail(request, bucket_id, vault_id):
@@ -44,14 +45,9 @@ def app_vault_detail(request, bucket_id, vault_id):
             parent = None
 
         # process creator
-        try:
-            creator = BcPeople.objects.get(id=vault["creator"]["id"])
-        except BcPeople.DoesNotExist:
-            serializer = BcPeopleSerializer(data=vault["creator"])
-            if serializer.is_valid():
-                creator = serializer.save()
-            else:  # invalid serializer
-                return HttpResponseBadRequest(f'creator serializer error: {serializer.errors}')
+        creator, message = db_get_or_create_person(person=vault["creator"])
+        if not creator:  # create person error
+            return HttpResponseBadRequest(message)
 
         # remove 'bucket' key from vault. key 'bucket' still used in processing parent
         vault.pop('bucket')
@@ -171,14 +167,9 @@ def app_document_detail(request, bucket_id, document_id):
             return HttpResponseBadRequest(message)
 
         # process creator
-        try:
-            creator = BcPeople.objects.get(id=document["creator"]["id"])
-        except BcPeople.DoesNotExist:
-            serializer = BcPeopleSerializer(data=document["creator"])
-            if serializer.is_valid():
-                creator = serializer.save()
-            else:  # invalid serializer
-                return HttpResponseBadRequest(f'creator serializer error: {serializer.errors}')
+        creator, message = db_get_or_create_person(person=document["creator"])
+        if not creator:  # create person error
+            return HttpResponseBadRequest(message)
 
         # remove 'bucket' key from document. key 'bucket' still used in processing parent
         document.pop('bucket')
@@ -301,14 +292,9 @@ def app_upload_detail(request, bucket_id, upload_id):
             return HttpResponseBadRequest(message)
 
         # process creator
-        try:
-            creator = BcPeople.objects.get(id=upload["creator"]["id"])
-        except BcPeople.DoesNotExist:
-            serializer = BcPeopleSerializer(data=upload["creator"])
-            if serializer.is_valid():
-                creator = serializer.save()
-            else:  # invalid serializer
-                return HttpResponseBadRequest(f'creator serializer error: {serializer.errors}')
+        creator, message = db_get_or_create_person(person=upload["creator"])
+        if not creator:  # create person error
+            return HttpResponseBadRequest(message)
 
         # remove 'bucket' key from document. key 'bucket' still used in processing parent
         upload.pop('bucket')

@@ -1,10 +1,11 @@
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.urls import reverse
-from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, db_get_comment_parent,
+
+from bc.models import BcComment
+from bc.utils import (session_get_token_and_identity, bc_api_get,
+                      db_get_bucket, db_get_comment_parent, db_get_or_create_person,
                       api_comment_get_bucket_comment_uri,
                       static_get_comment_parent_uri, static_get_comment_parent_types)
-from bc.models import BcPeople, BcComment
-from bc.serializers import BcPeopleSerializer
 
 
 def app_comment_detail(request, bucket_id, comment_id):
@@ -41,14 +42,9 @@ def app_comment_detail(request, bucket_id, comment_id):
             return HttpResponseBadRequest(message)
 
         # process creator
-        try:
-            creator = BcPeople.objects.get(id=comment["creator"]["id"])
-        except BcPeople.DoesNotExist:
-            serializer = BcPeopleSerializer(data=comment["creator"])
-            if serializer.is_valid():
-                creator = serializer.save()
-            else:  # invalid serializer
-                return HttpResponseBadRequest(f'creator serializer error: {serializer.errors}')
+        creator, message = db_get_or_create_person(person=comment["creator"])
+        if not creator:  # create person error
+            return HttpResponseBadRequest(message)
 
         # remove 'bucket' key from comment. key 'bucket' still used in processing parent
         comment.pop('bucket')

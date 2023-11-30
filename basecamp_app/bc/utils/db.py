@@ -1,6 +1,7 @@
 from django.urls import reverse
-from bc.models import (BcProject, BcTodo, BcTodolist, BcScheduleEntry, BcQuestionAnswer, BcMessage, BcVault, BcUpload,
-                       BcDocument)
+from bc.models import (BcProject, BcPeople, BcTodo, BcTodolist, BcScheduleEntry, BcQuestionAnswer, BcMessage, BcVault,
+                       BcUpload, BcDocument)
+from bc.serializers import BcPeopleSerializer
 from bc.utils import static_get_comment_parent_types, static_get_vault_parent_types
 
 
@@ -16,6 +17,22 @@ def db_get_bucket(bucket_id):
                     '">save project to db</a> first.')
 
     return _bucket, _message
+
+
+def db_get_or_create_person(person):
+    try:
+        _creator = BcPeople.objects.get(id=person["id"])
+        _message = None
+    except BcPeople.DoesNotExist:
+        serializer = BcPeopleSerializer(data=person)
+        if serializer.is_valid():
+            _creator = serializer.save()
+            _message = None
+        else:  # invalid serializer
+            _creator = None
+            _message = f'creator serializer error: {serializer.errors}'
+
+    return _creator, _message
 
 
 def db_get_comment_parent(parent, bucket_id):

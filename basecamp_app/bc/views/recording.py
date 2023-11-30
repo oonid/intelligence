@@ -1,6 +1,8 @@
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.urls import reverse
-from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, db_get_comment_parent,
+
+from bc.utils import (session_get_token_and_identity, bc_api_get,
+                      db_get_bucket, db_get_comment_parent, db_get_or_create_person,
                       api_recording_get_recordings_uri, api_recording_get_bucket_recording_parent_comment_uri,
                       static_get_recording_types, static_get_comment_parent_types)
 
@@ -102,11 +104,19 @@ def app_project_recording_by_type(request, bucket_id, recording_type):
                 if not parent:  # not exists
                     return HttpResponseBadRequest(message)
 
+                # process creator
+                creator, message = db_get_or_create_person(person=recording["creator"])
+                if not creator:  # create person error
+                    return HttpResponseBadRequest(message)
+
                 # remove 'bucket' key from recording. key 'bucket' still used in processing parent
                 recording.pop('bucket')
 
                 # remove 'parent' key from recording, will use model instance parent instead
                 recording.pop('parent')
+
+                # remove 'creator' key from recording, will use model instance creator instead
+                recording.pop('creator')
 
                 _parent_comment_uri = reverse('app-project-recording-parent-comment',
                                               kwargs={'bucket_id': bucket.id,

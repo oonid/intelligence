@@ -1,10 +1,9 @@
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.urls import reverse
 from django.template import Template, RequestContext
 
-from bc.serializers import BcPeopleSerializer
-from bc.utils import (session_get_token_and_identity, bc_api_get, api_people_my_profile_uri, api_people_get_person_uri,
-                      api_people_get_all_people_uri)
+from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_or_create_person,
+                      api_people_my_profile_uri, api_people_get_person_uri, api_people_get_all_people_uri)
 
 
 def app_people_main(request):
@@ -110,12 +109,9 @@ def app_people_load_all_to_db(request):
                 print(person)
             # process company
             if "company" in person and "id" in person["company"]:
-                serializer = BcPeopleSerializer(data=person)
-                if serializer.is_valid():
-                    people = serializer.save()
-                    print(f'person {people} loaded.')
-                else:  # invalid serializer
-                    print(serializer.errors)
+                people, message = db_get_or_create_person(person=person)
+                if not people:  # create person error
+                    return HttpResponseBadRequest(message)
 
             else:
                 print(f'person {person["name"]} <{person["email_address"]}> has no company information.')
@@ -142,12 +138,9 @@ def app_people_load_all_to_db(request):
                     print(person)
                 # process company
                 if "company" in person and "id" in person["company"]:
-                    serializer = BcPeopleSerializer(data=person)
-                    if serializer.is_valid():
-                        people = serializer.save()
-                        print(f'person {people} loaded.')
-                    else:  # invalid serializer
-                        print(serializer.errors)
+                    people, message = db_get_or_create_person(person=person)
+                    if not people:  # create person error
+                        return HttpResponseBadRequest(message)
 
                 else:
                     print(f'person {person["name"]} <{person["email_address"]}> has no company information.')

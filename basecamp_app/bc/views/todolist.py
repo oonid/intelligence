@@ -1,9 +1,9 @@
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.urls import reverse
-from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket,
+
+from bc.models import BcTodoset, BcTodolist
+from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, db_get_or_create_person,
                       api_todolist_get_bucket_todoset_todolists_uri, api_todolist_get_bucket_todolist_uri)
-from bc.models import BcTodoset, BcPeople, BcTodolist
-from bc.serializers import BcPeopleSerializer
 
 
 def app_todolist_main(request, bucket_id, todoset_id):
@@ -144,14 +144,9 @@ def app_todolist_detail(request, bucket_id, todolist_id):
         todolist.pop('bucket')
 
         # process creator
-        try:
-            creator = BcPeople.objects.get(id=todolist["creator"]["id"])
-        except BcPeople.DoesNotExist:
-            serializer = BcPeopleSerializer(data=todolist["creator"])
-            if serializer.is_valid():
-                creator = serializer.save()
-            else:  # invalid serializer
-                return HttpResponseBadRequest(f'creator serializer error: {serializer.errors}')
+        creator, message = db_get_or_create_person(person=todolist["creator"])
+        if not creator:  # create person error
+            return HttpResponseBadRequest(message)
 
         # remove 'creator' key from todolist, will use model instance creator instead
         todolist.pop('creator')

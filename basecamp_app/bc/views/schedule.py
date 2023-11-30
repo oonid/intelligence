@@ -1,10 +1,11 @@
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.urls import reverse
-from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, api_schedule_get_bucket_schedule_uri,
-                      api_schedule_get_bucket_schedule_entries_uri, api_schedule_get_bucket_schedule_entry_uri)
-from bc.models import BcPeople, BcSchedule, BcScheduleEntry, BcRecurrenceSchedule
-from bc.serializers import BcPeopleSerializer
 from json import dumps as json_dumps
+
+from bc.models import BcSchedule, BcScheduleEntry, BcRecurrenceSchedule
+from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, db_get_or_create_person,
+                      api_schedule_get_bucket_schedule_uri, api_schedule_get_bucket_schedule_entries_uri,
+                      api_schedule_get_bucket_schedule_entry_uri)
 
 
 def app_schedule_detail(request, bucket_id, schedule_id):
@@ -34,20 +35,14 @@ def app_schedule_detail(request, bucket_id, schedule_id):
         schedule.pop('bucket')
 
         # process creator
-        try:
-            creator = BcPeople.objects.get(id=schedule["creator"]["id"])
-        except BcPeople.DoesNotExist:
-            serializer = BcPeopleSerializer(data=schedule["creator"])
-            if serializer.is_valid():
-                creator = serializer.save()
-            else:  # invalid serializer
-                return HttpResponseBadRequest(f'creator serializer error: {serializer.errors}')
+        creator, message = db_get_or_create_person(person=schedule["creator"])
+        if not creator:  # create person error
+            return HttpResponseBadRequest(message)
 
         # remove 'creator' key from schedule, will use model instance creator instead
         schedule.pop('creator')
 
         # process schedule
-
         try:
             _schedule = BcSchedule.objects.get(id=schedule["id"])
         except BcSchedule.DoesNotExist:
@@ -167,14 +162,9 @@ def app_schedule_entry_detail(request, bucket_id, schedule_entry_id):
         schedule_entry.pop('bucket')
 
         # process creator
-        try:
-            creator = BcPeople.objects.get(id=schedule_entry["creator"]["id"])
-        except BcPeople.DoesNotExist:
-            serializer = BcPeopleSerializer(data=schedule_entry["creator"])
-            if serializer.is_valid():
-                creator = serializer.save()
-            else:  # invalid serializer
-                return HttpResponseBadRequest(f'creator serializer error: {serializer.errors}')
+        creator, message = db_get_or_create_person(person=schedule_entry["creator"])
+        if not creator:  # create person error
+            return HttpResponseBadRequest(message)
 
         # remove 'creator' key from schedule entry, will use model instance creator instead
         schedule_entry.pop('creator')
@@ -182,14 +172,10 @@ def app_schedule_entry_detail(request, bucket_id, schedule_entry_id):
         # process participants
         participants = []
         for participant in schedule_entry["participants"]:
-            try:
-                _participant = BcPeople.objects.get(id=participant["id"])
-            except BcPeople.DoesNotExist:
-                serializer = BcPeopleSerializer(data=participant)
-                if serializer.is_valid():
-                    _participant = serializer.save()
-                else:  # invalid serializer
-                    return HttpResponseBadRequest(f'creator serializer error: {serializer.errors}')
+
+            _participant, message = db_get_or_create_person(person=participant)
+            if not _participant:  # create person error
+                return HttpResponseBadRequest(message)
 
             # list of assignee objects, will be appended later as many-to-many
             participants.append(_participant)
