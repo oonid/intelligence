@@ -9,6 +9,7 @@ class BcRecurrenceSchedule(models.Model):
     used by:
     * Question Schedule: https://github.com/basecamp/bc3-api/blob/master/sections/questions.md
     * Recurrence Schedule Entry: https://github.com/basecamp/bc3-api/blob/master/sections/schedule_entries.md
+    * Repetition Schedule Todo: https://github.com/basecamp/bc3-api/blob/master/sections/todos.md
     """
     frequency = models.CharField(max_length=30)
     # PostgreSQL has ArrayField: https://docs.djangoproject.com/en/4.2/ref/contrib/postgres/fields/#arrayfield
@@ -67,10 +68,10 @@ class BcQuestion(models.Model):
     bookmark_url = models.URLField()
     subscription_url = models.URLField()
     # parent in ["Questionnaire"]
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
+    parent_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    parent_object_id = models.PositiveIntegerField()
     # https://docs.djangoproject.com/en/4.2/ref/contrib/contenttypes/#generic-relations
-    parent = GenericForeignKey("content_type", "object_id")
+    parent = GenericForeignKey("parent_content_type", "parent_object_id")
     bucket = models.ForeignKey(to=BcProject, on_delete=models.CASCADE)
     creator = models.ForeignKey(to=BcPeople, on_delete=models.CASCADE)
     paused = models.BooleanField()
@@ -102,10 +103,10 @@ class BcQuestionAnswer(models.Model):
     comments_count = models.IntegerField()
     comments_url = models.URLField()
     # parent in ["Question"]
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
+    parent_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    parent_object_id = models.PositiveIntegerField()
     # https://docs.djangoproject.com/en/4.2/ref/contrib/contenttypes/#generic-relations
-    parent = GenericForeignKey("content_type", "object_id")
+    parent = GenericForeignKey("parent_content_type", "parent_object_id")
     bucket = models.ForeignKey(to=BcProject, on_delete=models.CASCADE)
     creator = models.ForeignKey(to=BcPeople, on_delete=models.CASCADE)
     content = models.TextField()

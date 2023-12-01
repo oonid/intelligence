@@ -1,7 +1,8 @@
 from django.db import models
 from django.contrib.contenttypes.fields import GenericForeignKey
 from django.contrib.contenttypes.models import ContentType
-from bc.models import BcTodoBase, BcPeople
+
+from bc.models import BcTodoBase, BcPeople, BcRecurrenceSchedule
 
 
 class BcTodoCompletion(models.Model):
@@ -20,15 +21,16 @@ class BcTodo(BcTodoBase):
     comments_count = models.IntegerField()
     comments_url = models.URLField()
     # parent in ["Todoset", "Todolist"]
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
+    parent_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    parent_object_id = models.PositiveIntegerField()
     # https://docs.djangoproject.com/en/4.2/ref/contrib/contenttypes/#generic-relations
-    parent = GenericForeignKey("content_type", "object_id")
+    parent = GenericForeignKey("parent_content_type", "parent_object_id")
     description = models.CharField(max_length=100)
     completion = models.ForeignKey(to=BcTodoCompletion, on_delete=models.CASCADE, null=True, blank=True)
     content = models.CharField(max_length=100)
     starts_on = models.DateField(null=True)
     due_on = models.DateField(null=True)
+    repetition_schedule = models.ForeignKey(to=BcRecurrenceSchedule, on_delete=models.CASCADE, null=True, blank=True)
     # null has no effect on ManyToManyField, set blank=True to make it optional
     assignees = models.ManyToManyField(to=BcPeople, blank=True,
                                        related_name='todo_assignees')

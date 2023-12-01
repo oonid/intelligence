@@ -61,10 +61,10 @@ class BcMessage(models.Model):
     comments_count = models.IntegerField()
     comments_url = models.URLField()
     # parent in ["Message::Board"]
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
+    parent_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    parent_object_id = models.PositiveIntegerField()
     # https://docs.djangoproject.com/en/4.2/ref/contrib/contenttypes/#generic-relations
-    parent = GenericForeignKey("content_type", "object_id")
+    parent = GenericForeignKey("parent_content_type", "parent_object_id")
     bucket = models.ForeignKey(to=BcProject, on_delete=models.CASCADE)
     creator = models.ForeignKey(to=BcPeople, on_delete=models.CASCADE)
     content = models.TextField()

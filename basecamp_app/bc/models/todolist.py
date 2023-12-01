@@ -21,10 +21,10 @@ class BcTodolist(BcTodoBase):
     comments_count = models.IntegerField()
     comments_url = models.URLField()
     # parent in ["Todoset", "Todolist"]
-    content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    object_id = models.PositiveIntegerField()
+    parent_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
+    parent_object_id = models.PositiveIntegerField()
     # https://docs.djangoproject.com/en/4.2/ref/contrib/contenttypes/#generic-relations
-    parent = GenericForeignKey("content_type", "object_id")
+    parent = GenericForeignKey("parent_content_type", "parent_object_id")
     description = models.CharField(max_length=100)
     todos_url = models.URLField()
     app_todos_url = models.URLField()
