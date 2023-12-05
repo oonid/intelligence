@@ -110,11 +110,12 @@ class BcWebhook(models.Model):
     # { "status_was": "trashed" }
     details = models.JSONField(null=True, blank=True)
     creator = models.ForeignKey(to=BcPeople, on_delete=models.CASCADE)
-    recording_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE)
-    recording_object_id = models.PositiveIntegerField()
+    # recording can be undefined if part of it still unavailable at db. set null & blank at these two.
+    recording_content_type = models.ForeignKey(ContentType, on_delete=models.CASCADE, null=True, blank=True)
+    recording_object_id = models.PositiveIntegerField(null=True, blank=True)
     # https://docs.djangoproject.com/en/4.2/ref/contrib/contenttypes/#generic-relations
     recording = GenericForeignKey("recording_content_type", "recording_object_id")
-    # record raw data for debugging trails
+    # record raw data for debugging trails, especially if the recording still undefined (null)
     raw = models.JSONField()
 
     def __str__(self):

@@ -84,10 +84,10 @@ class Migration(migrations.Migration):
                 ('created_at', models.DateTimeField(db_index=True)),
                 ('kind', models.CharField(max_length=100)),
                 ('details', models.JSONField(blank=True, null=True)),
-                ('recording_object_id', models.PositiveIntegerField()),
+                ('recording_object_id', models.PositiveIntegerField(blank=True, null=True)),
                 ('raw', models.JSONField()),
                 ('creator', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='bc.bcpeople')),
-                ('recording_content_type', models.ForeignKey(on_delete=django.db.models.deletion.CASCADE, to='contenttypes.contenttype')),
+                ('recording_content_type', models.ForeignKey(blank=True, null=True, on_delete=django.db.models.deletion.CASCADE, to='contenttypes.contenttype')),
             ],
         ),
         migrations.CreateModel(
