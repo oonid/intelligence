@@ -10,6 +10,10 @@ __pycache__/
 # django sqlite db
 /basecamp_app/db.sqlite3
 
+# coverage files and report directory (related to tests)
+/basecamp_app/.coverage
+/basecamp_app/htmlcov/
+
 # Covers JetBrains IDEs
 # Reference: https://intellij-support.jetbrains.com/hc/en-us/articles/206544839
 .idea/

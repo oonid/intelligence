@@ -1,0 +1,30 @@
+[run]
+source = .
+omit =
+    # omit anything in a venv directory anywhere
+    ./venv/*
+    # omit django files
+    manage.py,*asgi*,*wsgi*,*settings.py,*admin.py,*apps.py
+    # omit migration files
+    */migrations/*
+    # omit test file or folder
+    */tests/*,*tests.py
+    # omit package signature __init__.py
+    *__init__.py
+    # omit django project directory
+    intelligence/*
+
+[report]
+omit =
+    # omit anything in a venv directory anywhere
+    ./venv/*
+    # omit django files
+    manage.py,*asgi*,*wsgi*,*settings.py,*admin.py,*apps.py
+    # omit migration files
+    */migrations/*
+    # omit test file or folder
+    */tests/*,*tests.py
+    # omit package signature __init__.py
+    *__init__.py
+    # omit django project directory
+    intelligence/*
