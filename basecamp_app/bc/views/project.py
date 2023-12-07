@@ -111,13 +111,13 @@ def app_project_detail(request, project_id, update_db=False):
         for tool in project_dock:
 
             try:
-                tool = BcProjectTool.objects.get(id=tool["id"])
+                _tool = BcProjectTool.objects.get(id=tool["id"])
             except BcProjectTool.DoesNotExist:
-                tool = BcProjectTool.objects.create(**tool)
+                _tool = BcProjectTool.objects.create(**tool)
 
             # make sure tool in the project exist
-            if not project.dock.filter(id=tool.id).exists():
-                project.dock.add(tool)
+            if not project.dock.filter(id=_tool.id).exists():
+                project.dock.add(_tool)
 
         print(f'project: {project.name} '
               f'dock: {project.dock.count()} '
