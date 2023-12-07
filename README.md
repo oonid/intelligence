@@ -51,6 +51,7 @@ pip install -r requirements.txt
 * `djangorestframework`: Used to build APIs on top of Django.
 * `gunicorn`: A Python web server (WSGI) often paired with nginx.
 * `requests`: An HTTP client used to facilitate the OAuth process.
+* `coverage`: A tool used for measuring code coverage, assessing the effectiveness of tests.
 
 ### Files
 
@@ -61,3 +62,19 @@ SECRET_KEY="s*cret"
 DJANGO_ALLOWED_HOSTS="localhost 127.0.0.1 [::1]"
 DJANGO_ALLOW_ASYNC_UNSAFE="true"
 ```
+
+### Settings
+
+#### Sessions
+
+The session engine in settings.py has been changed from the default database-backed to 
+[cookie-based](https://docs.djangoproject.com/en/dev/topics/http/sessions/#using-cookie-based-sessions) sessions.
+We opted for the cookie-based approach as it is more convenient during the early development phase when the database 
+might not be in use yet.
+
+#### Cache
+
+Even though it is not explicitly mentioned in settings.py, we have chosen to utilize the default cache setting,
+employing a [local-memory cache](https://docs.djangoproject.com/en/dev/topics/cache/#local-memory-caching) backend. 
+We will use the cache as the transfer medium for tokens between the web app and API, as we only need it temporarily 
+(and, in many cases, it is not recommended).
