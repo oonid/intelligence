@@ -16,7 +16,7 @@ class BcMessageCategory(models.Model):
     updated_at = models.DateTimeField()
 
     def __str__(self):
-        return f'message category {self.id} {self.name})'
+        return f'message category {self.id} {self.name}'
 
 
 class BcMessageBoard(models.Model):
