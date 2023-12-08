@@ -15,6 +15,9 @@ class BcMessageCategory(models.Model):
     created_at = models.DateTimeField(db_index=True)
     updated_at = models.DateTimeField()
 
+    def __str__(self):
+        return f'message category {self.id} {self.name})'
+
 
 class BcMessageBoard(models.Model):
     """
