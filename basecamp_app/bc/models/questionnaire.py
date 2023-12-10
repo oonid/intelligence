@@ -24,6 +24,9 @@ class BcRecurrenceSchedule(models.Model):
     duration = models.IntegerField(null=True, blank=True)  # annual -> 32400
     end_date = models.DateField(null=True, blank=True)
 
+    def __str__(self):
+        return f'{self.frequency} starts at {self.start_date}'
+
 
 class BcQuestionnaire(models.Model):
     """
