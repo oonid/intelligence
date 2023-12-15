@@ -1,0 +1,1 @@
+[{"model": "bc.bcrecurrenceschedule", "pk": 1, "fields": {"frequency": "every_day", "days": [1, 2, 3, 4, 5], "hour": 17, "minute": 0, "week_instance": null, "week_interval": null, "month_interval": null, "start_date": "2022-11-22", "duration": null, "end_date": null}}]

@@ -1,0 +1,1430 @@
+{
+  "person": {
+    "1049715914":  {
+        "id": 1049715914,
+        "attachable_sgid": "BAh7CEkiCGdpZAY6BkVUSSIrZ2lkOi8vYmMzL1BlcnNvbi8xMDQ5NzE1OTE0P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg9hdHRhY2hhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--ff006accb6e013cca785190fa38f42c091d24f1e",
+        "name": "Victor Cooper",
+        "email_address": "victor@honchodesign.com",
+        "personable_type": "User",
+        "title": "Chief Strategist",
+        "bio": "Don’t let your dreams be dreams",
+        "location": "Chicago, IL",
+        "created_at": "2022-11-22T08:23:21.732Z",
+        "updated_at": "2022-11-22T08:23:21.904Z",
+        "admin": true,
+        "owner": true,
+        "client": false,
+        "employee": true,
+        "time_zone": "America/Chicago",
+        "avatar_url": "https://3.basecamp-static.com/195539477/people/BAhpBMpkkT4=--5520caeec1845b5090bbfc993ffe8eca8d138e14/avatar?v=1",
+        "company": {
+          "id": 1033447817,
+          "name": "Honcho Design"
+        },
+        "can_manage_projects": true,
+        "can_manage_people": true
+    }
+  },
+  "project": {
+    "2085958499": {
+        "id": 2085958499,
+        "status": "active",
+        "created_at": "2022-10-28T08:23:58.169Z",
+        "updated_at": "2022-11-22T17:56:27.363Z",
+        "name": "The Leto Laptop",
+        "description": "Laptop product launch.",
+        "purpose": "topic",
+        "clients_enabled": false,
+        "bookmark_url": "https://3.basecampapi.com/195539477/my/bookmarks/BAh7CEkiCGdpZAY6BkVUSSIrZ2lkOi8vYmMzL0J1Y2tldC8yMDg1OTU4NDk5P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg1yZWFkYWJsZQY7AFRJIg9leHBpcmVzX2F0BjsAVDA=--691d627098347705738640552798539681dcd3b6.json",
+        "url": "https://3.basecampapi.com/195539477/projects/2085958499.json",
+        "app_url": "https://3.basecamp.com/195539477/projects/2085958499",
+        "dock": [
+            {
+                "id": 1069479338,
+                "title": "Message Board",
+                "name": "message_board",
+                "enabled": true,
+                "position": 1,
+                "url": "https://3.basecampapi.com/195539477/buckets/2085958499/message_boards/1069479338.json",
+                "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/message_boards/1069479338"
+            },
+            {
+                "id": 1069479339,
+                "title": "To-dos",
+                "name": "todoset",
+                "enabled": true,
+                "position": 2,
+                "url": "https://3.basecampapi.com/195539477/buckets/2085958499/todosets/1069479339.json",
+                "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/todosets/1069479339"
+            },
+            {
+                "id": 1069479340,
+                "title": "Docs & Files",
+                "name": "vault",
+                "enabled": true,
+                "position": 3,
+                "url": "https://3.basecampapi.com/195539477/buckets/2085958499/vaults/1069479340.json",
+                "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/vaults/1069479340"
+            },
+            {
+                "id": 1069479341,
+                "title": "Campfire",
+                "name": "chat",
+                "enabled": true,
+                "position": 4,
+                "url": "https://3.basecampapi.com/195539477/buckets/2085958499/chats/1069479341.json",
+                "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/chats/1069479341"
+            },
+            {
+                "id": 1069479342,
+                "title": "Schedule",
+                "name": "schedule",
+                "enabled": true,
+                "position": 5,
+                "url": "https://3.basecampapi.com/195539477/buckets/2085958499/schedules/1069479342.json",
+                "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/schedules/1069479342"
+            },
+            {
+                "id": 1069479343,
+                "title": "Automatic Check-ins",
+                "name": "questionnaire",
+                "enabled": false,
+                "position": null,
+                "url": "https://3.basecampapi.com/195539477/buckets/2085958499/questionnaires/1069479343.json",
+                "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/questionnaires/1069479343"
+            },
+            {
+                "id": 1069479344,
+                "title": "Email Forwards",
+                "name": "inbox",
+                "enabled": false,
+                "position": null,
+                "url": "https://3.basecampapi.com/195539477/buckets/2085958499/inboxes/1069479344.json",
+                "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/inboxes/1069479344"
+            },
+            {
+                "id": 1069479345,
+                "title": "Card Table",
+                "name": "kanban_board",
+                "enabled": false,
+                "position": null,
+                "url": "https://3.basecampapi.com/195539477/buckets/2085958499/card_tables/1069479345.json",
+                "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/card_tables/1069479345"
+            }
+        ]
+    },
+    "2085958497": {
+        "id": 2085958497,
+        "status": "active",
+        "created_at": "2022-10-28T08:23:58.169Z",
+        "updated_at": "2022-11-22T17:56:27.363Z",
+        "name": "Honcho Design Newsroom",
+        "description": "Honcho Design Newsroom.",
+        "purpose": "topic",
+        "clients_enabled": false,
+        "bookmark_url": "https://3.basecampapi.com/195539477/my/bookmarks/dummy.json",
+        "url": "https://3.basecampapi.com/195539477/projects/2085958497.json",
+        "app_url": "https://3.basecamp.com/195539477/projects/2085958497",
+        "dock": []
+    }
+  },
+  "questionnaire": {
+    "1069479343": {
+        "id": 1069479343,
+        "status": "active",
+        "visible_to_clients": false,
+        "created_at": "2022-11-22T08:23:58.246Z",
+        "updated_at": "2022-11-22T08:25:12.647Z",
+        "title": "Automatic Check-ins",
+        "inherits_status": true,
+        "type": "Questionnaire",
+        "url": "https://3.basecampapi.com/195539477/buckets/2085958499/questionnaires/1069479343.json",
+        "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/questionnaires/1069479343",
+        "bookmark_url": "https://3.basecampapi.com/195539477/my/bookmarks/BAh7CEkiCGdpZAY6BkVUSSIuZ2lkOi8vYmMzL1JlY29yZGluZy8xMDY5NDc5MzQzP2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg1yZWFkYWJsZQY7AFRJIg9leHBpcmVzX2F0BjsAVDA=--6954f9a736e1acaa2632328b7ff8a9bcda0b1a10.json",
+        "bucket": {
+            "id": 2085958499,
+            "name": "The Leto Laptop",
+            "type": "Project"
+        },
+        "creator": {
+            "id": 1049715914,
+            "attachable_sgid": "BAh7CEkiCGdpZAY6BkVUSSIrZ2lkOi8vYmMzL1BlcnNvbi8xMDQ5NzE1OTE0P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg9hdHRhY2hhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--ff006accb6e013cca785190fa38f42c091d24f1e",
+            "name": "Victor Cooper",
+            "email_address": "victor@honchodesign.com",
+            "personable_type": "User",
+            "title": "Chief Strategist",
+            "bio": "Don’t let your dreams be dreams",
+            "location": "Chicago, IL",
+            "created_at": "2022-11-22T08:23:21.732Z",
+            "updated_at": "2022-11-22T08:23:21.904Z",
+            "admin": true,
+            "owner": true,
+            "client": false,
+            "employee": true,
+            "time_zone": "America/Chicago",
+            "avatar_url": "https://3.basecamp-static.com/195539477/people/BAhpBMpkkT4=--5520caeec1845b5090bbfc993ffe8eca8d138e14/avatar?v=1",
+            "company": {
+                "id": 1033447817,
+                "name": "Honcho Design"
+            },
+            "can_manage_projects": true,
+            "can_manage_people": true
+        },
+        "name": "Automatic Check-ins",
+        "questions_count": 1,
+        "questions_url": "https://3.basecampapi.com/195539477/buckets/2085958499/questionnaires/1069479343/questions.json"
+    }
+  },
+  "question": {
+    "1069479362": {
+        "id": 1069479362,
+        "status": "active",
+        "visible_to_clients": false,
+        "created_at": "2022-10-29T10:56:58.169Z",
+        "updated_at": "2022-11-22T08:25:12.645Z",
+        "title": "What did you work on today?",
+        "inherits_status": true,
+        "type": "Question",
+        "url": "https://3.basecampapi.com/195539477/buckets/2085958499/questions/1069479362.json",
+        "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/questions/1069479362",
+        "bookmark_url": "https://3.basecampapi.com/195539477/my/bookmarks/BAh7CEkiCGdpZAY6BkVUSSIuZ2lkOi8vYmMzL1JlY29yZGluZy8xMDY5NDc5MzYyP2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg1yZWFkYWJsZQY7AFRJIg9leHBpcmVzX2F0BjsAVDA=--98a22f48366f2b97eda3cc5996bcbd018f2118e3.json",
+        "subscription_url": "https://3.basecampapi.com/195539477/buckets/2085958499/recordings/1069479362/subscription.json",
+        "parent": {
+            "id": 1069479343,
+            "title": "Automatic Check-ins",
+            "type": "Questionnaire",
+            "url": "https://3.basecampapi.com/195539477/buckets/2085958499/questionnaires/1069479343.json",
+            "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/questionnaires/1069479343"
+        },
+        "bucket": {
+            "id": 2085958499,
+            "name": "The Leto Laptop",
+            "type": "Project"
+        },
+        "creator": {
+            "id": 1049715914,
+            "attachable_sgid": "BAh7CEkiCGdpZAY6BkVUSSIrZ2lkOi8vYmMzL1BlcnNvbi8xMDQ5NzE1OTE0P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg9hdHRhY2hhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--ff006accb6e013cca785190fa38f42c091d24f1e",
+            "name": "Victor Cooper",
+            "email_address": "victor@honchodesign.com",
+            "personable_type": "User",
+            "title": "Chief Strategist",
+            "bio": "Don’t let your dreams be dreams",
+            "location": "Chicago, IL",
+            "created_at": "2022-11-22T08:23:21.732Z",
+            "updated_at": "2022-11-22T08:23:21.904Z",
+            "admin": true,
+            "owner": true,
+            "client": false,
+            "employee": true,
+            "time_zone": "America/Chicago",
+            "avatar_url": "https://3.basecamp-static.com/195539477/people/BAhpBMpkkT4=--5520caeec1845b5090bbfc993ffe8eca8d138e14/avatar?v=1",
+            "company": {
+                "id": 1033447817,
+                "name": "Honcho Design"
+            },
+            "can_manage_projects": true,
+            "can_manage_people": true
+        },
+        "paused": false,
+        "schedule": {
+            "frequency": "every_day",
+            "days": [
+                1,
+                2,
+                3,
+                4,
+                5
+            ],
+            "hour": 17,
+            "minute": 0,
+            "week_instance": null,
+            "week_interval": null,
+            "month_interval": null,
+            "start_date": "2022-11-22",
+            "end_date": null
+        },
+        "answers_count": 32,
+        "answers_url": "https://3.basecampapi.com/195539477/buckets/2085958499/questions/1069479362/answers.json"
+    }
+  },
+  "question_answer": {
+    "1069479547": {
+        "id": 1069479547,
+        "status": "active",
+        "visible_to_clients": false,
+        "created_at": "2022-11-22T12:05:58.169Z",
+        "updated_at": "2022-11-22T12:05:58.169Z",
+        "title": "Answer to “What did you work on today?”",
+        "inherits_status": true,
+        "type": "Question::Answer",
+        "url": "https://3.basecampapi.com/195539477/buckets/2085958499/question_answers/1069479547.json",
+        "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/question_answers/1069479547",
+        "bookmark_url": "https://3.basecampapi.com/195539477/my/bookmarks/BAh7CEkiCGdpZAY6BkVUSSIuZ2lkOi8vYmMzL1JlY29yZGluZy8xMDY5NDc5NTQ3P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg1yZWFkYWJsZQY7AFRJIg9leHBpcmVzX2F0BjsAVDA=--d845e9d18c423a5f3d1d84039d37c670ba8b0066.json",
+        "subscription_url": "https://3.basecampapi.com/195539477/buckets/2085958499/recordings/1069479547/subscription.json",
+        "comments_count": 0,
+        "comments_url": "https://3.basecampapi.com/195539477/buckets/2085958499/recordings/1069479547/comments.json",
+        "parent": {
+            "id": 1069479362,
+            "title": "What did you work on today?",
+            "type": "Question",
+            "url": "https://3.basecampapi.com/195539477/buckets/2085958499/questions/1069479362.json",
+            "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/questions/1069479362"
+        },
+        "bucket": {
+            "id": 2085958499,
+            "name": "The Leto Laptop",
+            "type": "Project"
+        },
+        "creator": {
+            "id": 1049715915,
+            "attachable_sgid": "BAh7CEkiCGdpZAY6BkVUSSIrZ2lkOi8vYmMzL1BlcnNvbi8xMDQ5NzE1OTE1P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg9hdHRhY2hhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--aeb392ebf54ffd820e45f27add22bae3a8c7da56",
+            "name": "Annie Bryan",
+            "email_address": "annie@honchodesign.com",
+            "personable_type": "User",
+            "title": "Central Markets Manager",
+            "bio": "To open a store is easy, to keep it open is an art",
+            "location": null,
+            "created_at": "2022-11-22T08:23:21.911Z",
+            "updated_at": "2022-11-22T08:23:21.911Z",
+            "admin": false,
+            "owner": false,
+            "client": false,
+            "employee": true,
+            "time_zone": "America/Chicago",
+            "avatar_url": "https://3.basecamp-static.com/195539477/people/BAhpBMtkkT4=--9927c47a4cbee30a7f9aea667882496aba799149/avatar?v=1",
+            "company": {
+                "id": 1033447817,
+                "name": "Honcho Design"
+            },
+            "can_manage_projects": true,
+            "can_manage_people": true
+        },
+        "content": "<div>Last week or so was tough, but I think we're back on track. The next design presentation is coming up and we're in good shape.</div>",
+        "group_on": "2022-11-22"
+    }
+  },
+  "schedule": {
+    "1069479342": {
+        "id": 1069479342,
+        "status": "active",
+        "visible_to_clients": false,
+        "created_at": "2022-11-22T08:23:58.237Z",
+        "updated_at": "2022-11-22T08:25:04.318Z",
+        "title": "Schedule",
+        "inherits_status": true,
+        "type": "Schedule",
+        "url": "https://3.basecampapi.com/195539477/buckets/2085958499/schedules/1069479342.json",
+        "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/schedules/1069479342",
+        "bookmark_url": "https://3.basecampapi.com/195539477/my/bookmarks/BAh7CEkiCGdpZAY6BkVUSSIuZ2lkOi8vYmMzL1JlY29yZGluZy8xMDY5NDc5MzQyP2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg1yZWFkYWJsZQY7AFRJIg9leHBpcmVzX2F0BjsAVDA=--c25a35abffcd11650599ed79c2b7aa7b62c72a60.json",
+        "position": 5,
+        "bucket": {
+            "id": 2085958499,
+            "name": "The Leto Laptop",
+            "type": "Project"
+        },
+        "creator": {
+            "id": 1049715914,
+            "attachable_sgid": "BAh7CEkiCGdpZAY6BkVUSSIrZ2lkOi8vYmMzL1BlcnNvbi8xMDQ5NzE1OTE0P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg9hdHRhY2hhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--ff006accb6e013cca785190fa38f42c091d24f1e",
+            "name": "Victor Cooper",
+            "email_address": "victor@honchodesign.com",
+            "personable_type": "User",
+            "title": "Chief Strategist",
+            "bio": "Don’t let your dreams be dreams",
+            "location": "Chicago, IL",
+            "created_at": "2022-11-22T08:23:21.732Z",
+            "updated_at": "2022-11-22T08:23:21.904Z",
+            "admin": true,
+            "owner": true,
+            "client": false,
+            "employee": true,
+            "time_zone": "America/Chicago",
+            "avatar_url": "https://3.basecamp-static.com/195539477/people/BAhpBMpkkT4=--5520caeec1845b5090bbfc993ffe8eca8d138e14/avatar?v=1",
+            "company": {
+                "id": 1033447817,
+                "name": "Honcho Design"
+            },
+            "can_manage_projects": true,
+            "can_manage_people": true
+        },
+        "include_due_assignments": true,
+        "entries_count": 1,
+        "entries_url": "https://3.basecampapi.com/195539477/buckets/2085958499/schedules/1069479342/entries.json"
+    }
+  },
+  "schedule_entry": {
+    "1069479847": {
+        "id": 1069479847,
+        "status": "active",
+        "visible_to_clients": false,
+        "created_at": "2022-11-22T08:25:04.190Z",
+        "updated_at": "2022-11-22T08:25:04.316Z",
+        "title": "Team Meeting",
+        "inherits_status": true,
+        "type": "Schedule::Entry",
+        "url": "https://3.basecampapi.com/195539477/buckets/2085958499/schedule_entries/1069479847.json",
+        "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/schedule_entries/1069479847",
+        "bookmark_url": "https://3.basecampapi.com/195539477/my/bookmarks/BAh7CEkiCGdpZAY6BkVUSSIuZ2lkOi8vYmMzL1JlY29yZGluZy8xMDY5NDc5ODQ3P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg1yZWFkYWJsZQY7AFRJIg9leHBpcmVzX2F0BjsAVDA=--1c0cc0c23c279ac645718b2ea9912d5513075d97.json",
+        "subscription_url": "https://3.basecampapi.com/195539477/buckets/2085958499/recordings/1069479847/subscription.json",
+        "comments_count": 0,
+        "comments_url": "https://3.basecampapi.com/195539477/buckets/2085958499/recordings/1069479847/comments.json",
+        "parent": {
+            "id": 1069479342,
+            "title": "Schedule",
+            "type": "Schedule",
+            "url": "https://3.basecampapi.com/195539477/buckets/2085958499/schedules/1069479342.json",
+            "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/schedules/1069479342"
+        },
+        "bucket": {
+            "id": 2085958499,
+            "name": "The Leto Laptop",
+            "type": "Project"
+        },
+        "creator": {
+            "id": 1049715914,
+            "attachable_sgid": "BAh7CEkiCGdpZAY6BkVUSSIrZ2lkOi8vYmMzL1BlcnNvbi8xMDQ5NzE1OTE0P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg9hdHRhY2hhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--ff006accb6e013cca785190fa38f42c091d24f1e",
+            "name": "Victor Cooper",
+            "email_address": "victor@honchodesign.com",
+            "personable_type": "User",
+            "title": "Chief Strategist",
+            "bio": "Don’t let your dreams be dreams",
+            "location": "Chicago, IL",
+            "created_at": "2022-11-22T08:23:21.732Z",
+            "updated_at": "2022-11-22T08:23:21.904Z",
+            "admin": true,
+            "owner": true,
+            "client": false,
+            "employee": true,
+            "time_zone": "America/Chicago",
+            "avatar_url": "https://3.basecamp-static.com/195539477/people/BAhpBMpkkT4=--5520caeec1845b5090bbfc993ffe8eca8d138e14/avatar?v=1",
+            "company": {
+                "id": 1033447817,
+                "name": "Honcho Design"
+            },
+            "can_manage_projects": true,
+            "can_manage_people": true
+        },
+        "description": "<div>Time to synergize!</div>",
+        "summary": "Team Meeting",
+        "all_day": false,
+        "starts_at": "2022-11-23T10:25:04.177Z",
+        "ends_at": "2022-11-23T14:25:04.177Z",
+        "participants": [
+            {
+                "id": 1049715921,
+                "attachable_sgid": "BAh7CEkiCGdpZAY6BkVUSSIrZ2lkOi8vYmMzL1BlcnNvbi8xMDQ5NzE1OTIxP2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg9hdHRhY2hhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--61b488a9fa97d2e628aee86cf51a4ba0171888c2",
+                "name": "Steve Marsh",
+                "email_address": "steve@honchodesign.com",
+                "personable_type": "User",
+                "title": "Legacy Directives Strategist",
+                "bio": "You can do it!",
+                "location": null,
+                "created_at": "2022-11-22T08:23:21.991Z",
+                "updated_at": "2022-11-22T08:23:21.991Z",
+                "admin": false,
+                "owner": false,
+                "client": false,
+                "employee": true,
+                "time_zone": "Etc/UTC",
+                "avatar_url": "https://3.basecamp-static.com/195539477/people/BAhpBNFkkT4=--c57bba9b44447be39d4a79a5e7f2a592cae9e82c/avatar?v=1",
+                "company": {
+                    "id": 1033447817,
+                    "name": "Honcho Design"
+                },
+                "can_manage_projects": true,
+                "can_manage_people": true
+            }
+        ]
+    }
+  },
+  "todoset": {
+    "1069479339": {
+        "id": 1069479339,
+        "status": "active",
+        "visible_to_clients": false,
+        "created_at": "2022-11-22T08:23:58.206Z",
+        "updated_at": "2022-11-22T13:36:50.731Z",
+        "title": "To-dos",
+        "inherits_status": true,
+        "type": "Todoset",
+        "url": "https://3.basecampapi.com/195539477/buckets/2085958499/todosets/1069479339.json",
+        "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/todosets/1069479339",
+        "bookmark_url": "https://3.basecampapi.com/195539477/my/bookmarks/BAh7CEkiCGdpZAY6BkVUSSIuZ2lkOi8vYmMzL1JlY29yZGluZy8xMDY5NDc5MzM5P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg1yZWFkYWJsZQY7AFRJIg9leHBpcmVzX2F0BjsAVDA=--51a5eae687ae2189e66551c48e347d8666aa7629.json",
+        "position": 2,
+        "bucket": {
+            "id": 2085958499,
+            "name": "The Leto Laptop",
+            "type": "Project"
+        },
+        "creator": {
+            "id": 1049715914,
+            "attachable_sgid": "BAh7CEkiCGdpZAY6BkVUSSIrZ2lkOi8vYmMzL1BlcnNvbi8xMDQ5NzE1OTE0P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg9hdHRhY2hhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--ff006accb6e013cca785190fa38f42c091d24f1e",
+            "name": "Victor Cooper",
+            "email_address": "victor@honchodesign.com",
+            "personable_type": "User",
+            "title": "Chief Strategist",
+            "bio": "Don’t let your dreams be dreams",
+            "location": "Chicago, IL",
+            "created_at": "2022-11-22T08:23:21.732Z",
+            "updated_at": "2022-11-22T08:23:21.904Z",
+            "admin": true,
+            "owner": true,
+            "client": false,
+            "employee": true,
+            "time_zone": "America/Chicago",
+            "avatar_url": "https://3.basecamp-static.com/195539477/people/BAhpBMpkkT4=--5520caeec1845b5090bbfc993ffe8eca8d138e14/avatar?v=1",
+            "company": {
+                "id": 1033447817,
+                "name": "Honcho Design"
+            },
+            "can_manage_projects": true,
+            "can_manage_people": true
+        },
+        "completed": false,
+        "completed_ratio": "14/60",
+        "name": "To-dos",
+        "todolists_count": 10,
+        "todolists_url": "https://3.basecampapi.com/195539477/buckets/2085958499/todosets/1069479339/todolists.json",
+        "app_todoslists_url": "https://3.basecamp.com/195539477/buckets/2085958499/todosets/1069479339/todolists"
+    }
+  },
+  "todolist": {
+    "1069479520": {
+        "id": 1069479520,
+        "status": "active",
+        "visible_to_clients": false,
+        "created_at": "2022-11-19T10:49:58.169Z",
+        "updated_at": "2022-11-22T13:36:50.727Z",
+        "title": "Strategy ideas",
+        "inherits_status": true,
+        "type": "Todolist",
+        "url": "https://3.basecampapi.com/195539477/buckets/2085958499/todolists/1069479520.json",
+        "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/todolists/1069479520",
+        "bookmark_url": "https://3.basecampapi.com/195539477/my/bookmarks/BAh7CEkiCGdpZAY6BkVUSSIuZ2lkOi8vYmMzL1JlY29yZGluZy8xMDY5NDc5NTIwP2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg1yZWFkYWJsZQY7AFRJIg9leHBpcmVzX2F0BjsAVDA=--24332fbdc81b06784de7e8f2b6c1e29021bbae58.json",
+        "subscription_url": "https://3.basecampapi.com/195539477/buckets/2085958499/recordings/1069479520/subscription.json",
+        "comments_count": 0,
+        "comments_url": "https://3.basecampapi.com/195539477/buckets/2085958499/recordings/1069479520/comments.json",
+        "position": 1,
+        "parent": {
+            "id": 1069479339,
+            "title": "To-dos",
+            "type": "Todoset",
+            "url": "https://3.basecampapi.com/195539477/buckets/2085958499/todosets/1069479339.json",
+            "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/todosets/1069479339"
+        },
+        "bucket": {
+            "id": 2085958499,
+            "name": "The Leto Laptop",
+            "type": "Project"
+        },
+        "creator": {
+            "id": 1049715915,
+            "attachable_sgid": "BAh7CEkiCGdpZAY6BkVUSSIrZ2lkOi8vYmMzL1BlcnNvbi8xMDQ5NzE1OTE1P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg9hdHRhY2hhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--aeb392ebf54ffd820e45f27add22bae3a8c7da56",
+            "name": "Annie Bryan",
+            "email_address": "annie@honchodesign.com",
+            "personable_type": "User",
+            "title": "Central Markets Manager",
+            "bio": "To open a store is easy, to keep it open is an art",
+            "location": null,
+            "created_at": "2022-11-22T08:23:21.911Z",
+            "updated_at": "2022-11-22T08:23:21.911Z",
+            "admin": false,
+            "owner": false,
+            "client": false,
+            "employee": true,
+            "time_zone": "America/Chicago",
+            "avatar_url": "https://3.basecamp-static.com/195539477/people/BAhpBMtkkT4=--9927c47a4cbee30a7f9aea667882496aba799149/avatar?v=1",
+            "company": {
+                "id": 1033447817,
+                "name": "Honcho Design"
+            },
+            "can_manage_projects": true,
+            "can_manage_people": true
+        },
+        "description": "",
+        "completed": false,
+        "completed_ratio": "2/5",
+        "name": "Strategy ideas",
+        "todos_url": "https://3.basecampapi.com/195539477/buckets/2085958499/todolists/1069479520/todos.json",
+        "groups_url": "https://3.basecampapi.com/195539477/buckets/2085958499/todolists/1069479520/groups.json",
+        "app_todos_url": "https://3.basecamp.com/195539477/buckets/2085958499/todolists/1069479520/todos"
+    },
+    "968814030": {
+        "id":968814030,
+        "status": "active",
+        "visible_to_clients": false,
+        "created_at": "2022-11-19T10:49:58.169Z",
+        "updated_at": "2022-11-22T13:36:50.727Z",
+        "title": "Strategy ideas",
+        "inherits_status": true,
+        "type": "Todolist",
+        "url": "https://3.basecampapi.com/195539477/buckets/2085958499/todolists/968814030.json",
+        "app_url":"https://3.basecamp.com/195539477/buckets/2085958499/todolists/968814030",
+        "bookmark_url": "https://3.basecampapi.com/195539477/my/bookmarks/dummy.json",
+        "subscription_url": "https://3.basecampapi.com/195539477/buckets/2085958499/recordings/968814030/subscription.json",
+        "comments_count": 0,
+        "comments_url": "https://3.basecampapi.com/195539477/buckets/2085958499/recordings/968814030/comments.json",
+        "position": 1,
+        "parent": {
+            "id": 1069479339,
+            "title": "To-dos",
+            "type": "Todoset",
+            "url": "https://3.basecampapi.com/195539477/buckets/2085958499/todosets/1069479339.json",
+            "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/todosets/1069479339"
+        },
+        "bucket": {
+            "id": 2085958499,
+            "name": "The Leto Laptop",
+            "type": "Project"
+        },
+        "creator": {
+            "id": 1049715915,
+            "attachable_sgid": "BAh7CEkiCGdpZAY6BkVUSSIrZ2lkOi8vYmMzL1BlcnNvbi8xMDQ5NzE1OTE1P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg9hdHRhY2hhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--aeb392ebf54ffd820e45f27add22bae3a8c7da56",
+            "name": "Annie Bryan",
+            "email_address": "annie@honchodesign.com",
+            "personable_type": "User",
+            "title": "Central Markets Manager",
+            "bio": "To open a store is easy, to keep it open is an art",
+            "location": null,
+            "created_at": "2022-11-22T08:23:21.911Z",
+            "updated_at": "2022-11-22T08:23:21.911Z",
+            "admin": false,
+            "owner": false,
+            "client": false,
+            "employee": true,
+            "time_zone": "America/Chicago",
+            "avatar_url": "https://3.basecamp-static.com/195539477/people/BAhpBMtkkT4=--9927c47a4cbee30a7f9aea667882496aba799149/avatar?v=1",
+            "company": {
+                "id": 1033447817,
+                "name": "Honcho Design"
+            },
+            "can_manage_projects": true,
+            "can_manage_people": true
+        },
+        "description": "",
+        "completed": false,
+        "completed_ratio": "2/5",
+        "name": "Strategy ideas",
+        "todos_url": "https://3.basecampapi.com/195539477/buckets/2085958499/todolists/968814030/todos.json",
+        "groups_url": "https://3.basecampapi.com/195539477/buckets/2085958499/todolists/968814030/groups.json",
+        "app_todos_url": "https://3.basecamp.com/195539477/buckets/2085958499/todolists/968814030/todos"
+    }
+  },
+  "todo": {
+    "1069479523": {
+        "id": 1069479523,
+        "status": "active",
+        "visible_to_clients": false,
+        "created_at": "2022-12-11T13:25:58.169Z",
+        "updated_at": "2022-11-22T17:56:30.804Z",
+        "title": "Clear and simple UI",
+        "inherits_status": true,
+        "type": "Todo",
+        "url": "https://3.basecampapi.com/195539477/buckets/2085958499/todos/1069479523.json",
+        "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/todos/1069479523",
+        "bookmark_url": "https://3.basecampapi.com/195539477/my/bookmarks/BAh7CEkiCGdpZAY6BkVUSSIuZ2lkOi8vYmMzL1JlY29yZGluZy8xMDY5NDc5NTIzP2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg1yZWFkYWJsZQY7AFRJIg9leHBpcmVzX2F0BjsAVDA=--7372f7af1010860331b2d7e0c9b55ab29e63f821.json",
+        "subscription_url": "https://3.basecampapi.com/195539477/buckets/2085958499/recordings/1069479523/subscription.json",
+        "comments_count": 0,
+        "comments_url": "https://3.basecampapi.com/195539477/buckets/2085958499/recordings/1069479523/comments.json",
+        "parent": {
+            "id": 1069479520,
+            "title": "Strategy ideas",
+            "type": "Todolist",
+            "url": "https://3.basecampapi.com/195539477/buckets/2085958499/todolists/1069479520.json",
+            "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/todolists/1069479520"
+        },
+        "bucket": {
+            "id": 2085958499,
+            "name": "The Leto Laptop",
+            "type": "Project"
+        },
+        "creator": {
+            "id": 1049715915,
+            "attachable_sgid": "BAh7CEkiCGdpZAY6BkVUSSIrZ2lkOi8vYmMzL1BlcnNvbi8xMDQ5NzE1OTE1P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg9hdHRhY2hhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--aeb392ebf54ffd820e45f27add22bae3a8c7da56",
+            "name": "Annie Bryan",
+            "email_address": "annie@honchodesign.com",
+            "personable_type": "User",
+            "title": "Central Markets Manager",
+            "bio": "To open a store is easy, to keep it open is an art",
+            "location": null,
+            "created_at": "2022-11-22T08:23:21.911Z",
+            "updated_at": "2022-11-22T08:23:21.911Z",
+            "admin": false,
+            "owner": false,
+            "client": false,
+            "employee": true,
+            "time_zone": "America/Chicago",
+            "avatar_url": "https://3.basecamp-static.com/195539477/people/BAhpBMtkkT4=--9927c47a4cbee30a7f9aea667882496aba799149/avatar?v=1",
+            "company": {
+                "id": 1033447817,
+                "name": "Honcho Design"
+            },
+            "can_manage_projects": true,
+            "can_manage_people": true
+        },
+        "description": "",
+        "completed": true,
+        "completion": {
+            "created_at": "2022-11-22T17:56:30.731Z",
+            "creator": {
+                "id": 1049715937,
+                "attachable_sgid": "BAh7CEkiCGdpZAY6BkVUSSIrZ2lkOi8vYmMzL1BlcnNvbi8xMDQ5NzE1OTM3P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg9hdHRhY2hhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--1255eb7c3d72232ea454ba0b42aaee71238c1d07",
+                "name": "Sharon Bradford",
+                "email_address": "sharon@honchodesign.com",
+                "personable_type": "User",
+                "title": "Principal Branding Administrator",
+                "bio": null,
+                "location": null,
+                "created_at": "2022-11-22T08:23:22.231Z",
+                "updated_at": "2022-11-22T08:23:22.231Z",
+                "admin": false,
+                "owner": false,
+                "client": false,
+                "employee": false,
+                "time_zone": "Etc/UTC",
+                "avatar_url": "https://3.basecamp-static.com/195539477/people/BAhpBOFkkT4=--560f7fa1330d4341e3c089226bcb7fefb82dbfd1/avatar?v=1",
+                "can_manage_projects": true,
+                "can_manage_people": true
+            }
+        },
+        "content": "Clear and simple UI",
+        "starts_on": null,
+        "due_on": null,
+        "assignees": [
+            {
+                "id": 1049715937,
+                "attachable_sgid": "BAh7CEkiCGdpZAY6BkVUSSIrZ2lkOi8vYmMzL1BlcnNvbi8xMDQ5NzE1OTM3P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg9hdHRhY2hhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--1255eb7c3d72232ea454ba0b42aaee71238c1d07",
+                "name": "Sharon Bradford",
+                "email_address": "sharon@honchodesign.com",
+                "personable_type": "User",
+                "title": "Principal Branding Administrator",
+                "bio": null,
+                "location": null,
+                "created_at": "2022-11-22T08:23:22.231Z",
+                "updated_at": "2022-11-22T08:23:22.231Z",
+                "admin": false,
+                "owner": false,
+                "client": false,
+                "employee": false,
+                "time_zone": "Etc/UTC",
+                "avatar_url": "https://3.basecamp-static.com/195539477/people/BAhpBOFkkT4=--560f7fa1330d4341e3c089226bcb7fefb82dbfd1/avatar?v=1",
+                "can_manage_projects": true,
+                "can_manage_people": true
+            }
+        ],
+        "completion_subscribers": [
+            {
+                "id": 1049715937,
+                "attachable_sgid": "BAh7CEkiCGdpZAY6BkVUSSIrZ2lkOi8vYmMzL1BlcnNvbi8xMDQ5NzE1OTM3P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg9hdHRhY2hhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--1255eb7c3d72232ea454ba0b42aaee71238c1d07",
+                "name": "Sharon Bradford",
+                "email_address": "sharon@honchodesign.com",
+                "personable_type": "User",
+                "title": "Principal Branding Administrator",
+                "bio": null,
+                "location": null,
+                "created_at": "2022-11-22T08:23:22.231Z",
+                "updated_at": "2022-11-22T08:23:22.231Z",
+                "admin": false,
+                "owner": false,
+                "client": false,
+                "employee": false,
+                "time_zone": "Etc/UTC",
+                "avatar_url": "https://3.basecamp-static.com/195539477/people/BAhpBOFkkT4=--560f7fa1330d4341e3c089226bcb7fefb82dbfd1/avatar?v=1",
+                "can_manage_projects": true,
+                "can_manage_people": true
+            }
+        ],
+        "completion_url": "https://3.basecampapi.com/195539477/buckets/2085958499/todos/1069479523/completion.json"
+    },
+    "968814335": {
+        "id": 968814335,
+        "status":"active",
+        "visible_to_clients": false,
+        "created_at":"2018-03-16T12:17:04.938+01:00",
+        "updated_at":"2018-03-19T09:31:12.753+01:00",
+        "title":"Go cutting edge: iOS8 and Android 4.5 only",
+        "inherits_status": true,
+        "type":"Todo",
+        "url":"https://3.basecampapi.com/195539477/buckets/2085958499/todos/968814335.json",
+        "app_url":"https://3.basecamp.com/195539477/buckets/2085958499/todos/968814335",
+        "bookmark_url":"https://3.basecampapi.com/195539477/my/bookmarks/dummy.json",
+        "subscription_url": "https://3.basecampapi.com/195539477/buckets/2085958499/recordings/968814335/subscription.json",
+        "comments_count": 0,
+        "comments_url": "https://3.basecampapi.com/195539477/buckets/2085958499/recordings/968814335/comments.json",
+        "parent":{
+            "id":968814030,
+            "title": "Strategy ideas",
+            "type":"Todolist",
+            "url":"https://3.basecampapi.com/195539477/buckets/2085958499/todolists/968814030.json",
+            "app_url":"https://3.basecamp.com/195539477/buckets/2085958499/todolists/968814030"
+        },
+        "bucket":{
+            "id":2085958499,
+            "name":"The Leto Laptop",
+            "type":"Project"
+        },
+        "creator": {
+            "id": 1049715915,
+            "attachable_sgid": "BAh7CEkiCGdpZAY6BkVUSSIrZ2lkOi8vYmMzL1BlcnNvbi8xMDQ5NzE1OTE1P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg9hdHRhY2hhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--5f103c46d4f123f0068fcd0192a0f7fea7f26193",
+            "name": "Annie Bryan",
+            "email_address": "annie@honchodesign.com",
+            "personable_type": "User",
+            "title": "Central Markets Manager",
+            "bio": "To open a store is easy, to keep it open is an art",
+            "created_at": "2018-02-14T17:02:25.043Z",
+            "updated_at": "2018-02-14T17:02:25.043Z",
+            "admin": false,
+            "owner": false,
+            "time_zone": "America/Chicago",
+            "avatar_url": "https://3.basecamp-static.com/195539477/people/BAhpBMtkkT4=--e609ef146e39f9ca5e4bb7242fdfd50aec4c3b3f/avatar-64-x4",
+            "company": {
+                "id": 1033447817,
+                "name": "Honcho Design"
+            }
+        },
+        "description": "",
+        "completed": true,
+        "completion": {
+            "created_at": "2022-11-22T17:56:30.731Z",
+            "creator": {
+                "id": 1049715937,
+                "attachable_sgid": "BAh7CEkiCGdpZAY6BkVUSSIrZ2lkOi8vYmMzL1BlcnNvbi8xMDQ5NzE1OTM3P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg9hdHRhY2hhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--1255eb7c3d72232ea454ba0b42aaee71238c1d07",
+                "name": "Sharon Bradford",
+                "email_address": "sharon@honchodesign.com",
+                "personable_type": "User",
+                "title": "Principal Branding Administrator",
+                "bio": null,
+                "location": null,
+                "created_at": "2022-11-22T08:23:22.231Z",
+                "updated_at": "2022-11-22T08:23:22.231Z",
+                "admin": false,
+                "owner": false,
+                "client": false,
+                "employee": false,
+                "time_zone": "Etc/UTC",
+                "avatar_url": "https://3.basecamp-static.com/195539477/people/BAhpBOFkkT4=--560f7fa1330d4341e3c089226bcb7fefb82dbfd1/avatar?v=1",
+                "can_manage_projects": true,
+                "can_manage_people": true
+            }
+        },
+        "content":"Go cutting edge: iOS8 and Android 4.5 only",
+        "starts_on": null,
+        "due_on": null,
+        "assignees": [],
+        "completion_subscribers": [],
+        "completion_url": "https://3.basecampapi.com/195539477/buckets/2085958499/todos/968814335/completion.json"
+    }
+  },
+  "message_category": {
+    "823758531": {
+        "id": 823758531,
+        "name": "Announcement",
+        "icon": "📢",
+        "created_at": "2017-03-28T15:25:09.455Z",
+        "updated_at": "2017-03-28T15:25:09.455Z"
+    }
+  },
+  "message_board": {
+    "1069479338": {
+        "id": 1069479338,
+        "status": "active",
+        "visible_to_clients": false,
+        "created_at": "2022-11-22T08:23:58.186Z",
+        "updated_at": "2022-11-22T17:53:36.294Z",
+        "title": "Message Board",
+        "inherits_status": true,
+        "type": "Message::Board",
+        "url": "https://3.basecampapi.com/195539477/buckets/2085958499/message_boards/1069479338.json",
+        "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/message_boards/1069479338",
+        "bookmark_url": "https://3.basecampapi.com/195539477/my/bookmarks/BAh7CEkiCGdpZAY6BkVUSSIuZ2lkOi8vYmMzL1JlY29yZGluZy8xMDY5NDc5MzM4P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg1yZWFkYWJsZQY7AFRJIg9leHBpcmVzX2F0BjsAVDA=--b1fc49d3c71b863b1635683193ce19eb723e7674.json",
+        "position": 1,
+        "bucket": {
+            "id": 2085958499,
+            "name": "The Leto Laptop",
+            "type": "Project"
+        },
+        "creator": {
+            "id": 1049715914,
+            "attachable_sgid": "BAh7CEkiCGdpZAY6BkVUSSIrZ2lkOi8vYmMzL1BlcnNvbi8xMDQ5NzE1OTE0P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg9hdHRhY2hhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--ff006accb6e013cca785190fa38f42c091d24f1e",
+            "name": "Victor Cooper",
+            "email_address": "victor@honchodesign.com",
+            "personable_type": "User",
+            "title": "Chief Strategist",
+            "bio": "Don’t let your dreams be dreams",
+            "location": "Chicago, IL",
+            "created_at": "2022-11-22T08:23:21.732Z",
+            "updated_at": "2022-11-22T08:23:21.904Z",
+            "admin": true,
+            "owner": true,
+            "client": false,
+            "employee": true,
+            "time_zone": "America/Chicago",
+            "avatar_url": "https://3.basecamp-static.com/195539477/people/BAhpBMpkkT4=--5520caeec1845b5090bbfc993ffe8eca8d138e14/avatar?v=1",
+            "company": {
+                "id": 1033447817,
+                "name": "Honcho Design"
+            },
+            "can_manage_projects": true,
+            "can_manage_people": true
+        },
+        "messages_count": 9,
+        "messages_url": "https://3.basecampapi.com/195539477/buckets/2085958499/message_boards/1069479338/messages.json",
+        "app_messages_url": "https://3.basecamp.com/195539477/buckets/2085958499/message_boards/1069479338/messages"
+    }
+  },
+  "message": {
+    "1069479351": {
+        "id": 1069479351,
+        "status": "active",
+        "visible_to_clients": false,
+        "created_at": "2022-10-29T10:17:58.169Z",
+        "updated_at": "2022-11-22T17:53:36.289Z",
+        "title": "We won Leto!",
+        "inherits_status": true,
+        "type": "Message",
+        "url": "https://3.basecampapi.com/195539477/buckets/2085958499/messages/1069479351.json",
+        "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/messages/1069479351",
+        "bookmark_url": "https://3.basecamp.com/195539477/my/bookmarks/BAh7CEkiCGdpZAY6BkVUSSIuZ2lkOi8vYmMzL1JlY29yZGluZy8xMDY5NDc5MzUxP2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg1yZWFkYWJsZQY7AFRJIg9leHBpcmVzX2F0BjsAVDA=--8d413a5e5694e558bd418b7a0ced751d7c9cf921",
+        "subscription_url": "https://3.basecamp.com/195539477/buckets/2085958499/recordings/1069479351/subscription",
+        "comments_count": 10,
+        "comments_url": "https://3.basecampapi.com/195539477/buckets/2085958499/recordings/1069479351/comments.json",
+        "parent": {
+            "id": 1069479338,
+            "title": "Message Board",
+            "type": "Message::Board",
+            "url": "https://3.basecampapi.com/195539477/buckets/2085958499/message_boards/1069479338.json",
+            "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/message_boards/1069479338"
+        },
+        "bucket": {
+            "id": 2085958499,
+            "name": "The Leto Laptop",
+            "type": "Project"
+        },
+        "creator": {
+            "id": 1049715914,
+            "attachable_sgid": "BAh7CEkiCGdpZAY6BkVUSSIrZ2lkOi8vYmMzL1BlcnNvbi8xMDQ5NzE1OTE0P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg9hdHRhY2hhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--ff006accb6e013cca785190fa38f42c091d24f1e",
+            "name": "Victor Cooper",
+            "email_address": "victor@honchodesign.com",
+            "personable_type": "User",
+            "title": "Chief Strategist",
+            "bio": "Don’t let your dreams be dreams",
+            "location": "Chicago, IL",
+            "created_at": "2022-11-22T08:23:21.732Z",
+            "updated_at": "2022-11-22T08:23:21.904Z",
+            "admin": true,
+            "owner": true,
+            "client": false,
+            "employee": true,
+            "time_zone": "America/Chicago",
+            "avatar_url": "https://3.basecamp-static.com/195539477/people/BAhpBMpkkT4=--5520caeec1845b5090bbfc993ffe8eca8d138e14/avatar?v=1",
+            "company": {
+                "id": 1033447817,
+                "name": "Honcho Design"
+            },
+            "can_manage_projects": true,
+            "can_manage_people": true
+        },
+        "content": "<div>Hey guys,\n\n  We won the Leto account! This is huge for us, it really marks a turning point for the company.\n\n  As you know we've been pursuing bigger clients in the consumer space, but we've done so carefully. We've never been about getting the biggest clients - those are easy to get. We've been trying to get the best clients for us - ones that will challenge us, grow us, make us better, and ultimately giving us a platform to show how awesome you guys all are. And now we have that!\n\n  A big congrats to everyone who worked so hard to make this happen, and now the fun really begins. Most of the pitch team will stay on as leading members of the first project, the Leto Microsite.\n\n  Again, great job everyone, and let's go kick some more butt!\n\n  -Victor</div>",
+        "subject": "We won Leto!"
+    }
+  },
+  "vault": {
+    "1069479098": {
+        "id": 1069479098,
+        "status": "active",
+        "visible_to_clients": false,
+        "created_at": "2022-10-14T17:36:37.216Z",
+        "updated_at": "2022-10-14T17:36:37.216Z",
+        "title": "HR Stuff",
+        "inherits_status": true,
+        "type": "Vault",
+        "url": "https://3.basecampapi.com/195539477/buckets/2085958497/vaults/1069479098.json",
+        "app_url": "https://3.basecamp.com/195539477/buckets/2085958497/vaults/1069479098",
+        "bookmark_url": "https://3.basecampapi.com/195539477/my/bookmarks/dummy.json",
+        "position": 1,
+        "bucket": {
+          "id": 2085958497,
+          "name": "Honcho Design Newsroom",
+          "type": "Project"
+        },
+        "creator": {
+          "id": 1049715914,
+          "attachable_sgid": "BAh7CEkiCGdpZAY6BkVUSSIrZ2lkOi8vYmMzL1BlcnNvbi8xMDQ5NzE1OTE0P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg9hdHRhY2hhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--ff006accb6e013cca785190fa38f42c091d24f1e",
+          "name": "Victor Cooper",
+          "email_address": "victor@honchodesign.com",
+          "personable_type": "User",
+          "title": "Chief Strategist",
+          "bio": "Don’t let your dreams be dreams",
+          "location": "Chicago, IL",
+          "created_at": "2022-11-25T16:24:33.557Z",
+          "updated_at": "2022-11-25T16:24:33.854Z",
+          "admin": true,
+          "owner": true,
+          "client": false,
+          "employee": true,
+          "time_zone": "America/Chicago",
+          "avatar_url": "https://3.basecamp-static.com/195539477/people/BAhpBMpkkT4=--5520caeec1845b5090bbfc993ffe8eca8d138e14/avatar?v=1",
+          "company": {
+            "id": 1033447817,
+            "name": "Honcho Design"
+          },
+          "can_manage_projects": true,
+          "can_manage_people": true
+        },
+        "documents_count": 0,
+        "documents_url": "https://3.basecampapi.com/195539477/buckets/2085958497/vaults/1069479098/documents.json",
+        "uploads_count": 0,
+        "uploads_url": "https://3.basecampapi.com/195539477/buckets/2085958497/vaults/1069479098/uploads.json",
+        "vaults_count": 0,
+        "vaults_url": "https://3.basecampapi.com/195539477/buckets/2085958497/vaults/1069479098/vaults.json"
+    },
+    "1069479340": {
+        "id": 1069479340,
+        "status": "active",
+        "visible_to_clients": false,
+        "created_at": "2022-10-14T17:36:37.216Z",
+        "updated_at": "2022-10-14T17:36:37.216Z",
+        "title": "Docs & Files",
+        "inherits_status": true,
+        "type": "Vault",
+        "url": "https://3.basecampapi.com/195539477/buckets/2085958499/vaults/1069479340.json",
+        "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/vaults/1069479340",
+        "bookmark_url": "https://3.basecampapi.com/195539477/my/bookmarks/dummy.json",
+        "position": 1,
+        "bucket": {
+            "id": 2085958499,
+            "name": "The Leto Laptop",
+            "type": "Project"
+        },
+        "creator": {
+          "id": 1049715914,
+          "attachable_sgid": "BAh7CEkiCGdpZAY6BkVUSSIrZ2lkOi8vYmMzL1BlcnNvbi8xMDQ5NzE1OTE0P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg9hdHRhY2hhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--ff006accb6e013cca785190fa38f42c091d24f1e",
+          "name": "Victor Cooper",
+          "email_address": "victor@honchodesign.com",
+          "personable_type": "User",
+          "title": "Chief Strategist",
+          "bio": "Don’t let your dreams be dreams",
+          "location": "Chicago, IL",
+          "created_at": "2022-11-25T16:24:33.557Z",
+          "updated_at": "2022-11-25T16:24:33.854Z",
+          "admin": true,
+          "owner": true,
+          "client": false,
+          "employee": true,
+          "time_zone": "America/Chicago",
+          "avatar_url": "https://3.basecamp-static.com/195539477/people/BAhpBMpkkT4=--5520caeec1845b5090bbfc993ffe8eca8d138e14/avatar?v=1",
+          "company": {
+            "id": 1033447817,
+            "name": "Honcho Design"
+          },
+          "can_manage_projects": true,
+          "can_manage_people": true
+        },
+        "documents_count": 0,
+        "documents_url": "https://3.basecampapi.com/195539477/buckets/2085958499/vaults/1069479340/documents.json",
+        "uploads_count": 0,
+        "uploads_url": "https://3.basecampapi.com/195539477/buckets/2085958499/vaults/1069479340/uploads.json",
+        "vaults_count": 0,
+        "vaults_url": "https://3.basecampapi.com/195539477/buckets/2085958499/vaults/1069479340/vaults.json"
+      }
+  },
+  "document": {
+    "1069479093": {
+        "id": 1069479093,
+        "status": "active",
+        "visible_to_clients": false,
+        "created_at": "2022-10-11T09:08:24.930Z",
+        "updated_at": "2022-11-22T08:24:37.813Z",
+        "title": "New Hire Info, Benefits Summary, and Forms",
+        "inherits_status": true,
+        "type": "Document",
+        "url": "https://3.basecampapi.com/195539477/buckets/2085958497/documents/1069479093.json",
+        "app_url": "https://3.basecamp.com/195539477/buckets/2085958497/documents/1069479093",
+        "bookmark_url": "https://3.basecampapi.com/195539477/my/bookmarks/BAh7CEkiCGdpZAY6BkVUSSIuZ2lkOi8vYmMzL1JlY29yZGluZy8xMDY5NDc5MDkzP2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg1yZWFkYWJsZQY7AFRJIg9leHBpcmVzX2F0BjsAVDA=--d5a19e835d576ed355c002664a8ea7a1567c362f.json",
+        "subscription_url": "https://3.basecampapi.com/195539477/buckets/2085958497/recordings/1069479093/subscription.json",
+        "comments_count": 1,
+        "comments_url": "https://3.basecampapi.com/195539477/buckets/2085958497/recordings/1069479093/comments.json",
+        "position": 1,
+        "parent": {
+            "id": 1069479098,
+            "title": "HR Stuff",
+            "type": "Vault",
+            "url": "https://3.basecampapi.com/195539477/buckets/2085958497/vaults/1069479098.json",
+            "app_url": "https://3.basecamp.com/195539477/buckets/2085958497/vaults/1069479098"
+        },
+        "bucket": {
+            "id": 2085958497,
+            "name": "Honcho Design Newsroom",
+            "type": "Project"
+        },
+        "creator": {
+            "id": 1049715916,
+            "attachable_sgid": "BAh7CEkiCGdpZAY6BkVUSSIrZ2lkOi8vYmMzL1BlcnNvbi8xMDQ5NzE1OTE2P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg9hdHRhY2hhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--c94599eef0a4237fbaa56ff2648f57f1dae89ffd",
+            "name": "Cheryl Walters",
+            "email_address": "cheryl@honchodesign.com",
+            "personable_type": "User",
+            "title": "Corporate Integration Director",
+            "bio": "A joke is a very serious thing",
+            "location": null,
+            "created_at": "2022-11-22T08:23:21.926Z",
+            "updated_at": "2022-11-22T08:23:21.926Z",
+            "admin": false,
+            "owner": false,
+            "client": false,
+            "employee": true,
+            "time_zone": "Etc/UTC",
+            "avatar_url": "https://3.basecamp-static.com/195539477/people/BAhpBMxkkT4=--0ea74d7e5d39ad2d120da79250b179b7e0b00c44/avatar?v=1",
+            "company": {
+                "id": 1033447817,
+                "name": "Honcho Design"
+            },
+            "can_manage_projects": true,
+            "can_manage_people": true
+        },
+        "content": "<strong>Health Insurance</strong>\n  We have just one health insurance policy. The company pays most of the premium, and you cover the rest. Domestic partnerships are covered, as well as marriages. Open enrollment starts in January.<br><br>\n\n  <strong>401K Retirement Plan</strong>\n  We match dollar-for-dollar up to 10% of your salary that you contribute to the plan. You are eligible to enroll in the 401K plan after your first paycheck.<br><br>\n\n  <strong>Flexible Spending Account (FSA)</strong>\n  The FSA is an account where you can set aside pre-tax money for out-of-pocket medical expenses, such as prescriptions, OTC medicine, vision care, etc.  You have to decide up front how much money you want to put in the account, and the max is $2500/year.<br><br>\n\n  <strong>Continuing Education Allowance</strong>\n  We provide you with $500 a year to take classes that help you professionally. Really, anything that helps you with your job.<br><br>\n\n  <strong>Matching Charitable Gifts</strong>\n  When you donate money to a qualified charity, we will make a matching gift to that charity on your behalf. The maximum for the year is $500 per employee.<br><br>\n\n  <strong>Paid Time Off</strong>\n  Paid time off doesn't really exist here - if you need a day (or week!) off, you just need to clear it with your team or others who would be affected by your absence. You should try to take at least 3 weeks off a year."
+    }
+  },
+  "upload": {
+    "1069479848": {
+        "id": 1069479848,
+        "status": "active",
+        "visible_to_clients": false,
+        "created_at": "2022-11-22T08:25:04.400Z",
+        "updated_at": "2022-11-22T08:25:04.408Z",
+        "title": "company-logo.png",
+        "inherits_status": true,
+        "type": "Upload",
+        "url": "https://3.basecampapi.com/195539477/buckets/2085958499/uploads/1069479848.json",
+        "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/uploads/1069479848",
+        "bookmark_url": "https://3.basecampapi.com/195539477/my/bookmarks/BAh7CEkiCGdpZAY6BkVUSSIuZ2lkOi8vYmMzL1JlY29yZGluZy8xMDY5NDc5ODQ4P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg1yZWFkYWJsZQY7AFRJIg9leHBpcmVzX2F0BjsAVDA=--b125776d2d29e638ecfefc0fd5bf4957f79ae0d5.json",
+        "subscription_url": "https://3.basecampapi.com/195539477/buckets/2085958499/recordings/1069479848/subscription.json",
+        "comments_count": 0,
+        "comments_url": "https://3.basecampapi.com/195539477/buckets/2085958499/recordings/1069479848/comments.json",
+        "position": 1,
+        "parent": {
+            "id": 1069479340,
+            "title": "Docs & Files",
+            "type": "Vault",
+            "url": "https://3.basecampapi.com/195539477/buckets/2085958499/vaults/1069479340.json",
+            "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/vaults/1069479340"
+        },
+        "bucket": {
+            "id": 2085958499,
+            "name": "The Leto Laptop",
+            "type": "Project"
+        },
+        "creator": {
+            "id": 1049715914,
+            "attachable_sgid": "BAh7CEkiCGdpZAY6BkVUSSIrZ2lkOi8vYmMzL1BlcnNvbi8xMDQ5NzE1OTE0P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg9hdHRhY2hhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--ff006accb6e013cca785190fa38f42c091d24f1e",
+            "name": "Victor Cooper",
+            "email_address": "victor@honchodesign.com",
+            "personable_type": "User",
+            "title": "Chief Strategist",
+            "bio": "Don’t let your dreams be dreams",
+            "location": "Chicago, IL",
+            "created_at": "2022-11-22T08:23:21.732Z",
+            "updated_at": "2022-11-22T08:23:21.904Z",
+            "admin": true,
+            "owner": true,
+            "client": false,
+            "employee": true,
+            "time_zone": "America/Chicago",
+            "avatar_url": "https://3.basecamp-static.com/195539477/people/BAhpBMpkkT4=--5520caeec1845b5090bbfc993ffe8eca8d138e14/avatar?v=1",
+            "company": {
+                "id": 1033447817,
+                "name": "Honcho Design"
+            },
+            "can_manage_projects": true,
+            "can_manage_people": true
+        },
+        "description": "<div>Check out the new logo</div>",
+        "content_type": "image/png",
+        "byte_size": 1281,
+        "filename": "company-logo.png",
+        "download_url": "https://3.basecampapi.com/195539477/buckets/2085958499/uploads/1069479848/download/company-logo.png",
+        "app_download_url": "http://storage.3.basecamp.test/195539477/buckets/2085958499/uploads/1069479848/download/company-logo.png",
+        "width": 164,
+        "height": 39
+    }
+  },
+  "comment": {
+    "1069479361": {
+        "id": 1069479361,
+        "status": "active",
+        "visible_to_clients": false,
+        "created_at": "2022-10-30T01:01:58.169Z",
+        "updated_at": "2022-10-30T01:01:58.169Z",
+        "title": "Re: We won Leto!",
+        "inherits_status": true,
+        "type": "Comment",
+        "url": "https://3.basecampapi.com/195539477/buckets/2085958499/comments/1069479361.json",
+        "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/messages/1069479351#__recording_1069479361",
+        "bookmark_url": "https://3.basecampapi.com/195539477/my/bookmarks/BAh7CEkiCGdpZAY6BkVUSSIuZ2lkOi8vYmMzL1JlY29yZGluZy8xMDY5NDc5MzYxP2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg1yZWFkYWJsZQY7AFRJIg9leHBpcmVzX2F0BjsAVDA=--8b7691463c92f63fe45627584ed759b44fe7bdaa.json",
+        "parent": {
+            "id": 1069479351,
+            "title": "We won Leto!",
+            "type": "Message",
+            "url": "https://3.basecampapi.com/195539477/buckets/2085958499/messages/1069479351.json",
+            "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/messages/1069479351"
+        },
+        "bucket": {
+            "id": 2085958499,
+            "name": "The Leto Laptop",
+            "type": "Project"
+        },
+        "creator": {
+            "id": 1049715915,
+            "attachable_sgid": "BAh7CEkiCGdpZAY6BkVUSSIrZ2lkOi8vYmMzL1BlcnNvbi8xMDQ5NzE1OTE1P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg9hdHRhY2hhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--aeb392ebf54ffd820e45f27add22bae3a8c7da56",
+            "name": "Annie Bryan",
+            "email_address": "annie@honchodesign.com",
+            "personable_type": "User",
+            "title": "Central Markets Manager",
+            "bio": "To open a store is easy, to keep it open is an art",
+            "location": null,
+            "created_at": "2022-11-22T08:23:21.911Z",
+            "updated_at": "2022-11-22T08:23:21.911Z",
+            "admin": false,
+            "owner": false,
+            "client": false,
+            "employee": true,
+            "time_zone": "America/Chicago",
+            "avatar_url": "https://3.basecamp-static.com/195539477/people/BAhpBMtkkT4=--9927c47a4cbee30a7f9aea667882496aba799149/avatar?v=1",
+            "company": {
+                "id": 1033447817,
+                "name": "Honcho Design"
+            },
+            "can_manage_projects": true,
+            "can_manage_people": true
+        },
+        "content": "<div>I just want to echo what just about everyone already said. This is a big one for us, and I can't wait to get going. I'll be spinning up the project shortly!</div>"
+    }
+  },
+  "webhook": {
+    "1479523571": {
+        "id":1479523571,
+        "kind":"todo_copied",
+        "details":{
+            "copy_id":981721240
+        },
+        "created_at":"2018-03-23T10:19:33.908+01:00",
+        "copy":{
+            "id":981721240,
+            "url":"https://3.basecampapi.com/195539477/buckets/2085958499/todos/981721240.json",
+            "app_url":"https://3.basecamp.com/195539477/buckets/2085958499/todos/981721240",
+            "bucket":{
+                "id":2085958499
+            }
+        },
+        "recording":{
+            "id":968814335,
+            "status":"active",
+            "created_at":"2018-03-16T12:17:04.938+01:00",
+            "updated_at":"2018-03-19T09:31:12.753+01:00",
+            "title":"Go cutting edge: iOS8 and Android 4.5 only",
+            "inherits_status": true,
+            "type":"Todo",
+            "url":"https://3.basecampapi.com/195539477/buckets/2085958499/todos/968814335.json",
+            "app_url":"https://3.basecamp.com/195539477/buckets/2085958499/todos/968814335",
+            "bookmark_url":"https://3.basecampapi.com/195539477/my/bookmarks/BAh7CEkiCGdpZAY6BkVUSSItZ2lkOi8vYmMzL1JlY29yZGluZy85Njg4MTQzMzU_ZXhwaXJlc19pbgY7AFRJIgxwdXJwb3NlBjsAVEkiDXJlYWRhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--9c496c78316f7ff7c52fbbbc957f198efd1c338c.json",
+            "parent":{
+                "id":968814030,
+                "title": "Strategy ideas",
+                "type":"Todolist",
+                "url":"https://3.basecampapi.com/195539477/buckets/2085958499/todolists/968814030.json",
+                "app_url":"https://3.basecamp.com/195539477/buckets/2085958499/todolists/968814030"
+            },
+            "bucket":{
+                "id":2085958499,
+                "name":"The Leto Laptop",
+                "type":"Project"
+            },
+            "creator": {
+                "id": 1049715915,
+                "attachable_sgid": "BAh7CEkiCGdpZAY6BkVUSSIrZ2lkOi8vYmMzL1BlcnNvbi8xMDQ5NzE1OTE1P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg9hdHRhY2hhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--5f103c46d4f123f0068fcd0192a0f7fea7f26193",
+                "name": "Annie Bryan",
+                "email_address": "annie@honchodesign.com",
+                "personable_type": "User",
+                "title": "Central Markets Manager",
+                "bio": "To open a store is easy, to keep it open is an art",
+                "created_at": "2018-02-14T17:02:25.043Z",
+                "updated_at": "2018-02-14T17:02:25.043Z",
+                "admin": false,
+                "owner": false,
+                "time_zone": "America/Chicago",
+                "avatar_url": "https://3.basecamp-static.com/195539477/people/BAhpBMtkkT4=--e609ef146e39f9ca5e4bb7242fdfd50aec4c3b3f/avatar-64-x4",
+                "company": {
+                    "id": 1033447817,
+                    "name": "Honcho Design"
+                }
+            },
+            "content":"Go cutting edge: iOS8 and Android 4.5 only"
+        },
+        "creator": {
+            "id": 1049715915,
+            "attachable_sgid": "BAh7CEkiCGdpZAY6BkVUSSIrZ2lkOi8vYmMzL1BlcnNvbi8xMDQ5NzE1OTE1P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg9hdHRhY2hhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--5f103c46d4f123f0068fcd0192a0f7fea7f26193",
+            "name": "Annie Bryan",
+            "email_address": "annie@honchodesign.com",
+            "personable_type": "User",
+            "title": "Central Markets Manager",
+            "bio": "To open a store is easy, to keep it open is an art",
+            "created_at": "2018-02-14T17:02:25.043Z",
+            "updated_at": "2018-02-14T17:02:25.043Z",
+            "admin": false,
+            "owner": false,
+            "time_zone": "America/Chicago",
+            "avatar_url": "https://3.basecamp-static.com/195539477/people/BAhpBMtkkT4=--e609ef146e39f9ca5e4bb7242fdfd50aec4c3b3f/avatar-64-x4",
+            "company": {
+                "id": 1033447817,
+                "name": "Honcho Design"
+            }
+        }
+    },
+    "1479523572": {
+        "id": 1479523572,
+        "created_at": "2022-11-15T14:45:42.173+07:00",
+        "creator": {
+            "id": 1049715915,
+            "attachable_sgid": "BAh7CEkiCGdpZAY6BkVUSSIrZ2lkOi8vYmMzL1BlcnNvbi8xMDQ5NzE1OTE1P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg9hdHRhY2hhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--5f103c46d4f123f0068fcd0192a0f7fea7f26193",
+            "name": "Annie Bryan",
+            "email_address": "annie@honchodesign.com",
+            "personable_type": "User",
+            "title": "Central Markets Manager",
+            "bio": "To open a store is easy, to keep it open is an art",
+            "created_at": "2018-02-14T17:02:25.043Z",
+            "updated_at": "2018-02-14T17:02:25.043Z",
+            "admin": false,
+            "owner": false,
+            "time_zone": "America/Chicago",
+            "avatar_url": "https://3.basecamp-static.com/195539477/people/BAhpBMtkkT4=--e609ef146e39f9ca5e4bb7242fdfd50aec4c3b3f/avatar-64-x4",
+            "company": {
+                "id": 1033447817,
+                "name": "Honcho Design"
+            }
+        },
+        "details": {
+            "notified_recipient_ids": []
+        },
+        "kind": "cloud_file_created",
+        "recording": {
+            "id": 968814336,
+            "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/cloud_files/968814336",
+            "bookmark_url": "https://3.basecampapi.com/195539477/my/bookmarks/dummy.json",
+            "bucket":{
+                "id":2085958499,
+                "name":"The Leto Laptop",
+                "type":"Project"
+            },
+            "content": "",
+            "created_at": "2022-11-15T14:45:42.156+07:00",
+            "creator": {
+                "id": 1049715915,
+                "attachable_sgid": "BAh7CEkiCGdpZAY6BkVUSSIrZ2lkOi8vYmMzL1BlcnNvbi8xMDQ5NzE1OTE1P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg9hdHRhY2hhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--5f103c46d4f123f0068fcd0192a0f7fea7f26193",
+                "name": "Annie Bryan",
+                "email_address": "annie@honchodesign.com",
+                "personable_type": "User",
+                "title": "Central Markets Manager",
+                "bio": "To open a store is easy, to keep it open is an art",
+                "created_at": "2018-02-14T17:02:25.043Z",
+                "updated_at": "2018-02-14T17:02:25.043Z",
+                "admin": false,
+                "owner": false,
+                "time_zone": "America/Chicago",
+                "avatar_url": "https://3.basecamp-static.com/195539477/people/BAhpBMtkkT4=--e609ef146e39f9ca5e4bb7242fdfd50aec4c3b3f/avatar-64-x4",
+                "company": {
+                    "id": 1033447817,
+                    "name": "Honcho Design"
+                }
+            },
+            "inherits_status": true,
+            "parent": {
+                "id": 1069479340,
+                "title": "Docs & Files",
+                "type": "Vault",
+                "url": "https://3.basecampapi.com/195539477/buckets/2085958499/vaults/1069479340.json",
+                "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/vaults/1069479340"
+            },
+            "position": 1,
+            "status": "active",
+            "subscription_url": "https://3.basecampapi.com/195539477/buckets/2085958499/recordings/968814336/subscription.json",
+            "title": "Moodboard",
+            "type": "CloudFile",
+            "updated_at": "2022-11-15T14:45:42.176+07:00",
+            "url": "https://3.basecampapi.com/195539477/buckets/2085958499/cloud_files/968814336.json",
+            "visible_to_clients": false
+        }
+    },
+    "1479523573": {
+        "id": 1479523573,
+        "created_at": "2022-11-15T14:45:42.173+07:00",
+        "creator": {
+            "id": 1049715915,
+            "attachable_sgid": "BAh7CEkiCGdpZAY6BkVUSSIrZ2lkOi8vYmMzL1BlcnNvbi8xMDQ5NzE1OTE1P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg9hdHRhY2hhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--5f103c46d4f123f0068fcd0192a0f7fea7f26193",
+            "name": "Annie Bryan",
+            "email_address": "annie@honchodesign.com",
+            "personable_type": "User",
+            "title": "Central Markets Manager",
+            "bio": "To open a store is easy, to keep it open is an art",
+            "created_at": "2018-02-14T17:02:25.043Z",
+            "updated_at": "2018-02-14T17:02:25.043Z",
+            "admin": false,
+            "owner": false,
+            "time_zone": "America/Chicago",
+            "avatar_url": "https://3.basecamp-static.com/195539477/people/BAhpBMtkkT4=--e609ef146e39f9ca5e4bb7242fdfd50aec4c3b3f/avatar-64-x4",
+            "company": {
+                "id": 1033447817,
+                "name": "Honcho Design"
+            }
+        },
+        "details": {
+            "notified_recipient_ids": []
+        },
+        "kind": "google_document_created",
+        "recording": {
+            "id": 5155621343,
+            "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/google_documents/5155621343",
+            "bookmark_url": "https://3.basecampapi.com/195539477/my/bookmarks/dummy.json",
+            "bucket":{
+                "id":2085958499,
+                "name":"The Leto Laptop",
+                "type":"Project"
+            },
+            "content": "",
+            "created_at": "2022-11-15T14:45:42.156+07:00",
+            "creator": {
+                "id": 1049715915,
+                "attachable_sgid": "BAh7CEkiCGdpZAY6BkVUSSIrZ2lkOi8vYmMzL1BlcnNvbi8xMDQ5NzE1OTE1P2V4cGlyZXNfaW4GOwBUSSIMcHVycG9zZQY7AFRJIg9hdHRhY2hhYmxlBjsAVEkiD2V4cGlyZXNfYXQGOwBUMA==--5f103c46d4f123f0068fcd0192a0f7fea7f26193",
+                "name": "Annie Bryan",
+                "email_address": "annie@honchodesign.com",
+                "personable_type": "User",
+                "title": "Central Markets Manager",
+                "bio": "To open a store is easy, to keep it open is an art",
+                "created_at": "2018-02-14T17:02:25.043Z",
+                "updated_at": "2018-02-14T17:02:25.043Z",
+                "admin": false,
+                "owner": false,
+                "time_zone": "America/Chicago",
+                "avatar_url": "https://3.basecamp-static.com/195539477/people/BAhpBMtkkT4=--e609ef146e39f9ca5e4bb7242fdfd50aec4c3b3f/avatar-64-x4",
+                "company": {
+                    "id": 1033447817,
+                    "name": "Honcho Design"
+                }
+            },
+            "inherits_status": true,
+            "parent": {
+                "id": 1069479340,
+                "title": "Docs & Files",
+                "type": "Vault",
+                "url": "https://3.basecampapi.com/195539477/buckets/2085958499/vaults/1069479340.json",
+                "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/vaults/1069479340"
+            },
+            "position": 1,
+            "status": "active",
+            "subscription_url": "https://3.basecampapi.com/195539477/buckets/2085958499/recordings/5155621343/subscription.json",
+            "title": "Request Asset",
+            "type": "GoogleDocument",
+            "updated_at": "2022-11-15T14:45:42.176+07:00",
+            "url": "https://3.basecampapi.com/195539477/buckets/2085958499/google_documents/5155621343.json",
+            "visible_to_clients": false
+        }
+    }
+  }
+}
