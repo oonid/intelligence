@@ -56,6 +56,12 @@ class BcWebhookSerializer(serializers.ModelSerializer):
             # recording is a GenericForeignKey
             self.recording = _recording
 
+        # as defined in https://github.com/basecamp/bc3-api/blob/master/sections/webhooks.md
+        # The payload for copy/move events will also include some details on the copied recording under "copy"
+        # exclude field copy for now, if the key exist
+        if 'copy' in data:
+            _copy = data.pop('copy')
+
         # even though the recording exception happened, we did not raise exception, as we just want to save the raw
 
         return data  # return data without the creator field

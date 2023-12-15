@@ -55,23 +55,17 @@ class BcGoogleDocument(BcWebhookRecordingBase):
 class BcInboxForward(BcWebhookRecordingBase):
     """
     InboxForward is one of the endpoints in webhooks.
-    no specific definition of InboxForward in the documentation,
-    so let's start with fields from webhooks recording.
-    https://github.com/basecamp/bc3-api/blob/master/sections/webhooks.md
+    TODO: move InboxForward from webhook
+    https://github.com/basecamp/bc3-api/blob/master/sections/forwards.md#get-a-forward
     """
-    def __str__(self):
-        return f'{self.type} {self.id} {self.title} ({self.status})'
 
 
 class BcClientApprovalResponse(BcWebhookRecordingBase):
     """
     ClientApprovalResponse is one of the endpoints in webhooks.
-    no specific definition of ClientApprovalResponse in the documentation,
-    so let's start with fields from webhooks recording.
-    https://github.com/basecamp/bc3-api/blob/master/sections/webhooks.md
+    TODO: move ClientApprovalResponse from webhook
+    https://github.com/basecamp/bc3-api/blob/master/sections/client_approvals.md#get-a-client-approval
     """
-    def __str__(self):
-        return f'{self.type} {self.id} {self.title} ({self.status})'
 
 
 class BcClientForward(BcWebhookRecordingBase):
@@ -80,20 +74,16 @@ class BcClientForward(BcWebhookRecordingBase):
     no specific definition of ClientForward in the documentation,
     so let's start with fields from webhooks recording.
     https://github.com/basecamp/bc3-api/blob/master/sections/webhooks.md
+    need sample data for ClientForward
     """
-    def __str__(self):
-        return f'{self.type} {self.id} {self.title} ({self.status})'
 
 
 class BcClientReply(BcWebhookRecordingBase):
     """
     ClientReply is one of the endpoints in webhooks.
-    no specific definition of ClientReply in the documentation,
-    so let's start with fields from webhooks recording.
-    https://github.com/basecamp/bc3-api/blob/master/sections/webhooks.md
+    TODO: move ClientReply from webhook
+    https://github.com/basecamp/bc3-api/blob/master/sections/client_replies.md#get-client-replies
     """
-    def __str__(self):
-        return f'{self.type} {self.id} {self.title} ({self.status})'
 
 
 class BcWebhook(models.Model):
