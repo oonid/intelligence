@@ -8,5 +8,5 @@ class BcCompanySerializer(serializers.ModelSerializer):
         model = BcCompany
         fields = ['id', 'name']
 
-    def create(self, validated_data):
-        print(f'BcCompanySerializer.create: {validated_data}')
+    # not implement create, as it will use the create method from parent (ModelSerializer)
+    # if implement create at child, calling method create will only call method at child (no parent method called)
