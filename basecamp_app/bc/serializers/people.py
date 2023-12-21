@@ -13,18 +13,20 @@ class BcPeopleSerializer(serializers.ModelSerializer):
         this method called before create, and this override make the creator and bucket can use existing
         this method called before is_valid(), so no validated_data
         """
-        # create or get company instance from request data, remove (pop) the company field from data
-        company_data = data.pop('company')
+        # get company instance from request data
         try:
-            company = BcCompany.objects.get(id=company_data["id"])
+            company = BcCompany.objects.get(id=data["company"]["id"])
+            # assign the company to serializer
+            self.company = company
+            # remove (pop) the company field from data, if the instance found
+            data.pop('company')
         except BcCompany.DoesNotExist:
-            # create new company if the id does not exist
-            company = BcCompany.objects.create(**company_data)
-        # assign the company to serializer
-        self.company = company
+            # the company creation via BcCompanySerializer
+            self.company = None
 
         # exclude 'can_ping' field from data, as we currently did not use the field
-        data.pop('can_ping')
+        if 'can_ping' in data:
+            data.pop('can_ping')
 
         if 'out_of_office' in data:  # exclude 'out_of_office' field from data, as we currently did not use the field
             data.pop('out_of_office')
@@ -56,10 +58,12 @@ class BcPeopleSerializer(serializers.ModelSerializer):
         if people:
             return people  # found by email_address
 
-        # still not found, create the data
+        # create the data. https://www.django-rest-framework.org/api-guide/relations/#writable-nested-serializers
 
         if self.company:  # previously assigned from to_internal_value()
             people = BcPeople.objects.create(company=self.company, **validated_data)
         else:  # on any other condition assign fully from validated_data
-            people = BcPeople.objects.create(**validated_data)
+            company_data = validated_data.pop('company')
+            company = BcCompany.objects.create(**company_data)
+            people = BcPeople.objects.create(company=company, **validated_data)
         return people
