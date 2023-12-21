@@ -1,5 +1,7 @@
 # intelligence
 
+![coverage](https://raw.githubusercontent.com/oonid/intelligence/master/coverage_badge.svg?sanitize=true)
+
 A brief exploration of a web app built with [Django](https://www.djangoproject.com/) that interacts with the [Basecamp API](https://github.com/basecamp/bc3-api).
 
 Objectives:
