@@ -1,4 +1,5 @@
 from rest_framework import serializers
+from rest_framework.exceptions import ValidationError
 
 from bc.models import BcPeople, BcCompany
 from bc.serializers import BcCompanySerializer
@@ -13,6 +14,9 @@ class BcPeopleSerializer(serializers.ModelSerializer):
         this method called before create, and this override make the creator and bucket can use existing
         this method called before is_valid(), so no validated_data
         """
+        if 'company' not in data:
+            raise ValidationError({'people company error': f'people no company field'})
+
         # get company instance from request data
         try:
             company = BcCompany.objects.get(id=data["company"]["id"])
