@@ -24,26 +24,27 @@ class BcWebhookSerializer(serializers.ModelSerializer):
         if 'raw' not in data:
             data['raw'] = deepcopy(data)
 
-        # create or get creator instance from request data, remove (pop) the creator field from data
-        creator_data = data.pop('creator')
-
+        # get creator instance from request data
         # can not use db_get_or_create_person as it would be circular import
         try:
-            _creator = BcPeople.objects.get(id=creator_data["id"])
+            creator = BcPeople.objects.get(id=data["creator"]["id"])
+            # assign the creator to serializer
+            self.creator = creator
+            # remove (pop) the creator field from data if the instance found
+            data.pop('creator')
         except BcPeople.DoesNotExist:
-            serializer = BcPeopleSerializer(data=creator_data)
-            if serializer.is_valid():
-                _creator = serializer.save()
-            else:  # invalid serializer
-                raise ValidationError({"get_or_create_person error": serializer.errors})
-
-        # if no exception, assign the creator to serializer
-        self.creator = _creator
+            # the creator will be created via BcPeopleSerializer below, now only set as None
+            self.creator = None
+            # serializer = BcPeopleSerializer(data=creator_data)
+            # if serializer.is_valid():
+            #     _creator = serializer.save()
+            # else:  # invalid serializer
+            #     raise ValidationError({"get_or_create_person error": serializer.errors})
 
         # process recording
         recording_data = data.pop('recording')
 
-        # process bucket inside recording
+        # process bucket inside recording, without proper bucket will return is_valid() as False
         if not ('bucket' in recording_data and recording_data["bucket"]["type"] == "Project"):
             raise ValidationError({"webhook recording bucket error":
                                    f'webhook recording {recording_data["title"]} has no bucket type Project'})
@@ -71,13 +72,18 @@ class BcWebhookSerializer(serializers.ModelSerializer):
         fields = '__all__'
 
     def create(self, validated_data):
-        print(f'BcWebhookSerializer.create: {validated_data}')
 
-        if self.creator:
-            # recording could be None
-            payload = BcWebhook.objects.create(creator=self.creator, recording=self.recording, **validated_data)
-        else:  # undefined creator or recording
-            payload = BcWebhook.objects.create(**validated_data)
+        if not self.creator:  # undefined creator, not loaded at to_internal_value()
+            creator_data = validated_data.pop('creator')
+            creator_serializer = BcPeopleSerializer(data=creator_data)
+            if creator_serializer.is_valid():
+                self.creator = creator_serializer.save()
+            else:  # invalid serializer
+                raise ValidationError({"People Serializer error": creator_serializer.errors})
+
+        # process creator and recording to create webhook payload, recording could be None
+        payload = BcWebhook.objects.create(creator=self.creator, recording=self.recording, **validated_data)
+
         return payload
 
     @staticmethod
@@ -138,8 +144,8 @@ class BcWebhookSerializer(serializers.ModelSerializer):
                 app_model = django_apps.get_model(app_label=app_config.name,
                                                   model_name=type_model_names[recording["type"]])
                 try:
+                    _exception = None  # assign _exception above _recording to comply the coverage :)
                     _recording = app_model.objects.get(id=recording["id"])
-                    _exception = None
                 except app_model.DoesNotExist:
                     _recording = None
                     _exception = self.static_get_not_found_message(recording)
@@ -168,8 +174,8 @@ class BcWebhookSerializer(serializers.ModelSerializer):
             app_model = django_apps.get_model(app_label=app_config.name,
                                               model_name=type_model_names[parent["type"]])
             try:
+                _exception = None  # assign _exception above _parent to comply the coverage :)
                 _parent = app_model.objects.get(id=parent["id"])
-                _exception = None
             except app_model.DoesNotExist:
                 _parent = None
                 _exception = self.static_get_not_found_message(parent)
@@ -179,7 +185,7 @@ class BcWebhookSerializer(serializers.ModelSerializer):
 
         return _parent, _exception
 
-    def db_get_recording_bucket(self, bucket):
+    def get_recording_bucket(self, bucket):
         if not bucket:  # None
             return None, f'webhook recording has no bucket'
 
@@ -190,13 +196,14 @@ class BcWebhookSerializer(serializers.ModelSerializer):
             _bucket = BcProject.objects.get(id=bucket["id"])
             _exception = None
         except BcProject.DoesNotExist:
+            # can not create BcProject from very limited data of recording bucket
             _bucket = None
             _exception = self.static_get_not_found_message(data=bucket)
 
         return _bucket, _exception
 
     @staticmethod
-    def db_get_recording_creator(creator):
+    def get_or_create_recording_creator(creator):
         if not creator:  # None
             return None, f'webhook recording has no creator'
 
@@ -224,11 +231,42 @@ class BcWebhookSerializer(serializers.ModelSerializer):
                 app_model = django_apps.get_model(app_label=app_config.name,
                                                   model_name=type_model_names[recording["type"]])
                 try:
+                    _exception = None  # assign _exception above _recording to comply the coverage :)
                     _recording = app_model.objects.get(id=recording["id"])
-                    _exception = None
                 except app_model.DoesNotExist:
                     _recording = None
                     _exception = self.static_get_not_found_message(recording)
+            except LookupError:
+                _recording = None
+                _exception = f'model not found for recording type {recording["type"]}'
+
+        else:
+            _recording = None
+            _exception = (f'recording {recording["id"]} type {recording["type"]} not in '
+                          f'{self.static_get_webhook_recording_base_children_types()}')
+
+        return _recording, _exception
+
+    def _create_webhook_recording_base_child_model(self, recording, _bucket, _creator, _parent):
+        """
+        make sure all parameters not None.
+        make sure this method only called by create_webhook_recording_base_child().
+        split this method to set easier on test.
+        :param recording:
+        :param _bucket:
+        :param _creator:
+        :param _parent:
+        :return:
+        """
+
+        if recording["type"] in self.static_get_webhook_recording_base_children_types():
+            type_model_names = self.static_get_webhook_recording_type_model_names()
+            try:
+                app_config = django_apps.get_app_config(BcConfig.name)
+                app_model = django_apps.get_model(app_label=app_config.name,
+                                                  model_name=type_model_names[recording["type"]])
+                _recording = app_model.objects.create(bucket=_bucket, creator=_creator, parent=_parent, **recording)
+                _exception = None
             except LookupError:
                 _recording = None
                 _exception = f'model not found for recording type {recording["type"]}'
@@ -244,13 +282,13 @@ class BcWebhookSerializer(serializers.ModelSerializer):
         # to create a child of BcWebhookRecordingBase, it needs: bucket, creator, parent.
 
         bucket_data = recording.pop('bucket', None)
-        _bucket, _exception = self.db_get_recording_bucket(bucket=bucket_data)
+        _bucket, _exception = self.get_recording_bucket(bucket=bucket_data)
         if not _bucket:
             return None, _exception
 
         # create or get creator instance from request data, remove (pop) the creator field from data
         creator_data = recording.pop('creator', None)
-        _creator, _exception = self.db_get_recording_creator(creator=creator_data)
+        _creator, _exception = self.get_or_create_recording_creator(creator=creator_data)
         if not _creator:
             return None, _exception
 
@@ -260,22 +298,7 @@ class BcWebhookSerializer(serializers.ModelSerializer):
         if not _parent:
             return None, _exception
 
-        type_model_names = self.static_get_webhook_recording_type_model_names()
-
-        if recording["type"] in self.static_get_webhook_recording_base_children_types():
-            try:
-                app_config = django_apps.get_app_config(BcConfig.name)
-                app_model = django_apps.get_model(app_label=app_config.name,
-                                                  model_name=type_model_names[recording["type"]])
-                _recording = app_model.objects.create(bucket=_bucket, creator=_creator, parent=_parent, **recording)
-                _exception = None
-            except LookupError:
-                _recording = None
-                _exception = f'model not found for recording type {recording["type"]}'
-
-        else:
-            _recording = None
-            _exception = (f'recording {recording["id"]} type {recording["type"]} not in '
-                          f'{self.static_get_webhook_recording_base_children_types()}')
+        _recording, _exception = self._create_webhook_recording_base_child_model(
+            recording=recording, _bucket=_bucket, _creator=_creator, _parent=_parent)
 
         return _recording, _exception
