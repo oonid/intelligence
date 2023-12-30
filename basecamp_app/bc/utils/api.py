@@ -1,6 +1,8 @@
 from os import environ
 from requests import get as http_get
 
+from bc.utils import static_get_recording_types
+
 # utilities to process environment variables and APIs
 
 
@@ -160,7 +162,7 @@ def api_recording_get_recordings_uri(recording_type, bucket=None):
     """
     basecamp_api_uri = environ["BASECAMP_API_URI"]
     basecamp_account_id = environ["BASECAMP_ACCOUNT_ID"]  # id of the organization
-    if not recording_type:  # undefined recording_type
+    if recording_type not in static_get_recording_types():  # undefined recording_type
         raise ValueError('undefined recording_type')
     # recording_type defined
     api_uri = f'{basecamp_api_uri}/{basecamp_account_id}/projects/recordings.json?type={recording_type}'
