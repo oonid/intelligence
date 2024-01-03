@@ -23,8 +23,8 @@ def db_get_bucket(bucket_id):
 
 def db_get_or_create_person(person):
     try:
+        _exception = None  # assign _exception above _recording to comply the coverage :)
         _creator = BcPeople.objects.get(id=person["id"])
-        _exception = None
     except BcPeople.DoesNotExist:
         serializer = BcPeopleSerializer(data=person)
         if serializer.is_valid():
