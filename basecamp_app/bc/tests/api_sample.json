@@ -990,6 +990,13 @@
         "app_url": "https://3.basecamp.com/195539477/buckets/2085958499/vaults/1069479340",
         "bookmark_url": "https://3.basecampapi.com/195539477/my/bookmarks/dummy.json",
         "position": 1,
+        "parent": {
+          "id": 1069479098,
+          "title": "HR Stuff",
+          "type": "Vault",
+          "url": "https://3.basecampapi.com/195539477/buckets/2085958497/vaults/1069479098.json",
+          "app_url": "https://3.basecamp.com/195539477/buckets/2085958497/vaults/1069479098"
+        },
         "bucket": {
             "id": 2085958499,
             "name": "The Leto Laptop",
