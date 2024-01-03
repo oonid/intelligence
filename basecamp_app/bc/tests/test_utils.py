@@ -2,8 +2,385 @@ from django.test import TestCase
 
 from os import environ
 from unittest.mock import patch
+from pathlib import Path
+from json import loads as json_loads, dumps as json_dumps, load as json_stream_load
 
 import bc.utils
+
+
+class UtilsDbTest(TestCase):
+    fixtures = ["bc_bccompany", "bc_bcpeople",
+                "bc_bcproject", "bc_bcprojecttool",
+                "bc_bcquestionnaire", "bc_bcquestion", "bc_bcquestionanswer", "bc_bcrecurrenceschedule",
+                "bc_bcschedule", "bc_bcscheduleentry",
+                "bc_bcmessagecategory", "bc_bcmessageboard", "bc_bcmessage",
+                "bc_bctodoset", "bc_bctodolist", "bc_bctodo", "bc_bctodocompletion",
+                "bc_bcvault", "bc_bcdocument", "bc_bcupload",
+                "bc_bccomment",]
+
+    @classmethod
+    def setUpTestData(cls):  # Run once to set up non-modified data for all class methods
+
+        # api_sample.json is collections of API data from bc3-api site https://github.com/basecamp/bc3-api/tree/master
+        test_dir = Path(__file__).resolve().parent
+        with open(test_dir / "api_sample.json") as stream:
+            api_sample_json = json_stream_load(stream)
+
+        # sample API data from https://github.com/basecamp/bc3-api/blob/master/sections/people.md
+        # the database loaded with fixture bc_bcpeople.json and bc_bccompany.json
+        cls.person_data = json_dumps(api_sample_json["person"]["1049715914"])
+
+        # sample API data from https://github.com/basecamp/bc3-api/blob/master/sections/messages.md#get-a-message
+        # the database loaded with fixture bc_bcmessage.json
+        cls.message_data = json_dumps(api_sample_json["message"]["1069479351"])
+
+        # sample API data from https://github.com/basecamp/bc3-api/blob/master/sections/comments.md#get-a-comment
+        # the database loaded with fixture bc_bccomment.json
+        cls.comment_data = json_dumps(api_sample_json["comment"]["1069479361"])
+
+        # sample API data from https://github.com/basecamp/bc3-api/blob/master/sections/documents.md
+        # the database loaded with fixture bc_bcdocument.json
+        cls.document_data = json_dumps(api_sample_json["document"]["1069479093"])
+
+        # sample API data from https://github.com/basecamp/bc3-api/blob/master/sections/uploads.md#get-an-upload
+        # the database loaded with fixture bc_bcupload.json
+        cls.upload_data = json_dumps(api_sample_json["upload"]["1069479848"])
+
+        # sample data from https://github.com/basecamp/bc3-api/blob/master/sections/todolists.md#example-json-response
+        # the database loaded with fixture bc_bctodolist.json
+        cls.todolist_data = json_dumps(api_sample_json["todolist"]["1069479520"])
+
+        # sample data from https://github.com/basecamp/bc3-api/blob/master/sections/todos.md#get-a-to-do
+        # the database loaded with fixture bc_bctodo.json
+        cls.todo_data = json_dumps(api_sample_json["todo"]["1069479523"])
+
+        # sample from https://github.com/basecamp/bc3-api/blob/master/sections/schedule_entries.md#get-a-schedule-entry
+        # the database loaded with fixture bc_bcscheduleentry.json
+        cls.schedule_entry_data = json_dumps(api_sample_json["schedule_entry"]["1069479847"])
+
+        # sample API data from https://github.com/basecamp/bc3-api/blob/master/sections/question_answers.md
+        # the database loaded with fixture bc_bcquestionanswer.json
+        cls.question_answer_data = json_dumps(api_sample_json["question_answer"]["1069479547"])
+
+        # sample API data from https://github.com/basecamp/bc3-api/blob/master/sections/vaults.md#get-a-vault
+        # using vault with ID 1069479340, generated as dummy data
+        # the database loaded with fixture bc_bcvault.json
+        cls.vault_1069479340_data = json_dumps(api_sample_json["vault"]["1069479340"])
+
+    def setUp(self):  # Run once for every test method to set up clean data
+        self.person = json_loads(self.person_data)
+        self.message = json_loads(self.message_data, strict=False)  # disable strict to process content with \n
+        self.comment = json_loads(self.comment_data)
+        self.document = json_loads(self.document_data, strict=False)  # disable strict to process content with \n
+        self.upload = json_loads(self.upload_data)
+        self.todolist = json_loads(self.todolist_data)
+        self.todo = json_loads(self.todo_data)
+        self.schedule_entry = json_loads(self.schedule_entry_data)
+        self.question_answer = json_loads(self.question_answer_data)
+        self.vault = json_loads(self.vault_1069479340_data)
+
+    def test_db_get_bucket(self):
+        bucket_id = 2085958499
+        _bucket, _exception = bc.utils.db_get_bucket(bucket_id=bucket_id)
+        self.assertEqual(_exception, None)
+        self.assertEqual(_bucket.id, bucket_id)
+
+    def test_db_get_bucket_with_not_exist_bucket(self):
+        bucket_id = 1
+        _bucket, _exception = bc.utils.db_get_bucket(bucket_id=bucket_id)
+        self.assertEqual(_exception, f'bucket {bucket_id} not found<br/><a href="/bc/project/1/update-db">'
+                                     f'save project to db</a> first.')
+        self.assertEqual(_bucket, None)
+
+    def test_db_get_or_create_person(self):
+        _creator, _exception = bc.utils.db_get_or_create_person(person=self.person)
+        self.assertEqual(_exception, None)
+        self.assertEqual(_creator.id, self.person["id"])
+
+    def test_db_get_or_create_person_with_new_person(self):
+        # change the person ID to new (non-exist) ID, as it also check by email address, change it too
+        self.person["id"] = 1
+        self.person["email_address"] = 'new@email.address'
+
+        _creator, _exception = bc.utils.db_get_or_create_person(person=self.person)
+        self.assertEqual(_exception, None)
+        self.assertEqual(_creator.id, self.person["id"])
+
+    def test_db_get_or_create_person_with_new_person_no_company(self):
+        # remove company field from existing person data, and change the person ID to new (non-exist) ID
+        self.person["id"] = 1
+        self.person.pop('company')
+
+        _creator, _exception = bc.utils.db_get_or_create_person(person=self.person)
+        self.assertEqual(_exception, "creator serializer error: {'people company error': "
+                                     "ErrorDetail(string='people no company field', code='invalid')}")
+        self.assertEqual(_creator, None)
+
+    def test_db_get_message(self):
+        _message, _exception = bc.utils.db_get_message(message=self.message, bucket_id=self.message["bucket"]["id"])
+        self.assertEqual(_exception, None)
+        self.assertEqual(_message.id, self.message["id"])
+
+    def test_db_get_message_with_invalid_message_type(self):
+        # change message type to invalid type "Cloud"
+        self.message["type"] = "Cloud"
+
+        _message, _exception = bc.utils.db_get_message(message=self.message, bucket_id=self.message["bucket"]["id"])
+        self.assertEqual(_exception, f'invalid message type ({self.message["type"]}).')
+        self.assertEqual(_message, None)
+
+    def test_db_get_message_with_new_message(self):
+        # change message ID to new (non-exist) ID
+        self.message["id"] = 1
+
+        _message, _exception = bc.utils.db_get_message(message=self.message, bucket_id=self.message["bucket"]["id"])
+        self.assertEqual(_exception, f'Message {self.message["id"]} not found<br/>'
+                                     f'<a href="/bc/project/{self.message["bucket"]["id"]}/'
+                                     f'message/{self.message["id"]}">try to open Message</a> first.')
+        self.assertEqual(_message, None)
+
+    def test_db_get_comment_parent_with_parent_type_message(self):
+        _parent, _exception = bc.utils.db_get_comment_parent(parent=self.comment["parent"],
+                                                             bucket_id=self.comment["bucket"]["id"])
+        self.assertEqual(_exception, None)
+        self.assertEqual(_parent.id, self.comment["parent"]["id"])
+
+    def test_db_get_comment_parent_with_parent_type_message_new_message(self):
+        # change parent (message) ID to new (non-exist) ID
+        self.comment["parent"]["id"] = 1
+
+        _parent, _exception = bc.utils.db_get_comment_parent(parent=self.comment["parent"],
+                                                             bucket_id=self.comment["bucket"]["id"])
+        self.assertEqual(_exception, f'Message {self.comment["parent"]["id"]} not found<br/>'
+                                     f'<a href="/bc/project/{self.comment["bucket"]["id"]}/'
+                                     f'message/{self.comment["parent"]["id"]}">try to open Message</a> first.')
+        self.assertEqual(_parent, None)
+
+    def test_db_get_comment_parent_with_invalid_parent_type(self):
+        # change parent type to invalid type "Cloud"
+        self.comment["parent"]["type"] = "Cloud"
+
+        _parent, _exception = bc.utils.db_get_comment_parent(parent=self.comment["parent"],
+                                                             bucket_id=self.comment["bucket"]["id"])
+        self.assertEqual(_exception, f'parent {self.comment["parent"]["id"]} type {self.comment["parent"]["type"]} not '
+                                     f'in {bc.utils.static_get_comment_parent_types()}.')
+        self.assertEqual(_parent, None)
+
+    def test_db_get_comment_parent_with_parent_type_document(self):
+        # change parent type to existing document
+        self.comment["parent"]["type"] = self.document["type"]
+        self.comment["parent"]["id"] = self.document["id"]
+
+        _parent, _exception = bc.utils.db_get_comment_parent(parent=self.comment["parent"],
+                                                             bucket_id=self.comment["bucket"]["id"])
+        self.assertEqual(_exception, None)
+        self.assertEqual(_parent.id, self.comment["parent"]["id"])
+
+    def test_db_get_comment_parent_with_parent_type_document_new_document(self):
+        # change parent (document) ID to new (non-exist) ID
+        self.comment["parent"]["type"] = self.document["type"]
+        self.comment["parent"]["id"] = 1
+
+        _parent, _exception = bc.utils.db_get_comment_parent(parent=self.comment["parent"],
+                                                             bucket_id=self.comment["bucket"]["id"])
+        self.assertEqual(_exception, f'document {self.comment["parent"]["id"]} not found<br/>'
+                                     f'<a href="/bc/project/{self.comment["bucket"]["id"]}/'
+                                     f'document/{self.comment["parent"]["id"]}">try to open document</a> first.')
+        self.assertEqual(_parent, None)
+
+    def test_db_get_comment_parent_with_parent_type_upload(self):
+        # change parent type to existing upload
+        self.comment["parent"]["type"] = self.upload["type"]
+        self.comment["parent"]["id"] = self.upload["id"]
+
+        _parent, _exception = bc.utils.db_get_comment_parent(parent=self.comment["parent"],
+                                                             bucket_id=self.comment["bucket"]["id"])
+        self.assertEqual(_exception, None)
+        self.assertEqual(_parent.id, self.comment["parent"]["id"])
+
+    def test_db_get_comment_parent_with_parent_type_upload_new_upload(self):
+        # change parent (upload) ID to new (non-exist) ID
+        self.comment["parent"]["type"] = self.upload["type"]
+        self.comment["parent"]["id"] = 1
+
+        _parent, _exception = bc.utils.db_get_comment_parent(parent=self.comment["parent"],
+                                                             bucket_id=self.comment["bucket"]["id"])
+        self.assertEqual(_exception, f'upload {self.comment["parent"]["id"]} not found<br/>'
+                                     f'<a href="/bc/project/{self.comment["bucket"]["id"]}/'
+                                     f'upload/{self.comment["parent"]["id"]}">try to open upload</a> first.')
+        self.assertEqual(_parent, None)
+
+    def test_db_get_comment_parent_with_parent_type_todolist(self):
+        # change parent type to existing todolist
+        self.comment["parent"]["type"] = self.todolist["type"]
+        self.comment["parent"]["id"] = self.todolist["id"]
+
+        _parent, _exception = bc.utils.db_get_comment_parent(parent=self.comment["parent"],
+                                                             bucket_id=self.comment["bucket"]["id"])
+        self.assertEqual(_exception, None)
+        self.assertEqual(_parent.id, self.comment["parent"]["id"])
+
+    def test_db_get_comment_parent_with_parent_type_todolist_new_todolist(self):
+        # change parent (todolist) ID to new (non-exist) ID
+        self.comment["parent"]["type"] = self.todolist["type"]
+        self.comment["parent"]["id"] = 1
+
+        _parent, _exception = bc.utils.db_get_comment_parent(parent=self.comment["parent"],
+                                                             bucket_id=self.comment["bucket"]["id"])
+        self.assertEqual(_exception, f'todolist {self.comment["parent"]["id"]} not found<br/>'
+                                     f'<a href="/bc/project/{self.comment["bucket"]["id"]}/'
+                                     f'todolist/{self.comment["parent"]["id"]}">try to open todolist</a> first.')
+        self.assertEqual(_parent, None)
+
+    def test_db_get_comment_parent_with_parent_type_todo(self):
+        # change parent type to existing todo
+        self.comment["parent"]["type"] = self.todo["type"]
+        self.comment["parent"]["id"] = self.todo["id"]
+
+        _parent, _exception = bc.utils.db_get_comment_parent(parent=self.comment["parent"],
+                                                             bucket_id=self.comment["bucket"]["id"])
+        self.assertEqual(_exception, None)
+        self.assertEqual(_parent.id, self.comment["parent"]["id"])
+
+    def test_db_get_comment_parent_with_parent_type_todo_new_todo(self):
+        # change parent (todo) ID to new (non-exist) ID
+        self.comment["parent"]["type"] = self.todo["type"]
+        self.comment["parent"]["id"] = 1
+
+        _parent, _exception = bc.utils.db_get_comment_parent(parent=self.comment["parent"],
+                                                             bucket_id=self.comment["bucket"]["id"])
+        self.assertEqual(_exception, f'todo {self.comment["parent"]["id"]} not found<br/>'
+                                     f'<a href="/bc/project/{self.comment["bucket"]["id"]}/'
+                                     f'todo/{self.comment["parent"]["id"]}">try to open todo</a> first.')
+        self.assertEqual(_parent, None)
+
+    def test_db_get_comment_parent_with_parent_type_schedule_entry(self):
+        # change parent type to existing schedule_entry
+        self.comment["parent"]["type"] = self.schedule_entry["type"]
+        self.comment["parent"]["id"] = self.schedule_entry["id"]
+
+        _parent, _exception = bc.utils.db_get_comment_parent(parent=self.comment["parent"],
+                                                             bucket_id=self.comment["bucket"]["id"])
+        self.assertEqual(_exception, None)
+        self.assertEqual(_parent.id, self.comment["parent"]["id"])
+
+    def test_db_get_comment_parent_with_parent_type_schedule_entry_new_schedule_entry(self):
+        # change parent (schedule entry) ID to new (non-exist) ID
+        self.comment["parent"]["type"] = self.schedule_entry["type"]
+        self.comment["parent"]["id"] = 1
+
+        _parent, _exception = bc.utils.db_get_comment_parent(parent=self.comment["parent"],
+                                                             bucket_id=self.comment["bucket"]["id"])
+        self.assertEqual(_exception, f'schedule entry {self.comment["parent"]["id"]} not found<br/>'
+                                     f'<a href="/bc/project/{self.comment["bucket"]["id"]}/'
+                                     f'schedule_entry/{self.comment["parent"]["id"]}">'
+                                     f'try to open schedule entry</a> first.')
+        self.assertEqual(_parent, None)
+
+    def test_db_get_comment_parent_with_parent_type_question_answer(self):
+        # change parent type to existing question_answer
+        self.comment["parent"]["type"] = self.question_answer["type"]
+        self.comment["parent"]["id"] = self.question_answer["id"]
+
+        _parent, _exception = bc.utils.db_get_comment_parent(parent=self.comment["parent"],
+                                                             bucket_id=self.comment["bucket"]["id"])
+        self.assertEqual(_exception, None)
+        self.assertEqual(_parent.id, self.comment["parent"]["id"])
+
+    def test_db_get_comment_parent_with_parent_type_question_answer_new_question_answer(self):
+        # change parent (question answer) ID to new (non-exist) ID
+        self.comment["parent"]["type"] = self.question_answer["type"]
+        self.comment["parent"]["id"] = 1
+
+        _parent, _exception = bc.utils.db_get_comment_parent(parent=self.comment["parent"],
+                                                             bucket_id=self.comment["bucket"]["id"])
+        self.assertEqual(_exception, f'question answer {self.comment["parent"]["id"]} not found<br/>'
+                                     f'<a href="/bc/project/{self.comment["bucket"]["id"]}/'
+                                     f'question_answer/{self.comment["parent"]["id"]}">'
+                                     f'try to open question answer</a> first.')
+        self.assertEqual(_parent, None)
+
+    def test_db_get_message_parent(self):
+        _parent, _exception = bc.utils.db_get_message_parent(parent=self.message["parent"],
+                                                             bucket_id=self.message["bucket"]["id"])
+
+        self.assertEqual(_exception, None)
+        self.assertEqual(_parent.id, self.message["parent"]["id"])
+
+    def test_db_get_message_parent_with_parent_type_message_board_new_message_board(self):
+        # change parent (message board) ID to new (non-exist) ID
+        self.message["parent"]["id"] = 1
+
+        _parent, _exception = bc.utils.db_get_message_parent(parent=self.message["parent"],
+                                                             bucket_id=self.message["bucket"]["id"])
+        self.assertEqual(_exception, f'message board {self.message["parent"]["id"]} not found<br/>'
+                                     f'<a href="/bc/project/{self.message["bucket"]["id"]}/'
+                                     f'message_board/{self.message["parent"]["id"]}">'
+                                     f'try to open message board</a> first.')
+        self.assertEqual(_parent, None)
+
+    def test_db_get_message_parent_with_invalid_parent_type(self):
+        # change parent type to invalid type "Cloud"
+        self.message["parent"]["type"] = "Cloud"
+
+        _parent, _exception = bc.utils.db_get_message_parent(parent=self.message["parent"],
+                                                             bucket_id=self.message["bucket"]["id"])
+        self.assertEqual(_exception, f'parent {self.message["parent"]["id"]} type {self.message["parent"]["type"]} not '
+                                     f'in {bc.utils.static_get_message_parent_types()}.')
+        self.assertEqual(_parent, None)
+
+    def test_db_get_vault_parent(self):
+        _parent, _exception = bc.utils.db_get_vault_parent(parent=self.vault["parent"],
+                                                           bucket_id=self.vault["bucket"]["id"])
+
+        self.assertEqual(_exception, None)
+        self.assertEqual(_parent.id, self.vault["parent"]["id"])
+
+    def test_db_get_vault_parent_with_parent_type_vault_new_vault(self):
+        # change parent (vault) ID to new (non-exist) ID
+        self.vault["parent"]["id"] = 1
+
+        _parent, _exception = bc.utils.db_get_vault_parent(parent=self.vault["parent"],
+                                                           bucket_id=self.vault["bucket"]["id"])
+        self.assertEqual(_exception, f'vault {self.vault["parent"]["id"]} not found<br/>'
+                                     f'<a href="/bc/project/{self.vault["bucket"]["id"]}/'
+                                     f'vault/{self.vault["parent"]["id"]}">try to open vault</a> first.')
+        self.assertEqual(_parent, None)
+
+    def test_db_get_vault_parent_with_invalid_parent_type(self):
+        # change parent type to invalid type "Cloud"
+        self.vault["parent"]["type"] = "Cloud"
+
+        _parent, _exception = bc.utils.db_get_vault_parent(parent=self.vault["parent"],
+                                                             bucket_id=self.vault["bucket"]["id"])
+        self.assertEqual(_exception, f'parent {self.vault["parent"]["id"]} type {self.vault["parent"]["type"]} not '
+                                     f'in {bc.utils.static_get_vault_parent_types()}.')
+        self.assertEqual(_parent, None)
+
+
+class UtilsConstTest(TestCase):
+
+    @classmethod
+    def setUpTestData(cls):  # Run once to set up non-modified data for all class methods
+        pass
+
+    def setUp(self):  # Run once for every test method to set up clean data
+        pass
+
+    def test_static_get_comment_parent_types(self):
+        self.assertEqual(bc.utils.static_get_comment_parent_types(),
+                         ['Document', 'Message', 'Question::Answer', 'Schedule::Entry', 'Todolist', 'Todo', 'Upload'])
+
+    def test_static_get_message_parent_types(self):
+        self.assertEqual(bc.utils.static_get_message_parent_types(), ['Message::Board'])
+
+    def test_static_get_vault_parent_types(self):
+        self.assertEqual(bc.utils.static_get_vault_parent_types(), ['Vault'])
+
+    def test_static_get_recording_types(self):
+        self.assertEqual(bc.utils.static_get_recording_types(),
+                         ['Comment', 'Document', 'Message', 'Question::Answer', 'Schedule::Entry', 'Todo', 'Todolist',
+                          'Upload', 'Vault'])
 
 
 class UtilsApiTest(TestCase):
