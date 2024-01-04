@@ -1,11 +1,160 @@
-from django.test import TestCase
+from django.test import TestCase, RequestFactory
+from django.contrib.sessions.middleware import SessionMiddleware
 
 from os import environ
 from unittest.mock import patch
 from pathlib import Path
 from json import loads as json_loads, dumps as json_dumps, load as json_stream_load
+from datetime import datetime, timedelta
 
+import time
 import bc.utils
+
+
+class UtilsUrlsTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):  # Run once to set up non-modified data for all class methods
+        # api_sample.json is collections of API data from bc3-api site https://github.com/basecamp/bc3-api/tree/master
+        test_dir = Path(__file__).resolve().parent
+        with open(test_dir / "api_sample.json") as stream:
+            api_sample_json = json_stream_load(stream)
+
+        # sample API data from https://github.com/basecamp/bc3-api/blob/master/sections/comments.md#get-a-comment
+        # the database loaded with fixture bc_bccomment.json
+        cls.comment_data = json_dumps(api_sample_json["comment"]["1069479361"])
+
+    def setUp(self):  # Run once for every test method to set up clean data
+        self.comment = json_loads(self.comment_data)
+
+    def test_static_get_comment_parent_uri(self):
+        # test with parent type Message, will return '#' (no uri)
+        _parent_uri = bc.utils.static_get_comment_parent_uri(parent=self.comment["parent"],
+                                                             bucket=self.comment["bucket"])
+        self.assertEqual(_parent_uri, '#')
+
+    def test_static_get_comment_parent_uri_with_invalid_parent_type(self):
+        # test with invalid parent type 'Cloud'
+        self.comment["parent"]["type"] = 'Cloud'
+
+        _parent_uri = bc.utils.static_get_comment_parent_uri(parent=self.comment["parent"],
+                                                             bucket=self.comment["bucket"])
+        self.assertEqual(_parent_uri, '#')
+
+    def test_static_get_comment_parent_uri_with_parent_type_todo(self):
+        # test with parent type 'Todo'
+        self.comment["parent"]["type"] = 'Todo'
+
+        _parent_uri = bc.utils.static_get_comment_parent_uri(parent=self.comment["parent"],
+                                                             bucket=self.comment["bucket"])
+        self.assertEqual(_parent_uri, '/bc/project/2085958499/todo/1069479351')
+
+    def test_static_get_comment_parent_uri_with_parent_type_todolist(self):
+        # test with parent type 'Todolist'
+        self.comment["parent"]["type"] = 'Todolist'
+
+        _parent_uri = bc.utils.static_get_comment_parent_uri(parent=self.comment["parent"],
+                                                             bucket=self.comment["bucket"])
+        self.assertEqual(_parent_uri, '/bc/project/2085958499/todolist/1069479351')
+
+
+class UtilsSessionTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):  # Run once to set up non-modified data for all class methods
+        pass
+
+    def setUp(self):  # Run once for every test method to set up clean data
+        self.next_1_min = datetime.now() + timedelta(minutes=1)
+        self.prev_1_min = datetime.now() - timedelta(minutes=1)
+
+        self.token = {
+            'expires_at': f'{self.next_1_min.isoformat()[:-3]}Z',
+            'access_token': 'access token',
+            'refresh_token': 'refresh token',
+        }
+        self.identity = {
+            'id': 1049715914,
+            'email_address': 'victor@honchodesign.com',
+            'first_name': 'Victor',
+            'last_name': 'Cooper',
+            'bc_id': 195539477,
+            'bc_name': 'Honcho',
+            'bc_href': 'https://3.basecampapi.com/195539477'
+        }
+
+    def test_session_get_token_and_identity(self):
+
+        request = RequestFactory().get('/')
+        middleware = SessionMiddleware(lambda x: None)
+        middleware.process_request(request)
+        request.session['token'] = self.token
+        request.session['identity'] = self.identity
+        request.session.save()
+
+        _token, _identity = bc.utils.session_get_token_and_identity(request=request)
+
+        self.assertEqual(_token, self.token)
+        self.assertEqual(_identity, self.identity)
+
+    def test_session_get_token_and_identity_with_expired_token(self):
+
+        request = RequestFactory().get('/')
+        middleware = SessionMiddleware(lambda x: None)
+        middleware.process_request(request)
+        self.token['expires_at'] = f'{self.prev_1_min.isoformat()[:-3]}Z'
+        request.session['token'] = self.token
+        request.session['identity'] = self.identity
+        request.session.save()
+
+        _token, _identity = bc.utils.session_get_token_and_identity(request=request)
+
+        self.assertEqual(_token, None)
+        self.assertEqual(_identity, None)
+
+    def test_session_get_token_and_identity_with_no_token(self):
+
+        request = RequestFactory().get('/')
+        middleware = SessionMiddleware(lambda x: None)
+        middleware.process_request(request)
+        request.session['identity'] = self.identity
+        request.session.save()
+
+        _token, _identity = bc.utils.session_get_token_and_identity(request=request)
+
+        self.assertEqual(_token, None)
+        self.assertEqual(_identity, None)
+
+    def test_session_get_token_and_identity_with_no_identity(self):
+
+        request = RequestFactory().get('/')
+        middleware = SessionMiddleware(lambda x: None)
+        middleware.process_request(request)
+        request.session['token'] = self.token
+        request.session.save()
+
+        _token, _identity = bc.utils.session_get_token_and_identity(request=request)
+
+        self.assertEqual(_token, None)
+        self.assertEqual(_identity, None)
+
+
+class UtilsReprTest(TestCase):
+    @classmethod
+    def setUpTestData(cls):  # Run once to set up non-modified data for all class methods
+        # api_sample.json is collections of API data from bc3-api site https://github.com/basecamp/bc3-api/tree/master
+        test_dir = Path(__file__).resolve().parent
+        with open(test_dir / "api_sample.json") as stream:
+            api_sample_json = json_stream_load(stream)
+
+        # sample API data from https://github.com/basecamp/bc3-api/blob/master/sections/messages.md#get-a-message
+        # the database loaded with fixture bc_bcmessage.json
+        cls.message_data = json_dumps(api_sample_json["message"]["1069479351"])
+
+    def setUp(self):  # Run once for every test method to set up clean data
+        self.message = json_loads(self.message_data, strict=False)  # disable strict to process content with \n
+
+    def test_repr_message_detail(self):
+        _repr = bc.utils.repr_message_detail(message=self.message, bucket_id=self.message["bucket"]["id"])
+        self.assertEqual(_repr, '<a href="/bc/project/2085958499/message/1069479351">1069479351</a> We won Leto! ')
 
 
 class UtilsDbTest(TestCase):
@@ -352,7 +501,7 @@ class UtilsDbTest(TestCase):
         self.vault["parent"]["type"] = "Cloud"
 
         _parent, _exception = bc.utils.db_get_vault_parent(parent=self.vault["parent"],
-                                                             bucket_id=self.vault["bucket"]["id"])
+                                                           bucket_id=self.vault["bucket"]["id"])
         self.assertEqual(_exception, f'parent {self.vault["parent"]["id"]} type {self.vault["parent"]["type"]} not '
                                      f'in {bc.utils.static_get_vault_parent_types()}.')
         self.assertEqual(_parent, None)
@@ -562,7 +711,7 @@ class UtilsApiTest(TestCase):
         recording_type = 'Cloud'  # invalid, undefined in static_get_recording_types()
         bucket = 1
         try:
-            api_uri = bc.utils.api_recording_get_recordings_uri(recording_type=recording_type, bucket=bucket)
+            _ = bc.utils.api_recording_get_recordings_uri(recording_type=recording_type, bucket=bucket)
         except ValueError as e:
             self.assertEqual(str(e), 'undefined recording_type')
 

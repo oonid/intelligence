@@ -22,7 +22,6 @@ def app_comment_detail(request, bucket_id, comment_id):
 
     # if OK
     comment = response.json()
-    print(comment)
 
     if ('parent' in comment and comment["parent"]["type"] in static_get_comment_parent_types() and
             'bucket' in comment and comment["bucket"]["type"] == "Project" and 'creator' in comment):
