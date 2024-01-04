@@ -21,20 +21,16 @@ def session_get_token_and_identity(request):
     token_expires_datetime = datetime.fromisoformat(token["expires_at"][:-1]).astimezone(timezone.utc)
 
     if token_expires_datetime < datetime.now().astimezone(timezone.utc):  # token expired, strip token, return None
-        try:
-            del request.session["token"]
-        except KeyError:
-            pass
-
+        # key "token" has been validated above, won't raise KeyError
+        del request.session["token"]
+        token = None  # reset token
         return token, identity  # None
 
     # token still updated
     if "identity" not in request.session:  # no identity, strip token and return None
-        try:
-            del request.session["token"]
-        except KeyError:
-            pass
-
+        # key "token" has been validated above, won't raise KeyError
+        del request.session["token"]
+        token = None  # reset token
         return token, identity  # None
 
     # identity exists
