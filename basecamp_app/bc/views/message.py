@@ -37,14 +37,14 @@ def app_message_type(request, bucket_id):
 
         message_type_list += f'<li>{_message_category.icon} {_message_category.name}</li>'
 
-    if 'next' in response.links and 'url' in response.links["next"]:
-        print(response.links["next"]["url"])
+    # if 'next' in response.links and 'url' in response.links["next"]:
+    #     print(response.links["next"]["url"])
 
     total_count = 0
     if "X-Total-Count" in response.headers:
         total_count = int(response.headers["X-Total-Count"])
 
-    total_count_str = f'total projects: {total_count}' if total_count > 0 else ''
+    total_count_str = f'total message types: {total_count}' if total_count > 0 else ''
 
     return HttpResponse(
         '<a href="' + reverse('app-project-detail', kwargs={'project_id': bucket_id}) + '">back</a><br/>'
@@ -69,17 +69,17 @@ def app_message_board_detail(request, bucket_id, message_board_id):
     message_board = response.json()
 
     # process bucket first, because at processing parent still need a valid bucket
-    bucket, message = db_get_bucket(bucket_id=message_board["bucket"]["id"])
-    if not bucket:  # not exists
-        return HttpResponseBadRequest(message)
+    _bucket, _exception = db_get_bucket(bucket_id=message_board["bucket"]["id"])
+    if not _bucket:  # not exists
+        return HttpResponseBadRequest(_exception)
 
     # remove 'bucket' key from message_board, will use model instance bucket instead
     message_board.pop('bucket')
 
     # process creator
-    creator, message = db_get_or_create_person(person=message_board["creator"])
-    if not creator:  # create person error
-        return HttpResponseBadRequest(message)
+    _creator, _exception = db_get_or_create_person(person=message_board["creator"])
+    if not _creator:  # create person error
+        return HttpResponseBadRequest(_exception)
 
     # remove 'creator' key from message_board, will use model instance creator instead
     message_board.pop('creator')
@@ -89,7 +89,7 @@ def app_message_board_detail(request, bucket_id, message_board_id):
         _message_board = BcMessageBoard.objects.get(id=message_board["id"])
     except BcMessageBoard.DoesNotExist:
         # save message_board
-        _message_board = BcMessageBoard.objects.create(bucket=bucket, creator=creator, **message_board)
+        _message_board = BcMessageBoard.objects.create(bucket=_bucket, creator=_creator, **message_board)
         _message_board.save()
 
     return HttpResponse(
@@ -121,9 +121,9 @@ def app_message_board_message(request, bucket_id, message_board_id):
     for message in data:
 
         # process bucket first, because at processing parent still need a valid bucket
-        bucket, exception = db_get_bucket(bucket_id=message["bucket"]["id"])
-        if not bucket:  # not exists
-            return HttpResponseBadRequest(exception)
+        _bucket, _exception = db_get_bucket(bucket_id=message["bucket"]["id"])
+        if not _bucket:  # not exists
+            return HttpResponseBadRequest(_exception)
 
         # check message_board, if not exist on db, save via message_board_detail
         try:
@@ -139,13 +139,13 @@ def app_message_board_message(request, bucket_id, message_board_id):
             )
 
         # process message
-        _message, exception = db_get_message(message=message, bucket_id=bucket.id)
+        _message, _exception = db_get_message(message=message, bucket_id=_bucket.id)
         # returned _message can be None, currently ignore the exception as we only show the list
 
-        message_list += repr_message_detail(message=message, bucket_id=bucket.id, message_obj=_message, as_list=True)
+        message_list += repr_message_detail(message=message, bucket_id=_bucket.id, message_obj=_message, as_list=True)
 
-    if 'next' in response.links and 'url' in response.links["next"]:
-        print(response.links["next"]["url"])
+    # if 'next' in response.links and 'url' in response.links["next"]:
+    #     print(response.links["next"]["url"])
 
     total_count = 0
     if "X-Total-Count" in response.headers:
@@ -179,26 +179,22 @@ def app_message_detail(request, bucket_id, message_id):
             'bucket' in message and message["bucket"]["type"] == "Project" and 'creator' in message):
 
         # process bucket first, because at processing parent still need a valid bucket
-        bucket, message = db_get_bucket(bucket_id=message["bucket"]["id"])
-        if not bucket:  # not exists
-            return HttpResponseBadRequest(message)
+        _bucket, _exception = db_get_bucket(bucket_id=message["bucket"]["id"])
+        if not _bucket:  # not exists
+            return HttpResponseBadRequest(_exception)
 
         # process parent message_board
-        if message["parent"]["type"] == "Message::Board":
-            try:
-                parent = BcMessageBoard.objects.get(id=message["parent"]["id"])
-            except BcMessageBoard.DoesNotExist:
-                # can not insert new BcMessageBoard with limited data of message["parent"]
-                return HttpResponseBadRequest(
-                    f'message board not found: {message["parent"]}<br/>'
-                    '<a href="' + reverse('app-message-board-detail',
-                                          kwargs={'bucket_id': message["bucket"]["id"],
-                                                  'message_board_id': message["parent"]["id"]}) +
-                    '">try to open message board</a> first.'
-                )
-
-        else:  # condition above has filter the type as Message::Board, should never be here
-            parent = None
+        try:
+            parent = BcMessageBoard.objects.get(id=message["parent"]["id"])
+        except BcMessageBoard.DoesNotExist:
+            # can not insert new BcMessageBoard with limited data of message["parent"]
+            return HttpResponseBadRequest(
+                f'message board not found: {message["parent"]}<br/>'
+                '<a href="' + reverse('app-message-board-detail',
+                                      kwargs={'bucket_id': message["bucket"]["id"],
+                                              'message_board_id': message["parent"]["id"]}) +
+                '">try to open message board</a> first.'
+            )
 
         # remove 'parent' key from message, will use model instance parent instead
         message.pop('parent')
@@ -207,9 +203,9 @@ def app_message_detail(request, bucket_id, message_id):
         message.pop('bucket')
 
         # process creator
-        creator, message = db_get_or_create_person(person=message["creator"])
-        if not creator:  # create person error
-            return HttpResponseBadRequest(message)
+        _creator, _exception = db_get_or_create_person(person=message["creator"])
+        if not _creator:  # create person error
+            return HttpResponseBadRequest(_exception)
 
         # remove 'creator' key from message, will use model instance creator instead
         message.pop('creator')
@@ -238,7 +234,7 @@ def app_message_detail(request, bucket_id, message_id):
             _message = BcMessage.objects.get(id=message["id"])
         except BcMessage.DoesNotExist:
             # save message
-            _message = BcMessage.objects.create(parent=parent, bucket=bucket, creator=creator,
+            _message = BcMessage.objects.create(parent=parent, bucket=_bucket, creator=_creator,
                                                 category=category, **message)
             _message.save()
 
