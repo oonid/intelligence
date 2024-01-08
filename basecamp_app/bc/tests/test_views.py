@@ -8,6 +8,880 @@ from json import loads as json_loads, dumps as json_dumps, load as json_stream_l
 from bc.models import BcComment
 
 
+class ViewsMessageTest(TestCase):
+    fixtures = ["bc_bccompany", "bc_bcpeople",
+                "bc_bcproject", "bc_bcprojecttool",
+                "bc_bcmessagecategory", "bc_bcmessageboard", "bc_bcmessage",]
+
+    @classmethod
+    def setUpTestData(cls):  # Run once to set up non-modified data for all class methods
+
+        # api_sample.json is collections of API data from bc3-api site https://github.com/basecamp/bc3-api/tree/master
+        test_dir = Path(__file__).resolve().parent
+        with open(test_dir / "api_sample.json") as stream:
+            api_sample_json = json_stream_load(stream)
+
+        # sample data from https://github.com/basecamp/bc3-api/blob/master/sections/message_types.md#get-a-message-type
+        # the database loaded with fixture bc_bcmessagecategory.json
+        cls.message_category_data = json_dumps(api_sample_json["message_category"]["823758531"])
+
+        # sample data from https://github.com/basecamp/bc3-api/blob/master/sections/message_boards.md#get-message-board
+        # the database loaded with fixture bc_bcmessageboard.json
+        cls.message_board_data = json_dumps(api_sample_json["message_board"]["1069479338"])
+
+        # sample API data from https://github.com/basecamp/bc3-api/blob/master/sections/messages.md#get-a-message
+        # the database loaded with fixture bc_bcmessage.json
+        cls.message_data = json_dumps(api_sample_json["message"]["1069479351"])
+
+    def setUp(self):  # Run once for every test method to set up clean data
+        self.message_category = json_loads(self.message_category_data)
+        self.message_board = json_loads(self.message_board_data)
+        self.message = json_loads(self.message_data, strict=False)  # disable strict to process content with \n
+
+    def test_app_message_type(self):
+
+        with (
+            patch('bc.views.message.session_get_token_and_identity') as mock_get_token_and_identity,
+            patch('bc.views.message.bc_api_get') as mock_request_get
+        ):
+            _token = {'access_token': 'access token', }
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            mock_request_get.return_value.status_code = 200
+            # sample data from https://github.com/basecamp/bc3-api/blob/master/sections/message_types.md
+            mock_request_get.return_value.json.return_value = [
+                {
+                    "id": 823758531,
+                    "name": "Announcement",
+                    "icon": "📢",
+                    "created_at": "2017-03-28T15:25:09.455Z",
+                    "updated_at": "2017-03-28T15:25:09.455Z"
+                },
+                {
+                    "id": 823758530,
+                    "name": "Update",
+                    "icon": "❤️",
+                    "created_at": "2017-03-28T15:25:09.450Z",
+                    "updated_at": "2017-03-28T15:25:09.450Z"
+                }
+            ]
+
+            # as the message_category data did not have bucket_id, borrow from message_board data
+            bucket_id = self.message_board["bucket"]["id"]
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(reverse('app-message-type', kwargs={'bucket_id': bucket_id}))
+
+            mock_get_token_and_identity.assert_called_once()
+            mock_request_get.assert_called_once()
+
+            self.assertEqual(response.status_code, 200)
+            # response.charset = utf-8
+            self.assertEqual(response.content,
+                             f'<a href="/bc/project/{bucket_id}">back</a><br/>'
+                             '<li>📢 Announcement</li>'
+                             '<li>❤️ Update</li>'.encode(response.charset))
+
+    def test_app_message_type_with_no_token(self):
+
+        with (
+            patch('bc.views.message.session_get_token_and_identity') as mock_get_token_and_identity
+        ):
+            _token = None
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            # as the message_category data did not have bucket_id, borrow from message_board data
+            bucket_id = self.message_board["bucket"]["id"]
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(reverse('app-message-type', kwargs={'bucket_id': bucket_id}))
+
+            mock_get_token_and_identity.assert_called_once()
+
+            self.assertEqual(response.status_code, 302)
+            self.assertEqual(response.url, reverse('bc-auth'))
+
+    def test_app_message_type_with_response_not_ok(self):
+
+        with (
+            patch('bc.views.message.session_get_token_and_identity') as mock_get_token_and_identity,
+            patch('bc.views.message.bc_api_get') as mock_request_get
+        ):
+            _token = {'access_token': 'access token', }
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            response_not_ok = 400
+            mock_request_get.return_value.status_code = response_not_ok
+
+            # as the message_category data did not have bucket_id, borrow from message_board data
+            bucket_id = self.message_board["bucket"]["id"]
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(reverse('app-message-type', kwargs={'bucket_id': bucket_id}))
+
+            mock_get_token_and_identity.assert_called_once()
+            mock_request_get.assert_called_once()
+
+            self.assertEqual(response.status_code, response_not_ok)
+
+    def test_app_message_type_with_header_x_total_count(self):
+
+        with (
+            patch('bc.views.message.session_get_token_and_identity') as mock_get_token_and_identity,
+            patch('bc.views.message.bc_api_get') as mock_request_get
+        ):
+            _token = {'access_token': 'access token', }
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            mock_request_get.return_value.status_code = 200
+            # sample data from https://github.com/basecamp/bc3-api/blob/master/sections/message_types.md
+            mock_request_get.return_value.json.return_value = [
+                {
+                    "id": 823758531,
+                    "name": "Announcement",
+                    "icon": "📢",
+                    "created_at": "2017-03-28T15:25:09.455Z",
+                    "updated_at": "2017-03-28T15:25:09.455Z"
+                },
+                {
+                    "id": 823758530,
+                    "name": "Update",
+                    "icon": "❤️",
+                    "created_at": "2017-03-28T15:25:09.450Z",
+                    "updated_at": "2017-03-28T15:25:09.450Z"
+                }
+            ]
+            x_total_count = 4  # dummy: 2 x 2 (paging)
+            mock_request_get.return_value.headers = {
+                "X-Total-Count": x_total_count,
+            }
+
+            # as the message_category data did not have bucket_id, borrow from message_board data
+            bucket_id = self.message_board["bucket"]["id"]
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(reverse('app-message-type', kwargs={'bucket_id': bucket_id}))
+
+            mock_get_token_and_identity.assert_called_once()
+            mock_request_get.assert_called_once()
+
+            self.assertEqual(response.status_code, 200)
+            # response.charset = utf-8
+            # print(response.content.decode(response.charset))
+            self.assertEqual(response.content,
+                             f'<a href="/bc/project/{bucket_id}">back</a><br/>total message types: {x_total_count}'
+                             '<li>📢 Announcement</li>'
+                             '<li>❤️ Update</li>'.encode(response.charset))
+
+    def test_app_message_board_detail(self):
+
+        with (
+            patch('bc.views.message.session_get_token_and_identity') as mock_get_token_and_identity,
+            patch('bc.views.message.bc_api_get') as mock_request_get
+        ):
+            _token = {'access_token': 'access token', }
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            mock_request_get.return_value.status_code = 200
+            # sample data from https://github.com/basecamp/bc3-api/blob/master/sections/message_types.md
+            mock_request_get.return_value.json.return_value = self.message_board
+
+            # save bucket id before it removed (pop) on the process
+            bucket_id = self.message_board["bucket"]["id"]
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(
+                reverse('app-message-board-detail',
+                        kwargs={'bucket_id': self.message_board["bucket"]["id"],
+                                'message_board_id': self.message_board["id"]}))
+
+            mock_get_token_and_identity.assert_called_once()
+            mock_request_get.assert_called_once()
+
+            self.assertEqual(response.status_code, 200)
+            # response.charset = utf-8
+            # print(response.content.decode(response.charset))
+            self.assertEqual(response.content,
+                             f'<a href="/bc/project/{bucket_id}">back</a><br/>'
+                             f'title: {self.message_board["title"]}<br/>'
+                             f'type: {self.message_board["type"]}<br/>'
+                             f'<a href="/bc/project/{bucket_id}/message_board/'
+                             f'{self.message_board["id"]}/message">{self.message_board["messages_count"]} messages</a>'
+                             f'<br/>'.encode(response.charset))
+
+    def test_app_message_board_detail_with_no_token(self):
+
+        with (
+            patch('bc.views.message.session_get_token_and_identity') as mock_get_token_and_identity
+        ):
+            _token = None
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(
+                reverse('app-message-board-detail',
+                        kwargs={'bucket_id': self.message_board["bucket"]["id"],
+                                'message_board_id': self.message_board["id"]}))
+
+            mock_get_token_and_identity.assert_called_once()
+
+            self.assertEqual(response.status_code, 302)
+            self.assertEqual(response.url, reverse('bc-auth'))
+
+    def test_app_message_board_with_response_not_ok(self):
+
+        with (
+            patch('bc.views.message.session_get_token_and_identity') as mock_get_token_and_identity,
+            patch('bc.views.message.bc_api_get') as mock_request_get
+        ):
+            _token = {'access_token': 'access token', }
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            response_not_ok = 400
+            mock_request_get.return_value.status_code = response_not_ok
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(
+                reverse('app-message-board-detail',
+                        kwargs={'bucket_id': self.message_board["bucket"]["id"],
+                                'message_board_id': self.message_board["id"]}))
+
+            mock_get_token_and_identity.assert_called_once()
+            mock_request_get.assert_called_once()
+
+            self.assertEqual(response.status_code, response_not_ok)
+
+    def test_app_message_board_detail_with_not_exist_bucket(self):
+
+        with (
+            patch('bc.views.message.session_get_token_and_identity') as mock_get_token_and_identity,
+            patch('bc.views.message.bc_api_get') as mock_request_get
+        ):
+            _token = {'access_token': 'access token', }
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            mock_request_get.return_value.status_code = 200
+            # sample data from https://github.com/basecamp/bc3-api/blob/master/sections/message_types.md
+            mock_request_get.return_value.json.return_value = self.message_board
+
+            # set bucket with not-exist ID
+            not_exist_bucket_id = 1
+            self.message_board["bucket"]["id"] = not_exist_bucket_id
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(
+                reverse('app-message-board-detail',
+                        kwargs={'bucket_id': self.message_board["bucket"]["id"],
+                                'message_board_id': self.message_board["id"]}))
+
+            mock_get_token_and_identity.assert_called_once()
+            mock_request_get.assert_called_once()
+
+            self.assertEqual(response.status_code, 400)
+            # response.charset = utf-8
+            # print(response.content.decode(response.charset))
+            self.assertEqual(response.content,
+                             f'bucket {not_exist_bucket_id} not found<br/><a href="/bc/project/{not_exist_bucket_id}/'
+                             f'update-db">save project to db</a> first.'.encode(response.charset))
+
+    def test_app_message_board_detail_with_not_exist_creator(self):
+
+        with (
+            patch('bc.views.message.session_get_token_and_identity') as mock_get_token_and_identity,
+            patch('bc.views.message.bc_api_get') as mock_request_get
+        ):
+            _token = {'access_token': 'access token', }
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            mock_request_get.return_value.status_code = 200
+            # sample data from https://github.com/basecamp/bc3-api/blob/master/sections/message_types.md
+            mock_request_get.return_value.json.return_value = self.message_board
+
+            # set bucket with not-exist ID, remove the creator company as it will trigger error
+            not_exist_creator_id = 1
+            self.message_board["creator"]["id"] = not_exist_creator_id
+            self.message_board["creator"].pop("company")
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(
+                reverse('app-message-board-detail',
+                        kwargs={'bucket_id': self.message_board["bucket"]["id"],
+                                'message_board_id': self.message_board["id"]}))
+
+            mock_get_token_and_identity.assert_called_once()
+            mock_request_get.assert_called_once()
+
+            self.assertEqual(response.status_code, 400)
+            # response.charset = utf-8
+            # print(response.content.decode(response.charset))
+            self.assertEqual(response.content,
+                             "creator serializer error: {'people company error': "
+                             "ErrorDetail(string='people no company field', code='invalid')}".encode(response.charset))
+
+    def test_app_message_board_detail_with_new_message_board(self):
+
+        with (
+            patch('bc.views.message.session_get_token_and_identity') as mock_get_token_and_identity,
+            patch('bc.views.message.bc_api_get') as mock_request_get
+        ):
+            _token = {'access_token': 'access token', }
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            mock_request_get.return_value.status_code = 200
+            # sample data from https://github.com/basecamp/bc3-api/blob/master/sections/message_types.md
+            mock_request_get.return_value.json.return_value = self.message_board
+
+            # set message board with not-exist ID, message board will be created inside the process
+            not_exist_message_board_id = 1
+            self.message_board["id"] = not_exist_message_board_id
+
+            # save bucket id before it removed (pop) on the process
+            bucket_id = self.message_board["bucket"]["id"]
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(
+                reverse('app-message-board-detail',
+                        kwargs={'bucket_id': self.message_board["bucket"]["id"],
+                                'message_board_id': self.message_board["id"]}))
+
+            mock_get_token_and_identity.assert_called_once()
+            mock_request_get.assert_called_once()
+
+            self.assertEqual(response.status_code, 200)
+            # response.charset = utf-8
+            # print(response.content.decode(response.charset))
+            self.assertEqual(response.content,
+                             f'<a href="/bc/project/{bucket_id}">back</a><br/>'
+                             f'title: {self.message_board["title"]}<br/>'
+                             f'type: {self.message_board["type"]}<br/>'
+                             f'<a href="/bc/project/{bucket_id}/message_board/'
+                             f'{self.message_board["id"]}/message">{self.message_board["messages_count"]} messages</a>'
+                             f'<br/>'.encode(response.charset))
+
+    def test_app_message_board_message(self):
+        with (
+            patch('bc.views.message.session_get_token_and_identity') as mock_get_token_and_identity,
+            patch('bc.views.message.bc_api_get') as mock_request_get
+        ):
+            _token = {'access_token': 'access token', }
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            mock_request_get.return_value.status_code = 200
+            # sample data from https://github.com/basecamp/bc3-api/blob/master/sections/messages.md
+            mock_request_get.return_value.json.return_value = [
+                self.message,
+            ]
+
+            # save bucket id before it removed (pop) on the process
+            bucket_id = self.message["bucket"]["id"]
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(
+                reverse('app-message-board-message',
+                        kwargs={'bucket_id': self.message["bucket"]["id"],
+                                'message_board_id': self.message["parent"]["id"]}))
+
+            mock_get_token_and_identity.assert_called_once()
+            mock_request_get.assert_called_once()
+
+            self.assertEqual(response.status_code, 200)
+            # response.charset = utf-8
+            # print(response.content.decode(response.charset))
+            self.assertEqual(response.content,
+                             f'<a href="/bc/project/{bucket_id}/message_board/{self.message["parent"]["id"]}">back</a>'
+                             f'<br/><li><a href="/bc/project/{bucket_id}/message/{self.message["id"]}">'
+                             f'{self.message["id"]}</a> We won Leto! (db)</li>'.encode(response.charset))
+
+    def test_app_message_board_message_with_no_token(self):
+
+        with (
+            patch('bc.views.message.session_get_token_and_identity') as mock_get_token_and_identity
+        ):
+            _token = None
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(
+                reverse('app-message-board-message',
+                        kwargs={'bucket_id': self.message["bucket"]["id"],
+                                'message_board_id': self.message["parent"]["id"]}))
+
+            mock_get_token_and_identity.assert_called_once()
+
+            self.assertEqual(response.status_code, 302)
+            self.assertEqual(response.url, reverse('bc-auth'))
+
+    def test_app_message_board_message_with_response_not_ok(self):
+
+        with (
+            patch('bc.views.message.session_get_token_and_identity') as mock_get_token_and_identity,
+            patch('bc.views.message.bc_api_get') as mock_request_get
+        ):
+            _token = {'access_token': 'access token', }
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            response_not_ok = 400
+            mock_request_get.return_value.status_code = response_not_ok
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(
+                reverse('app-message-board-message',
+                        kwargs={'bucket_id': self.message["bucket"]["id"],
+                                'message_board_id': self.message["parent"]["id"]}))
+
+            mock_get_token_and_identity.assert_called_once()
+            mock_request_get.assert_called_once()
+
+            self.assertEqual(response.status_code, response_not_ok)
+
+    def test_app_message_board_message_with_not_exist_bucket(self):
+
+        with (
+            patch('bc.views.message.session_get_token_and_identity') as mock_get_token_and_identity,
+            patch('bc.views.message.bc_api_get') as mock_request_get
+        ):
+            _token = {'access_token': 'access token', }
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            mock_request_get.return_value.status_code = 200
+            # sample data from https://github.com/basecamp/bc3-api/blob/master/sections/messages.md
+            # set bucket with not-exist ID
+            not_exist_bucket_id = 1
+            self.message["bucket"]["id"] = not_exist_bucket_id
+            mock_request_get.return_value.json.return_value = [
+                self.message,
+            ]
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(
+                reverse('app-message-board-message',
+                        kwargs={'bucket_id': self.message["bucket"]["id"],
+                                'message_board_id': self.message["parent"]["id"]}))
+
+            mock_get_token_and_identity.assert_called_once()
+            mock_request_get.assert_called_once()
+
+            self.assertEqual(response.status_code, 400)
+            # response.charset = utf-8
+            # print(response.content.decode(response.charset))
+            self.assertEqual(response.content,
+                             f'bucket {not_exist_bucket_id} not found<br/><a href="/bc/project/{not_exist_bucket_id}/'
+                             f'update-db">save project to db</a> first.'.encode(response.charset))
+
+    def test_app_message_board_message_with_not_exist_message_board(self):
+
+        with (
+            patch('bc.views.message.session_get_token_and_identity') as mock_get_token_and_identity,
+            patch('bc.views.message.bc_api_get') as mock_request_get
+        ):
+            _token = {'access_token': 'access token', }
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            mock_request_get.return_value.status_code = 200
+            # sample data from https://github.com/basecamp/bc3-api/blob/master/sections/messages.md
+            # set bucket with not-exist ID
+            not_exist_message_board_id = 1
+            self.message["parent"]["id"] = not_exist_message_board_id
+            mock_request_get.return_value.json.return_value = [
+                self.message,
+            ]
+
+            # save bucket id before it removed (pop) on the process
+            bucket_id = self.message["bucket"]["id"]
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(
+                reverse('app-message-board-message',
+                        kwargs={'bucket_id': self.message["bucket"]["id"],
+                                'message_board_id': self.message["parent"]["id"]}))
+
+            mock_get_token_and_identity.assert_called_once()
+            mock_request_get.assert_called_once()
+
+            self.assertEqual(response.status_code, 400)
+            # response.charset = utf-8
+            # print(response.content.decode(response.charset))
+            self.assertEqual(response.content,
+                             f'message board not found, id: {not_exist_message_board_id}<br/>'
+                             f'<a href="/bc/project/{bucket_id}/message_board/{not_exist_message_board_id}">'
+                             f'try to open message board</a> first.'.encode(response.charset))
+
+    def test_app_message_board_message_with_header_x_total_count(self):
+
+        with (
+            patch('bc.views.message.session_get_token_and_identity') as mock_get_token_and_identity,
+            patch('bc.views.message.bc_api_get') as mock_request_get
+        ):
+            _token = {'access_token': 'access token', }
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            mock_request_get.return_value.status_code = 200
+            # sample data from https://github.com/basecamp/bc3-api/blob/master/sections/messages.md
+            mock_request_get.return_value.json.return_value = [
+                self.message,
+            ]
+            x_total_count = 2  # dummy: 1 x 2 (paging)
+            mock_request_get.return_value.headers = {
+                "X-Total-Count": x_total_count,
+            }
+
+            # save bucket id before it removed (pop) on the process
+            bucket_id = self.message["bucket"]["id"]
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(
+                reverse('app-message-board-message',
+                        kwargs={'bucket_id': self.message["bucket"]["id"],
+                                'message_board_id': self.message["parent"]["id"]}))
+
+            mock_get_token_and_identity.assert_called_once()
+            mock_request_get.assert_called_once()
+
+            self.assertEqual(response.status_code, 200)
+            # response.charset = utf-8
+            # print(response.content.decode(response.charset))
+            self.assertEqual(response.content,
+                             f'<a href="/bc/project/{bucket_id}/message_board/{self.message["parent"]["id"]}">back</a>'
+                             f'<br/>total messages: {x_total_count}'
+                             f'<li><a href="/bc/project/{bucket_id}/message/{self.message["id"]}">{self.message["id"]}'
+                             f'</a> We won Leto! (db)</li>'.encode(response.charset))
+
+    def test_app_message_detail(self):
+        with (
+            patch('bc.views.message.session_get_token_and_identity') as mock_get_token_and_identity,
+            patch('bc.views.message.bc_api_get') as mock_request_get
+        ):
+            _token = {'access_token': 'access token', }
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            mock_request_get.return_value.status_code = 200
+            # sample data from https://github.com/basecamp/bc3-api/blob/master/sections/messages.md
+            mock_request_get.return_value.json.return_value = self.message
+
+            # save bucket id before it removed (pop) on the process
+            bucket_id = self.message["bucket"]["id"]
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(
+                reverse('app-message-detail',
+                        kwargs={'bucket_id': self.message["bucket"]["id"],
+                                'message_id': self.message["id"]}))
+
+            mock_get_token_and_identity.assert_called_once()
+            mock_request_get.assert_called_once()
+
+            self.assertEqual(response.status_code, 200)
+            # response.charset = utf-8
+            # print(response.content.decode(response.charset))
+            self.assertEqual(response.content,
+                             f'<a href="/bc/project/{bucket_id}">back</a><br/>'
+                             f'title: {self.message["title"]}<br/>type: {self.message["type"]}<br/>'
+                             f'comments_count: {self.message["comments_count"]}<br/>'.encode(response.charset))
+
+    def test_app_message_detail_with_no_token(self):
+
+        with (
+            patch('bc.views.message.session_get_token_and_identity') as mock_get_token_and_identity
+        ):
+            _token = None
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(
+                reverse('app-message-detail',
+                        kwargs={'bucket_id': self.message["bucket"]["id"],
+                                'message_id': self.message["id"]}))
+
+            mock_get_token_and_identity.assert_called_once()
+
+            self.assertEqual(response.status_code, 302)
+            self.assertEqual(response.url, reverse('bc-auth'))
+
+    def test_app_message_detail_with_response_not_ok(self):
+
+        with (
+            patch('bc.views.message.session_get_token_and_identity') as mock_get_token_and_identity,
+            patch('bc.views.message.bc_api_get') as mock_request_get
+        ):
+            _token = {'access_token': 'access token', }
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            response_not_ok = 400
+            mock_request_get.return_value.status_code = response_not_ok
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(
+                reverse('app-message-detail',
+                        kwargs={'bucket_id': self.message["bucket"]["id"],
+                                'message_id': self.message["id"]}))
+
+            mock_get_token_and_identity.assert_called_once()
+            mock_request_get.assert_called_once()
+
+            self.assertEqual(response.status_code, response_not_ok)
+
+    def test_app_message_detail_with_not_exist_bucket(self):
+
+        with (
+            patch('bc.views.message.session_get_token_and_identity') as mock_get_token_and_identity,
+            patch('bc.views.message.bc_api_get') as mock_request_get
+        ):
+            _token = {'access_token': 'access token', }
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            mock_request_get.return_value.status_code = 200
+            # sample data from https://github.com/basecamp/bc3-api/blob/master/sections/messages.md
+            # set bucket with not-exist ID
+            not_exist_bucket_id = 1
+            self.message["bucket"]["id"] = not_exist_bucket_id
+            mock_request_get.return_value.json.return_value = self.message
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(
+                reverse('app-message-detail',
+                        kwargs={'bucket_id': self.message["bucket"]["id"],
+                                'message_id': self.message["id"]}))
+
+            mock_get_token_and_identity.assert_called_once()
+            mock_request_get.assert_called_once()
+
+            self.assertEqual(response.status_code, 400)
+            # response.charset = utf-8
+            # print(response.content.decode(response.charset))
+            self.assertEqual(response.content,
+                             f'bucket {not_exist_bucket_id} not found<br/><a href="/bc/project/{not_exist_bucket_id}/'
+                             f'update-db">save project to db</a> first.'.encode(response.charset))
+
+    def test_app_message_detail_with_invalid_parent_type(self):
+
+        with (
+            patch('bc.views.message.session_get_token_and_identity') as mock_get_token_and_identity,
+            patch('bc.views.message.bc_api_get') as mock_request_get
+        ):
+            _token = {'access_token': 'access token', }
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            mock_request_get.return_value.status_code = 200
+            # sample data from https://github.com/basecamp/bc3-api/blob/master/sections/messages.md
+            # set parent type with invalid type "Cloud"
+            self.message["parent"]["type"] = "Cloud"
+            mock_request_get.return_value.json.return_value = self.message
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(
+                reverse('app-message-detail',
+                        kwargs={'bucket_id': self.message["bucket"]["id"],
+                                'message_id': self.message["id"]}))
+
+            mock_get_token_and_identity.assert_called_once()
+            mock_request_get.assert_called_once()
+
+            self.assertEqual(response.status_code, 400)
+            # response.charset = utf-8
+            # print(response.content.decode(response.charset))
+            self.assertEqual(response.content,
+                             f'message {self.message["title"]} has no creator or bucket type Project or '
+                             f'parent type Message::Board'.encode(response.charset))
+
+    def test_app_message_detail_with_not_exist_message_board(self):
+
+        with (
+            patch('bc.views.message.session_get_token_and_identity') as mock_get_token_and_identity,
+            patch('bc.views.message.bc_api_get') as mock_request_get
+        ):
+            _token = {'access_token': 'access token', }
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            mock_request_get.return_value.status_code = 200
+            # sample data from https://github.com/basecamp/bc3-api/blob/master/sections/messages.md
+            # set bucket with not-exist ID
+            not_exist_message_board_id = 1
+            self.message["parent"]["id"] = not_exist_message_board_id
+            mock_request_get.return_value.json.return_value = self.message
+
+            # save bucket id before it removed (pop) on the process
+            bucket_id = self.message["bucket"]["id"]
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(
+                reverse('app-message-detail',
+                        kwargs={'bucket_id': self.message["bucket"]["id"],
+                                'message_id': self.message["id"]}))
+
+            mock_get_token_and_identity.assert_called_once()
+            mock_request_get.assert_called_once()
+
+            self.assertEqual(response.status_code, 400)
+            # response.charset = utf-8
+            # print(response.content.decode(response.charset))
+            self.assertEqual(response.content,
+                             f'message board not found: {self.message["parent"]}<br/>'
+                             f'<a href="/bc/project/{bucket_id}/message_board/{not_exist_message_board_id}">'
+                             f'try to open message board</a> first.'.encode(response.charset))
+
+    def test_app_message_detail_with_not_exist_creator(self):
+
+        with (
+            patch('bc.views.message.session_get_token_and_identity') as mock_get_token_and_identity,
+            patch('bc.views.message.bc_api_get') as mock_request_get
+        ):
+            _token = {'access_token': 'access token', }
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            mock_request_get.return_value.status_code = 200
+            # sample data from https://github.com/basecamp/bc3-api/blob/master/sections/message_types.md
+            mock_request_get.return_value.json.return_value = self.message
+
+            # set bucket with not-exist ID, remove the creator company as it will trigger error
+            not_exist_creator_id = 1
+            self.message["creator"]["id"] = not_exist_creator_id
+            self.message["creator"].pop("company")
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(
+                reverse('app-message-detail',
+                        kwargs={'bucket_id': self.message["bucket"]["id"],
+                                'message_id': self.message["id"]}))
+
+            mock_get_token_and_identity.assert_called_once()
+            mock_request_get.assert_called_once()
+
+            self.assertEqual(response.status_code, 400)
+            # response.charset = utf-8
+            # print(response.content.decode(response.charset))
+            self.assertEqual(response.content,
+                             "creator serializer error: {'people company error': "
+                             "ErrorDetail(string='people no company field', code='invalid')}".encode(response.charset))
+
+    def test_app_message_detail_with_category(self):
+        with (
+            patch('bc.views.message.session_get_token_and_identity') as mock_get_token_and_identity,
+            patch('bc.views.message.bc_api_get') as mock_request_get
+        ):
+            _token = {'access_token': 'access token', }
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            mock_request_get.return_value.status_code = 200
+            # sample data from https://github.com/basecamp/bc3-api/blob/master/sections/message_types.md
+            self.message['category'] = self.message_category
+            mock_request_get.return_value.json.return_value = self.message
+
+            # save bucket id before it removed (pop) on the process
+            bucket_id = self.message["bucket"]["id"]
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(
+                reverse('app-message-detail',
+                        kwargs={'bucket_id': self.message["bucket"]["id"],
+                                'message_id': self.message["id"]}))
+
+            mock_get_token_and_identity.assert_called_once()
+            mock_request_get.assert_called_once()
+
+            self.assertEqual(response.status_code, 200)
+            # response.charset = utf-8
+            # print(response.content.decode(response.charset))
+            self.assertEqual(response.content,
+                             f'<a href="/bc/project/{bucket_id}">back</a><br/>'
+                             f'title: {self.message["title"]}<br/>type: {self.message["type"]}<br/>'
+                             f'comments_count: {self.message["comments_count"]}<br/>'.encode(response.charset))
+
+    def test_app_message_detail_with_not_exist_category(self):
+        with (
+            patch('bc.views.message.session_get_token_and_identity') as mock_get_token_and_identity,
+            patch('bc.views.message.bc_api_get') as mock_request_get
+        ):
+            _token = {'access_token': 'access token', }
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            mock_request_get.return_value.status_code = 200
+            # sample data from https://github.com/basecamp/bc3-api/blob/master/sections/message_types.md
+            # set with not-exist ID
+            self.message_category['id'] = 1
+            self.message['category'] = self.message_category
+            mock_request_get.return_value.json.return_value = self.message
+
+            # save bucket id before it removed (pop) on the process
+            bucket_id = self.message["bucket"]["id"]
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(
+                reverse('app-message-detail',
+                        kwargs={'bucket_id': self.message["bucket"]["id"],
+                                'message_id': self.message["id"]}))
+
+            mock_get_token_and_identity.assert_called_once()
+            mock_request_get.assert_called_once()
+
+            self.assertEqual(response.status_code, 400)
+            # response.charset = utf-8
+            # print(response.content.decode(response.charset))
+            self.assertEqual(response.content,
+                             f'message category not found: {self.message_category}<br/>'
+                             f'<a href="/bc/project/{bucket_id}/message/type">save message types to db</a>'
+                             f' first.'.encode(response.charset))
+
+    def test_app_message_detail_with_not_exist_message(self):
+        with (
+            patch('bc.views.message.session_get_token_and_identity') as mock_get_token_and_identity,
+            patch('bc.views.message.bc_api_get') as mock_request_get
+        ):
+            _token = {'access_token': 'access token', }
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            mock_request_get.return_value.status_code = 200
+            # sample data from https://github.com/basecamp/bc3-api/blob/master/sections/messages.md
+            # set with not-exist ID, will be created in the process
+            self.message['id'] = 1
+            mock_request_get.return_value.json.return_value = self.message
+
+            # save bucket id before it removed (pop) on the process
+            bucket_id = self.message["bucket"]["id"]
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(
+                reverse('app-message-detail',
+                        kwargs={'bucket_id': self.message["bucket"]["id"],
+                                'message_id': self.message["id"]}))
+
+            mock_get_token_and_identity.assert_called_once()
+            mock_request_get.assert_called_once()
+
+            self.assertEqual(response.status_code, 200)
+            # response.charset = utf-8
+            # print(response.content.decode(response.charset))
+            self.assertEqual(response.content,
+                             f'<a href="/bc/project/{bucket_id}">back</a><br/>'
+                             f'title: {self.message["title"]}<br/>type: {self.message["type"]}<br/>'
+                             f'comments_count: {self.message["comments_count"]}<br/>'.encode(response.charset))
+
+
 class ViewsCommentTest(TestCase):
     fixtures = ["bc_bccompany", "bc_bcpeople",
                 "bc_bcproject", "bc_bcprojecttool",
