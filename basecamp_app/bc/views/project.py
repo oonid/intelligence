@@ -1,5 +1,7 @@
 from django.http import HttpResponse, HttpResponseRedirect
 from django.urls import reverse
+from django.template import Template, Context
+
 from bc.utils import (session_get_token_and_identity, bc_api_get, api_project_get_all_projects_uri,
                       api_project_get_project_uri, static_get_recording_types)
 from bc.models import BcProject, BcProjectTool
@@ -20,13 +22,15 @@ def app_project_main(request):
     # if OK
     data = response.json()
 
-    course_list = ""
+    project_list = []
     for project in data:
-        course_list += ('<li><a href="' + reverse('app-project-detail', kwargs={'project_id': project["id"]}) +
-                        f'">{project["id"]}</a> {project["name"]}</li>')
+        project_list.append({
+            'id': project["id"],
+            'name': project["name"],
+            'url': reverse('app-project-detail', kwargs={'project_id': project["id"]})})
 
-    if 'next' in response.links and 'url' in response.links["next"]:
-        print(response.links["next"]["url"])
+    # if 'next' in response.links and 'url' in response.links["next"]:
+    #     print(response.links["next"]["url"])
 
     total_count = 0
     if "X-Total-Count" in response.headers:
@@ -34,10 +38,13 @@ def app_project_main(request):
 
     total_count_str = f'total projects: {total_count}' if total_count > 0 else ''
 
-    return HttpResponse(
-        '<a href="' + reverse('bc-main') + '">back to main</a><br/>'
-        f'{total_count_str}'
-        f'{course_list}')
+    # sanitize to avoid xss
+    t = Template('<a href="' + reverse('bc-main') + '">back to main</a><br/>{{total_count_str}}'
+                 '{% for project in project_list %}'
+                 '<li><a href="{{ project.url }}">{{ project.id }}</a> {{ project.name }}</li>'
+                 '{% endfor %}')
+    c = Context({'total_count_str': total_count_str, 'project_list': project_list})
+    return HttpResponse(t.render(context=c))
 
 
 def app_project_detail(request, project_id, update_db=False):
@@ -55,47 +62,64 @@ def app_project_detail(request, project_id, update_db=False):
     # if OK
     data = response.json()
 
-    tools = ""
+    tool_list = []
     for tool in data["dock"]:
         if tool["enabled"]:
             if tool["name"] in ['todoset']:
-                tools += (f'<li><a href="' +
-                          reverse('app-todoset-detail',
-                                  kwargs={'bucket_id': project_id, 'todoset_id': tool["id"]}) + f'">{tool["id"]}</a> '
-                          f'{tool["title"]} ({tool["name"]})</li>')
+                tool_list.append({
+                    'id': tool["id"],
+                    'title': tool["title"],
+                    'name': tool["name"],
+                    'url': reverse('app-todoset-detail',
+                                   kwargs={'bucket_id': project_id, 'todoset_id': tool["id"]})
+                })
             elif tool["name"] in ['message_board']:
-                tools += (f'<li><a href="' +
-                          reverse('app-message-board-detail',
-                                  kwargs={'bucket_id': project_id, 'message_board_id': tool["id"]}) +
-                          f'">{tool["id"]}</a> '
-                          f'{tool["title"]} ({tool["name"]})</li>')
+                tool_list.append({
+                    'id': tool["id"],
+                    'title': tool["title"],
+                    'name': tool["name"],
+                    'url': reverse('app-message-board-detail',
+                                   kwargs={'bucket_id': project_id, 'message_board_id': tool["id"]})
+                })
             elif tool["name"] in ['questionnaire']:
-                tools += (f'<li><a href="' +
-                          reverse('app-questionnaire-detail',
-                                  kwargs={'bucket_id': project_id, 'questionnaire_id': tool["id"]}) +
-                          f'">{tool["id"]}</a> '
-                          f'{tool["title"]} ({tool["name"]})</li>')
+                tool_list.append({
+                    'id': tool["id"],
+                    'title': tool["title"],
+                    'name': tool["name"],
+                    'url': reverse('app-questionnaire-detail',
+                                   kwargs={'bucket_id': project_id, 'questionnaire_id': tool["id"]})
+                })
             elif tool["name"] in ['schedule']:
-                tools += (f'<li><a href="' +
-                          reverse('app-schedule-detail',
-                                  kwargs={'bucket_id': project_id, 'schedule_id': tool["id"]}) +
-                          f'">{tool["id"]}</a> '
-                          f'{tool["title"]} ({tool["name"]})</li>')
+                tool_list.append({
+                    'id': tool["id"],
+                    'title': tool["title"],
+                    'name': tool["name"],
+                    'url': reverse('app-schedule-detail',
+                                   kwargs={'bucket_id': project_id, 'schedule_id': tool["id"]})
+                })
             elif tool["name"] in ['vault']:
-                tools += (f'<li><a href="' +
-                          reverse('app-vault-detail',
-                                  kwargs={'bucket_id': project_id, 'vault_id': tool["id"]}) +
-                          f'">{tool["id"]}</a> '
-                          f'{tool["title"]} ({tool["name"]})</li>')
+                tool_list.append({
+                    'id': tool["id"],
+                    'title': tool["title"],
+                    'name': tool["name"],
+                    'url': reverse('app-vault-detail',
+                                   kwargs={'bucket_id': project_id, 'vault_id': tool["id"]})
+                })
             else:  # other tools
-                tools += f'<li>{tool["title"]} ({tool["name"]})</li>'
+                tool_list.append({
+                    'id': tool["id"],
+                    'title': tool["title"],
+                    'name': tool["name"],
+                    'url': '#'
+                })
 
-    recording_type_list = ""
+    recording_type_list = []
     for recording_type in static_get_recording_types():
-        recording_type_list += ('<li><a href="' +
-                                reverse('app-project-recording-by-type',
-                                        kwargs={'bucket_id': project_id, 'recording_type': recording_type}) +
-                                f'">{recording_type}</a></li>')
+        recording_type_list.append({
+            'type': recording_type,
+            'url': reverse('app-project-recording-by-type',
+                           kwargs={'bucket_id': project_id, 'recording_type': recording_type})
+        })
 
     if update_db:
         # let's try to remove the m2m dock first
@@ -119,17 +143,28 @@ def app_project_detail(request, project_id, update_db=False):
             if not project.dock.filter(id=_tool.id).exists():
                 project.dock.add(_tool)
 
-        print(f'project: {project.name} '
-              f'dock: {project.dock.count()} '
-              f'enabled: {project.dock.filter(enabled=True).count()}')
-
-    return HttpResponse(
-        '<a href="' + reverse('app-project-main') + '">back</a><br/>'
-        f'project: {data["id"]}<br/>'
-        f'name: {data["name"]}<br/>'
-        f'purpose: {data["purpose"]}<br/>'
-        f'created_at: {data["created_at"]}<br/>'
-        f'enabled tools: <br/>{tools}<br/>'
-        '<a href="'+reverse('app-message-type', kwargs={'bucket_id': project_id})+'">message types</a><br/>'
-        f'recording types: <br/>{recording_type_list}<br/>'
-    )
+    # sanitize to avoid xss
+    t = Template('<a href="' + reverse('app-project-main') + '">back</a><br/>'
+                 'project: {{ project.id }}<br/>'
+                 'name: {{ project.name }}<br/>'
+                 'purpose: {{ project.purpose }}<br/>'
+                 'created_at: {{ project.created_at }}<br/>'
+                 'enabled tools: <br/>'
+                 '{% for tool in tool_list %}'
+                 '{% if tool.url == "#" %}'
+                 '<li>{{ tool.id }} {{ tool.title }} ({{ tool.name }})</li>'
+                 '{% else %}'
+                 '<li><a href="{{ tool.url }}">{{ tool.id }}</a> {{ tool.title }} ({{ tool.name }})</li>'
+                 '{% endif %}'
+                 '{% endfor %}<br/>'
+                 '<a href="{{ message_types_url }}">message types</a><br/>'
+                 'recording types: <br/>'
+                 '{% for recording_type in recording_type_list %}'
+                 '<li><a href="{{ recording_type.url }}">{{ recording_type.type }}</a></li>'
+                 '{% endfor %}<br/>')
+    message_types_url = reverse('app-message-type', kwargs={'bucket_id': project_id})
+    c = Context({'project': data,
+                 'tool_list': tool_list,
+                 'message_types_url': message_types_url,
+                 'recording_type_list': recording_type_list})
+    return HttpResponse(t.render(context=c))
