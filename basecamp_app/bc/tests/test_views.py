@@ -8,6 +8,363 @@ from json import loads as json_loads, dumps as json_dumps, load as json_stream_l
 from bc.models import BcComment
 
 
+class ViewsProjectTest(TestCase):
+    fixtures = ["bc_bccompany", "bc_bcpeople",
+                "bc_bcproject", "bc_bcprojecttool", ]
+
+    @classmethod
+    def setUpTestData(cls):  # Run once to set up non-modified data for all class methods
+
+        # api_sample.json is collections of API data from bc3-api site https://github.com/basecamp/bc3-api/tree/master
+        test_dir = Path(__file__).resolve().parent
+        with open(test_dir / "api_sample.json") as stream:
+            api_sample_json = json_stream_load(stream)
+
+        # sample API data from https://github.com/basecamp/bc3-api/blob/master/sections/projects.md#get-a-project
+        # the database loaded with fixture bc_bcproject.json and bc_bcprojecttool.json
+        cls.project_data_2085958499 = json_dumps(api_sample_json["project"]["2085958499"])
+        cls.project_data_2085958497 = json_dumps(api_sample_json["project"]["2085958497"])
+
+    def setUp(self):  # Run once for every test method to set up clean data
+        self.project = json_loads(self.project_data_2085958499)
+        self.project_2085958497 = json_loads(self.project_data_2085958497)
+
+    def test_app_project_main(self):
+
+        with (
+            patch('bc.views.project.session_get_token_and_identity') as mock_get_token_and_identity,
+            patch('bc.views.project.bc_api_get') as mock_request_get
+        ):
+            _token = {'access_token': 'access token', }
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            mock_request_get.return_value.status_code = 200
+            # sample data from https://github.com/basecamp/bc3-api/blob/master/sections/projects.md
+            mock_request_get.return_value.json.return_value = [
+                self.project,
+                self.project_2085958497,
+            ]
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(reverse('app-project-main'))
+
+            mock_get_token_and_identity.assert_called_once()
+            mock_request_get.assert_called_once()
+
+            self.assertEqual(response.status_code, 200)
+            # response.charset = utf-8
+            # print(response.content.decode(response.charset))
+            self.assertEqual(response.content,
+                             f'<a href="/bc/">back to main</a><br/>'
+                             f'<li><a href="/bc/project/{self.project["id"]}">'
+                             f'{self.project["id"]}</a> {self.project["name"]}</li>'
+                             f'<li><a href="/bc/project/{self.project_2085958497["id"]}">'
+                             f'{self.project_2085958497["id"]}</a> {self.project_2085958497["name"]}</li>'
+                             .encode(response.charset))
+
+    def test_app_project_main_with_no_token(self):
+
+        with (
+            patch('bc.views.project.session_get_token_and_identity') as mock_get_token_and_identity
+        ):
+            _token = None
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(reverse('app-project-main'))
+
+            mock_get_token_and_identity.assert_called_once()
+
+            self.assertEqual(response.status_code, 302)
+            self.assertEqual(response.url, reverse('bc-auth'))
+
+    def test_app_project_main_with_response_not_ok(self):
+
+        with (
+            patch('bc.views.project.session_get_token_and_identity') as mock_get_token_and_identity,
+            patch('bc.views.project.bc_api_get') as mock_request_get
+        ):
+            _token = {'access_token': 'access token', }
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            response_not_ok = 400
+            mock_request_get.return_value.status_code = response_not_ok
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(reverse('app-project-main'))
+
+            mock_get_token_and_identity.assert_called_once()
+            mock_request_get.assert_called_once()
+
+            self.assertEqual(response.status_code, response_not_ok)
+
+    def test_app_message_type_with_header_x_total_count(self):
+
+        with (
+            patch('bc.views.project.session_get_token_and_identity') as mock_get_token_and_identity,
+            patch('bc.views.project.bc_api_get') as mock_request_get
+        ):
+            _token = {'access_token': 'access token', }
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            mock_request_get.return_value.status_code = 200
+            # sample data from https://github.com/basecamp/bc3-api/blob/master/sections/projects.md
+            mock_request_get.return_value.json.return_value = [
+                self.project,
+                self.project_2085958497,
+            ]
+            x_total_count = 4  # dummy: 2 x 2 (paging)
+            mock_request_get.return_value.headers = {
+                "X-Total-Count": x_total_count,
+            }
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(reverse('app-project-main'))
+
+            mock_get_token_and_identity.assert_called_once()
+            mock_request_get.assert_called_once()
+
+            self.assertEqual(response.status_code, 200)
+            # response.charset = utf-8
+            # print(response.content.decode(response.charset))
+            self.assertEqual(response.content,
+                             f'<a href="/bc/">back to main</a><br/>'
+                             f'total projects: {x_total_count}'
+                             f'<li><a href="/bc/project/{self.project["id"]}">'
+                             f'{self.project["id"]}</a> {self.project["name"]}</li>'
+                             f'<li><a href="/bc/project/{self.project_2085958497["id"]}">'
+                             f'{self.project_2085958497["id"]}</a> {self.project_2085958497["name"]}</li>'
+                             .encode(response.charset))
+
+    def test_app_project_detail(self):
+        with (
+            patch('bc.views.project.session_get_token_and_identity') as mock_get_token_and_identity,
+            patch('bc.views.project.bc_api_get') as mock_request_get
+        ):
+            _token = {'access_token': 'access token', }
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            mock_request_get.return_value.status_code = 200
+            # sample data from https://github.com/basecamp/bc3-api/blob/master/sections/projects.md
+            # set questionnaire enabled, to comply test
+            for tool in self.project['dock']:
+                if tool['id'] == 1069479343:
+                    tool['enabled'] = True
+            mock_request_get.return_value.json.return_value = self.project
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(
+                reverse('app-project-detail',
+                        kwargs={'project_id': self.project["id"]}))
+
+            mock_get_token_and_identity.assert_called_once()
+            mock_request_get.assert_called_once()
+
+            self.assertEqual(response.status_code, 200)
+            # response.charset = utf-8
+            # print(response.content.decode(response.charset))
+            self.assertEqual(response.content,
+                             f'<a href="/bc/project/">back</a><br/>'
+                             f'project: {self.project["id"]}<br/>'
+                             f'name: {self.project["name"]}<br/>'
+                             f'purpose: {self.project["purpose"]}<br/>'
+                             f'created_at: {self.project["created_at"]}<br/>'
+                             f'enabled tools: <br/>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/message_board/1069479338">1069479338</a> '
+                             f'Message Board (message_board)</li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/todoset/1069479339">1069479339</a> '
+                             f'To-dos (todoset)</li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/vault/1069479340">1069479340</a> '
+                             f'Docs &amp; Files (vault)</li>'
+                             f'<li>1069479341 Campfire (chat)</li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/schedule/1069479342">1069479342</a> '
+                             f'Schedule (schedule)</li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/questionnaire/1069479343">1069479343</a> '
+                             f'Automatic Check-ins (questionnaire)</li><br/>'
+                             f'<a href="/bc/project/{self.project["id"]}/message/type">message types</a><br/>'
+                             f'recording types: <br/>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/recording/type/Comment">Comment</a></li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/recording/type/Document">Document</a></li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/recording/type/Message">Message</a></li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/recording/type/Question::Answer">'
+                             f'Question::Answer</a></li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/recording/type/Schedule::Entry">'
+                             f'Schedule::Entry</a></li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/recording/type/Todo">Todo</a></li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/recording/type/Todolist">Todolist</a></li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/recording/type/Upload">Upload</a></li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/recording/type/Vault">Vault</a></li><br/>'
+                             .encode(response.charset))
+
+    def test_app_project_detail_update_db(self):
+        with (
+            patch('bc.views.project.session_get_token_and_identity') as mock_get_token_and_identity,
+            patch('bc.views.project.bc_api_get') as mock_request_get
+        ):
+            _token = {'access_token': 'access token', }
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            mock_request_get.return_value.status_code = 200
+            # sample data from https://github.com/basecamp/bc3-api/blob/master/sections/projects.md
+            # set questionnaire enabled, to comply test
+            for tool in self.project['dock']:
+                if tool['id'] == 1069479343:
+                    tool['enabled'] = True
+            mock_request_get.return_value.json.return_value = self.project
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(
+                reverse('app-project-detail-update-db',
+                        kwargs={'project_id': self.project["id"]}))
+
+            mock_get_token_and_identity.assert_called_once()
+            mock_request_get.assert_called_once()
+
+            self.assertEqual(response.status_code, 200)
+            # response.charset = utf-8
+            # print(response.content.decode(response.charset))
+            self.assertEqual(response.content,
+                             f'<a href="/bc/project/">back</a><br/>'
+                             f'project: {self.project["id"]}<br/>'
+                             f'name: {self.project["name"]}<br/>'
+                             f'purpose: {self.project["purpose"]}<br/>'
+                             f'created_at: {self.project["created_at"]}<br/>'
+                             f'enabled tools: <br/>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/message_board/1069479338">1069479338</a> '
+                             f'Message Board (message_board)</li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/todoset/1069479339">1069479339</a> '
+                             f'To-dos (todoset)</li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/vault/1069479340">1069479340</a> '
+                             f'Docs &amp; Files (vault)</li>'
+                             f'<li>1069479341 Campfire (chat)</li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/schedule/1069479342">1069479342</a> '
+                             f'Schedule (schedule)</li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/questionnaire/1069479343">1069479343</a> '
+                             f'Automatic Check-ins (questionnaire)</li><br/>'
+                             f'<a href="/bc/project/{self.project["id"]}/message/type">message types</a><br/>'
+                             f'recording types: <br/>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/recording/type/Comment">Comment</a></li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/recording/type/Document">Document</a></li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/recording/type/Message">Message</a></li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/recording/type/Question::Answer">'
+                             f'Question::Answer</a></li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/recording/type/Schedule::Entry">'
+                             f'Schedule::Entry</a></li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/recording/type/Todo">Todo</a></li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/recording/type/Todolist">Todolist</a></li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/recording/type/Upload">Upload</a></li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/recording/type/Vault">Vault</a></li><br/>'
+                             .encode(response.charset))
+
+    def test_app_project_detail_update_db_with_not_exist_project_and_dock(self):
+        with (
+            patch('bc.views.project.session_get_token_and_identity') as mock_get_token_and_identity,
+            patch('bc.views.project.bc_api_get') as mock_request_get
+        ):
+            _token = {'access_token': 'access token', }
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            mock_request_get.return_value.status_code = 200
+            # sample data from https://github.com/basecamp/bc3-api/blob/master/sections/projects.md
+            # set with not exist ID
+            self.project['id'] = 1  # change Project ID with not exist ID
+            not_exist_message_board_id = 1
+            self.project['dock'][0]['id'] = not_exist_message_board_id  # change Message Board ID with not exist ID
+            mock_request_get.return_value.json.return_value = self.project
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(
+                reverse('app-project-detail-update-db',
+                        kwargs={'project_id': self.project["id"]}))
+
+            mock_get_token_and_identity.assert_called_once()
+            mock_request_get.assert_called_once()
+
+            self.assertEqual(response.status_code, 200)
+            # response.charset = utf-8
+            # print(response.content.decode(response.charset))
+            self.assertEqual(response.content,
+                             f'<a href="/bc/project/">back</a><br/>'
+                             f'project: {self.project["id"]}<br/>'
+                             f'name: {self.project["name"]}<br/>'
+                             f'purpose: {self.project["purpose"]}<br/>'
+                             f'created_at: {self.project["created_at"]}<br/>'
+                             f'enabled tools: <br/>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/message_board/'
+                             f'{not_exist_message_board_id}">{not_exist_message_board_id}</a> '
+                             f'Message Board (message_board)</li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/todoset/1069479339">1069479339</a> '
+                             f'To-dos (todoset)</li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/vault/1069479340">1069479340</a> '
+                             f'Docs &amp; Files (vault)</li>'
+                             f'<li>1069479341 Campfire (chat)</li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/schedule/1069479342">1069479342</a> '
+                             f'Schedule (schedule)</li><br/>'
+                             f'<a href="/bc/project/{self.project["id"]}/message/type">message types</a><br/>'
+                             f'recording types: <br/>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/recording/type/Comment">Comment</a></li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/recording/type/Document">Document</a></li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/recording/type/Message">Message</a></li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/recording/type/Question::Answer">'
+                             f'Question::Answer</a></li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/recording/type/Schedule::Entry">'
+                             f'Schedule::Entry</a></li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/recording/type/Todo">Todo</a></li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/recording/type/Todolist">Todolist</a></li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/recording/type/Upload">Upload</a></li>'
+                             f'<li><a href="/bc/project/{self.project["id"]}/recording/type/Vault">Vault</a></li><br/>'
+                             .encode(response.charset))
+
+    def test_app_project_detail_with_no_token(self):
+
+        with (
+            patch('bc.views.project.session_get_token_and_identity') as mock_get_token_and_identity
+        ):
+            _token = None
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(
+                reverse('app-project-detail',
+                        kwargs={'project_id': self.project["id"]}))
+
+            mock_get_token_and_identity.assert_called_once()
+
+            self.assertEqual(response.status_code, 302)
+            self.assertEqual(response.url, reverse('bc-auth'))
+
+    def test_app_project_detail_with_response_not_ok(self):
+
+        with (
+            patch('bc.views.project.session_get_token_and_identity') as mock_get_token_and_identity,
+            patch('bc.views.project.bc_api_get') as mock_request_get
+        ):
+            _token = {'access_token': 'access token', }
+            _identity = {'id': 1, }
+            mock_get_token_and_identity.return_value = _token, _identity
+
+            response_not_ok = 400
+            mock_request_get.return_value.status_code = response_not_ok
+
+            # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
+            response = self.client.get(
+                reverse('app-project-detail',
+                        kwargs={'project_id': self.project["id"]}))
+
+            mock_get_token_and_identity.assert_called_once()
+            mock_request_get.assert_called_once()
+
+            self.assertEqual(response.status_code, response_not_ok)
+
+
 class ViewsMessageTest(TestCase):
     fixtures = ["bc_bccompany", "bc_bcpeople",
                 "bc_bcproject", "bc_bcprojecttool",
