@@ -5,7 +5,8 @@ from bc.utils import (session_get_token_and_identity, bc_api_get, repr_message_d
                       db_get_bucket, db_get_comment_parent, db_get_or_create_person,
                       db_get_message, db_get_message_parent,
                       api_recording_get_recordings_uri, api_recording_get_bucket_recording_parent_comment_uri,
-                      static_get_recording_types, static_get_comment_parent_types, static_get_message_parent_types)
+                      static_get_recording_types, static_get_comment_parent_types, static_get_message_parent_types,
+                      repr_http_response_template_string, repr_template_response_entity_creator_bucket_parent)
 
 
 def app_recording_main(request):
@@ -38,7 +39,7 @@ def app_recording_by_type(request, recording_type):
                           access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
-        return HttpResponse('', status=response.status_code)
+        return HttpResponse(repr_http_response_template_string(''), status=response.status_code)
 
     # if OK
     data = response.json()
@@ -67,9 +68,9 @@ def app_project_recording_by_type(request, bucket_id, recording_type):
         return HttpResponse('')
 
     # load project from db or give recommendation link to save to db first
-    bucket, exception = db_get_bucket(bucket_id=bucket_id)
-    if not bucket:  # not exists
-        return HttpResponseBadRequest(exception)
+    _bucket, _exception = db_get_bucket(bucket_id=bucket_id)
+    if not _bucket:  # not exists
+        return HttpResponseBadRequest(_exception)
 
     # project exist on db
     token, identity = session_get_token_and_identity(request)
@@ -81,7 +82,7 @@ def app_project_recording_by_type(request, bucket_id, recording_type):
                           access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
-        return HttpResponse('', status=response.status_code)
+        return HttpResponse(repr_http_response_template_string(''), status=response.status_code)
 
     # if OK
     data = response.json()
@@ -96,20 +97,20 @@ def app_project_recording_by_type(request, bucket_id, recording_type):
                     'bucket' in recording and recording["bucket"]["type"] == "Project" and 'creator' in recording):
 
                 # process bucket first, because at processing parent still need a valid bucket
-                bucket, exception = db_get_bucket(bucket_id=recording["bucket"]["id"])
-                if not bucket:  # not exists
-                    return HttpResponseBadRequest(exception)
+                _bucket, _exception = db_get_bucket(bucket_id=recording["bucket"]["id"])
+                if not _bucket:  # not exists
+                    return HttpResponseBadRequest(_exception)
 
                 # process parent with type listed in static_get_comment_parent_types
-                parent, exception = db_get_comment_parent(parent=recording["parent"],
-                                                          bucket_id=recording["bucket"]["id"])
-                if not parent:  # not exists
-                    return HttpResponseBadRequest(exception)
+                _parent, _exception = db_get_comment_parent(parent=recording["parent"],
+                                                            bucket_id=recording["bucket"]["id"])
+                if not _parent:  # not exists
+                    return HttpResponseBadRequest(_exception)
 
                 # process creator
-                creator, exception = db_get_or_create_person(person=recording["creator"])
-                if not creator:  # create person error
-                    return HttpResponseBadRequest(exception)
+                _creator, _exception = db_get_or_create_person(person=recording["creator"])
+                if not _creator:  # create person error
+                    return HttpResponseBadRequest(_exception)
 
                 # remove 'bucket' key from recording. key 'bucket' still used in processing parent
                 recording.pop('bucket')
@@ -121,36 +122,36 @@ def app_project_recording_by_type(request, bucket_id, recording_type):
                 recording.pop('creator')
 
                 _parent_comment_uri = reverse('app-project-recording-parent-comment',
-                                              kwargs={'bucket_id': bucket.id,
-                                                      'parent_id': parent.id})
+                                              kwargs={'bucket_id': _bucket.id, 'parent_id': _parent.id})
 
                 recording_list += (f'<li>{recording["id"]} '
                                    f'<a href="{_parent_comment_uri}">parent_comment</a> {recording["title"]}</li>')
 
             else:
-                return HttpResponseBadRequest(
-                    f'recording {recording["title"]} has no creator or bucket type Project or parent type in '
-                    f'{static_get_comment_parent_types()}')
+                _exception = repr_template_response_entity_creator_bucket_parent(
+                    entity_type=recording["type"], entity_title=recording["title"],
+                    list_parent_types=static_get_comment_parent_types())
+                return HttpResponseBadRequest(_exception)
 
         elif recording["type"] in ['Message']:
             if ('parent' in recording and recording["parent"]["type"] in static_get_message_parent_types() and
                     'bucket' in recording and recording["bucket"]["type"] == "Project" and 'creator' in recording):
 
                 # process bucket first, because at processing parent still need a valid bucket
-                bucket, exception = db_get_bucket(bucket_id=recording["bucket"]["id"])
-                if not bucket:  # not exists
-                    return HttpResponseBadRequest(exception)
+                _bucket, _exception = db_get_bucket(bucket_id=recording["bucket"]["id"])
+                if not _bucket:  # not exists
+                    return HttpResponseBadRequest(_exception)
 
                 # process parent with type listed in static_get_message_parent_types
-                parent, exception = db_get_message_parent(parent=recording["parent"],
-                                                          bucket_id=recording["bucket"]["id"])
-                if not parent:  # not exists
-                    return HttpResponseBadRequest(exception)
+                _parent, _exception = db_get_message_parent(parent=recording["parent"],
+                                                            bucket_id=recording["bucket"]["id"])
+                if not _parent:  # not exists
+                    return HttpResponseBadRequest(_exception)
 
                 # process creator
-                creator, exception = db_get_or_create_person(person=recording["creator"])
-                if not creator:  # create person error
-                    return HttpResponseBadRequest(exception)
+                _creator, _exception = db_get_or_create_person(person=recording["creator"])
+                if not _creator:  # create person error
+                    return HttpResponseBadRequest(_exception)
 
                 # remove 'bucket' key from recording. key 'bucket' still used in processing parent
                 recording.pop('bucket')
@@ -162,31 +163,32 @@ def app_project_recording_by_type(request, bucket_id, recording_type):
                 recording.pop('creator')
 
                 # process Message
-                message, exception = db_get_message(message=recording, bucket_id=bucket.id)
+                _message, _exception = db_get_message(message=recording, bucket_id=_bucket.id)
                 # returned message can be None, currently ignore the exception as we only show the list
 
                 recording_list += (
-                    repr_message_detail(message=recording, bucket_id=bucket.id, message_obj=message, as_list=True))
+                    repr_message_detail(message=recording, bucket_id=_bucket.id, message_obj=_message, as_list=True))
 
             else:
-                return HttpResponseBadRequest(
-                    f'recording {recording["title"]} has no creator or bucket type Project or parent type in '
-                    f'{static_get_message_parent_types()}')
+                _exception = repr_template_response_entity_creator_bucket_parent(
+                    entity_type=recording["type"], entity_title=recording["title"],
+                    list_parent_types=static_get_comment_parent_types())
+                return HttpResponseBadRequest(_exception)
 
         else:  # others recording type
             print(f'{recording_type}: {recording.keys()}')
 
         recording_keys = recording.keys()
 
-    if 'next' in response.links and 'url' in response.links["next"]:
-        print(response.links["next"]["url"])
+    # if 'next' in response.links and 'url' in response.links["next"]:
+    #     print(response.links["next"]["url"])
 
     total_count = 0
     if "X-Total-Count" in response.headers:
         total_count = int(response.headers["X-Total-Count"])
 
     return HttpResponse(
-        '<a href="' + reverse('app-project-detail', kwargs={'project_id': bucket.id}) + '">back</a><br/>'
+        '<a href="' + reverse('app-project-detail', kwargs={'project_id': _bucket.id}) + '">back</a><br/>'
         f'recording {recording_type}: {recording_total}/{total_count} recordings<br/>'
         f'with {len(recording_keys)} keys: {recording_keys}<br/>'
         f'{recording_list}<br/>'
@@ -204,7 +206,7 @@ def app_project_recording_parent_comment(request, bucket_id, parent_id):
     response = bc_api_get(uri=api_recording_get_bucket_recording_parent_comment, access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
-        return HttpResponse('', status=response.status_code)
+        return HttpResponse(repr_http_response_template_string(''), status=response.status_code)
 
     # if OK
     data = response.json()
@@ -219,8 +221,8 @@ def app_project_recording_parent_comment(request, bucket_id, parent_id):
                          f'">{comment["id"]}</a> {comment["title"]}</li>')
         count += 1
 
-    if 'next' in response.links and 'url' in response.links["next"]:
-        print(response.links["next"]["url"])
+    # if 'next' in response.links and 'url' in response.links["next"]:
+    #     print(response.links["next"]["url"])
 
     total_count_str = ''
     if "X-Total-Count" in response.headers:

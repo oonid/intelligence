@@ -5,7 +5,8 @@ from bc.models import BcComment
 from bc.utils import (session_get_token_and_identity, bc_api_get,
                       db_get_bucket, db_get_comment_parent, db_get_or_create_person,
                       api_comment_get_bucket_comment_uri,
-                      static_get_comment_parent_uri, static_get_comment_parent_types)
+                      static_get_comment_parent_uri, static_get_comment_parent_types,
+                      repr_http_response_template_string, repr_template_response_entity_creator_bucket_parent)
 
 
 def app_comment_detail(request, bucket_id, comment_id):
@@ -18,7 +19,7 @@ def app_comment_detail(request, bucket_id, comment_id):
     response = bc_api_get(uri=api_todo_get_bucket_comment, access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
-        return HttpResponse('', status=response.status_code)
+        return HttpResponse(repr_http_response_template_string(''), status=response.status_code)
 
     # if OK
     comment = response.json()
@@ -31,19 +32,19 @@ def app_comment_detail(request, bucket_id, comment_id):
                       f'{comment["parent"]["id"]}</a>')
 
         # process bucket first, because at processing parent still need a valid bucket
-        bucket, message = db_get_bucket(bucket_id=comment["bucket"]["id"])
-        if not bucket:  # not exists
-            return HttpResponseBadRequest(message)
+        _bucket, _exception = db_get_bucket(bucket_id=comment["bucket"]["id"])
+        if not _bucket:  # not exists
+            return HttpResponseBadRequest(_exception)
 
         # process parent with type listed in static_get_comment_parent_types
-        parent, message = db_get_comment_parent(parent=comment["parent"], bucket_id=comment["bucket"]["id"])
-        if not parent:  # not exists
-            return HttpResponseBadRequest(message)
+        _parent, _exception = db_get_comment_parent(parent=comment["parent"], bucket_id=comment["bucket"]["id"])
+        if not _parent:  # not exists
+            return HttpResponseBadRequest(_exception)
 
         # process creator
-        creator, message = db_get_or_create_person(person=comment["creator"])
-        if not creator:  # create person error
-            return HttpResponseBadRequest(message)
+        _creator, _exception = db_get_or_create_person(person=comment["creator"])
+        if not _creator:  # create person error
+            return HttpResponseBadRequest(_exception)
 
         # remove 'bucket' key from comment. key 'bucket' still used in processing parent
         comment.pop('bucket')
@@ -58,13 +59,14 @@ def app_comment_detail(request, bucket_id, comment_id):
         try:
             _comment = BcComment.objects.get(id=comment["id"])
         except BcComment.DoesNotExist:
-            _comment = BcComment.objects.create(bucket=bucket, parent=parent, creator=creator, **comment)
+            _comment = BcComment.objects.create(bucket=_bucket, parent=_parent, creator=_creator, **comment)
             _comment.save()
 
     else:
-        return HttpResponseBadRequest(
-            f'comment {comment["title"]} has no creator or bucket type Project or parent type in '
-            f'{static_get_comment_parent_types()}')
+        _exception = repr_template_response_entity_creator_bucket_parent(
+            entity_type=comment["type"], entity_title=comment["title"],
+            list_parent_types=static_get_comment_parent_types())
+        return HttpResponseBadRequest(_exception)
 
     _comment_title = _comment.title if _comment else comment["title"]
 

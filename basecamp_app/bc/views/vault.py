@@ -7,7 +7,8 @@ from bc.utils import (session_get_token_and_identity, bc_api_get,
                       api_vault_get_bucket_vault_uri, api_vault_get_bucket_vault_vaults_uri,
                       api_vault_get_bucket_vault_documents_uri, api_document_get_bucket_document_uri,
                       api_vault_get_bucket_vault_uploads_uri, api_document_get_bucket_upload_uri,
-                      static_get_vault_parent_types, repr_http_response_template_string)
+                      static_get_vault_parent_types,
+                      repr_http_response_template_string, repr_template_response_entity_creator_bucket_parent)
 
 
 def app_vault_detail(request, bucket_id, vault_id):
@@ -187,9 +188,10 @@ def app_document_detail(request, bucket_id, document_id):
             _document.save()
 
     else:
-        return HttpResponseBadRequest(
-            f'document {document["title"]} has no creator or bucket type Project or parent type in '
-            f'{static_get_vault_parent_types()}')
+        _exception = repr_template_response_entity_creator_bucket_parent(
+            entity_type=document["type"], entity_title=document["title"],
+            list_parent_types=static_get_vault_parent_types())
+        return HttpResponseBadRequest(_exception)
 
     _document_title = _document.title if _document else document["title"]
 
@@ -310,9 +312,10 @@ def app_upload_detail(request, bucket_id, upload_id):
             _upload.save()
 
     else:
-        return HttpResponseBadRequest(
-            f'upload {upload["title"]} has no creator or bucket type Project or parent type in '
-            f'{static_get_vault_parent_types()}')
+        _exception = repr_template_response_entity_creator_bucket_parent(
+            entity_type=upload["type"], entity_title=upload["title"],
+            list_parent_types=static_get_vault_parent_types())
+        return HttpResponseBadRequest(_exception)
 
     _upload_title = _upload.title if _upload else upload["title"]
 

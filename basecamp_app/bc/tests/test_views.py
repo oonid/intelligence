@@ -1453,9 +1453,9 @@ class ViewsCommentTest(TestCase):
             self.assertEqual(response.status_code, 400)
             # response.charset = utf-8
             self.assertEqual(response.content,
-                             "comment Re: We won Leto! has no creator or bucket type Project or parent type in "
-                             "['Document', 'Message', 'Question::Answer', 'Schedule::Entry', 'Todolist', 'Todo', "
-                             "'Upload']".encode(response.charset))
+                             escape("Comment Re: We won Leto! has no creator or bucket type Project or parent type in "
+                                    "['Document', 'Message', 'Question::Answer', 'Schedule::Entry', 'Todolist', "
+                                    "'Todo', 'Upload']").encode(response.charset))
 
     def test_app_comment_detail_with_not_exist_comment(self):
 
