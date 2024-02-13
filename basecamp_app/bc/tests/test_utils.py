@@ -2,6 +2,7 @@ from django.test import TestCase, RequestFactory
 from django.contrib.sessions.middleware import SessionMiddleware
 
 from os import environ
+from html import escape
 from unittest.mock import patch
 from pathlib import Path
 from json import loads as json_loads, dumps as json_dumps, load as json_stream_load
@@ -260,8 +261,8 @@ class UtilsDbTest(TestCase):
         self.person.pop('company')
 
         _creator, _exception = bc.utils.db_get_or_create_person(person=self.person)
-        self.assertEqual(_exception, "creator serializer error: {'people company error': "
-                                     "ErrorDetail(string='people no company field', code='invalid')}")
+        self.assertEqual(_exception, escape("creator serializer error: {'people company error': "
+                                            "ErrorDetail(string='people no company field', code='invalid')}"))
         self.assertEqual(_creator, None)
 
     def test_db_get_message(self):
@@ -311,7 +312,7 @@ class UtilsDbTest(TestCase):
         _parent, _exception = bc.utils.db_get_comment_parent(parent=self.comment["parent"],
                                                              bucket_id=self.comment["bucket"]["id"])
         self.assertEqual(_exception, f'parent {self.comment["parent"]["id"]} type {self.comment["parent"]["type"]} not '
-                                     f'in {bc.utils.static_get_comment_parent_types()}.')
+                                     f'in {escape(str(bc.utils.static_get_comment_parent_types()))}.')
         self.assertEqual(_parent, None)
 
     def test_db_get_comment_parent_with_parent_type_document(self):
@@ -331,9 +332,9 @@ class UtilsDbTest(TestCase):
 
         _parent, _exception = bc.utils.db_get_comment_parent(parent=self.comment["parent"],
                                                              bucket_id=self.comment["bucket"]["id"])
-        self.assertEqual(_exception, f'document {self.comment["parent"]["id"]} not found<br/>'
+        self.assertEqual(_exception, f'Document {self.comment["parent"]["id"]} not found<br/>'
                                      f'<a href="/bc/project/{self.comment["bucket"]["id"]}/'
-                                     f'document/{self.comment["parent"]["id"]}">try to open document</a> first.')
+                                     f'document/{self.comment["parent"]["id"]}">try to open Document</a> first.')
         self.assertEqual(_parent, None)
 
     def test_db_get_comment_parent_with_parent_type_upload(self):
@@ -353,9 +354,9 @@ class UtilsDbTest(TestCase):
 
         _parent, _exception = bc.utils.db_get_comment_parent(parent=self.comment["parent"],
                                                              bucket_id=self.comment["bucket"]["id"])
-        self.assertEqual(_exception, f'upload {self.comment["parent"]["id"]} not found<br/>'
+        self.assertEqual(_exception, f'Upload {self.comment["parent"]["id"]} not found<br/>'
                                      f'<a href="/bc/project/{self.comment["bucket"]["id"]}/'
-                                     f'upload/{self.comment["parent"]["id"]}">try to open upload</a> first.')
+                                     f'upload/{self.comment["parent"]["id"]}">try to open Upload</a> first.')
         self.assertEqual(_parent, None)
 
     def test_db_get_comment_parent_with_parent_type_todolist(self):
@@ -375,9 +376,9 @@ class UtilsDbTest(TestCase):
 
         _parent, _exception = bc.utils.db_get_comment_parent(parent=self.comment["parent"],
                                                              bucket_id=self.comment["bucket"]["id"])
-        self.assertEqual(_exception, f'todolist {self.comment["parent"]["id"]} not found<br/>'
+        self.assertEqual(_exception, f'Todolist {self.comment["parent"]["id"]} not found<br/>'
                                      f'<a href="/bc/project/{self.comment["bucket"]["id"]}/'
-                                     f'todolist/{self.comment["parent"]["id"]}">try to open todolist</a> first.')
+                                     f'todolist/{self.comment["parent"]["id"]}">try to open Todolist</a> first.')
         self.assertEqual(_parent, None)
 
     def test_db_get_comment_parent_with_parent_type_todo(self):
@@ -397,9 +398,9 @@ class UtilsDbTest(TestCase):
 
         _parent, _exception = bc.utils.db_get_comment_parent(parent=self.comment["parent"],
                                                              bucket_id=self.comment["bucket"]["id"])
-        self.assertEqual(_exception, f'todo {self.comment["parent"]["id"]} not found<br/>'
+        self.assertEqual(_exception, f'Todo {self.comment["parent"]["id"]} not found<br/>'
                                      f'<a href="/bc/project/{self.comment["bucket"]["id"]}/'
-                                     f'todo/{self.comment["parent"]["id"]}">try to open todo</a> first.')
+                                     f'todo/{self.comment["parent"]["id"]}">try to open Todo</a> first.')
         self.assertEqual(_parent, None)
 
     def test_db_get_comment_parent_with_parent_type_schedule_entry(self):
@@ -419,10 +420,10 @@ class UtilsDbTest(TestCase):
 
         _parent, _exception = bc.utils.db_get_comment_parent(parent=self.comment["parent"],
                                                              bucket_id=self.comment["bucket"]["id"])
-        self.assertEqual(_exception, f'schedule entry {self.comment["parent"]["id"]} not found<br/>'
+        self.assertEqual(_exception, f'Schedule::Entry {self.comment["parent"]["id"]} not found<br/>'
                                      f'<a href="/bc/project/{self.comment["bucket"]["id"]}/'
                                      f'schedule_entry/{self.comment["parent"]["id"]}">'
-                                     f'try to open schedule entry</a> first.')
+                                     f'try to open Schedule::Entry</a> first.')
         self.assertEqual(_parent, None)
 
     def test_db_get_comment_parent_with_parent_type_question_answer(self):
@@ -442,10 +443,10 @@ class UtilsDbTest(TestCase):
 
         _parent, _exception = bc.utils.db_get_comment_parent(parent=self.comment["parent"],
                                                              bucket_id=self.comment["bucket"]["id"])
-        self.assertEqual(_exception, f'question answer {self.comment["parent"]["id"]} not found<br/>'
+        self.assertEqual(_exception, f'Question::Answer {self.comment["parent"]["id"]} not found<br/>'
                                      f'<a href="/bc/project/{self.comment["bucket"]["id"]}/'
                                      f'question_answer/{self.comment["parent"]["id"]}">'
-                                     f'try to open question answer</a> first.')
+                                     f'try to open Question::Answer</a> first.')
         self.assertEqual(_parent, None)
 
     def test_db_get_message_parent(self):
@@ -461,10 +462,10 @@ class UtilsDbTest(TestCase):
 
         _parent, _exception = bc.utils.db_get_message_parent(parent=self.message["parent"],
                                                              bucket_id=self.message["bucket"]["id"])
-        self.assertEqual(_exception, f'message board {self.message["parent"]["id"]} not found<br/>'
+        self.assertEqual(_exception, f'Message::Board {self.message["parent"]["id"]} not found<br/>'
                                      f'<a href="/bc/project/{self.message["bucket"]["id"]}/'
                                      f'message_board/{self.message["parent"]["id"]}">'
-                                     f'try to open message board</a> first.')
+                                     f'try to open Message::Board</a> first.')
         self.assertEqual(_parent, None)
 
     def test_db_get_message_parent_with_invalid_parent_type(self):
@@ -474,7 +475,7 @@ class UtilsDbTest(TestCase):
         _parent, _exception = bc.utils.db_get_message_parent(parent=self.message["parent"],
                                                              bucket_id=self.message["bucket"]["id"])
         self.assertEqual(_exception, f'parent {self.message["parent"]["id"]} type {self.message["parent"]["type"]} not '
-                                     f'in {bc.utils.static_get_message_parent_types()}.')
+                                     f'in {escape(str(bc.utils.static_get_message_parent_types()))}.')
         self.assertEqual(_parent, None)
 
     def test_db_get_vault_parent(self):
@@ -490,9 +491,9 @@ class UtilsDbTest(TestCase):
 
         _parent, _exception = bc.utils.db_get_vault_parent(parent=self.vault["parent"],
                                                            bucket_id=self.vault["bucket"]["id"])
-        self.assertEqual(_exception, f'vault {self.vault["parent"]["id"]} not found<br/>'
+        self.assertEqual(_exception, f'Vault {self.vault["parent"]["id"]} not found<br/>'
                                      f'<a href="/bc/project/{self.vault["bucket"]["id"]}/'
-                                     f'vault/{self.vault["parent"]["id"]}">try to open vault</a> first.')
+                                     f'vault/{self.vault["parent"]["id"]}">try to open Vault</a> first.')
         self.assertEqual(_parent, None)
 
     def test_db_get_vault_parent_with_invalid_parent_type(self):
@@ -502,7 +503,7 @@ class UtilsDbTest(TestCase):
         _parent, _exception = bc.utils.db_get_vault_parent(parent=self.vault["parent"],
                                                            bucket_id=self.vault["bucket"]["id"])
         self.assertEqual(_exception, f'parent {self.vault["parent"]["id"]} type {self.vault["parent"]["type"]} not '
-                                     f'in {bc.utils.static_get_vault_parent_types()}.')
+                                     f'in {escape(str(bc.utils.static_get_vault_parent_types()))}.')
         self.assertEqual(_parent, None)
 
 

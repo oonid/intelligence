@@ -2,6 +2,7 @@ from django.test import TestCase
 from django.urls import reverse
 
 from unittest.mock import patch
+from html import escape
 from pathlib import Path
 from json import loads as json_loads, dumps as json_dumps, load as json_stream_load
 
@@ -681,8 +682,9 @@ class ViewsMessageTest(TestCase):
             # response.charset = utf-8
             # print(response.content.decode(response.charset))
             self.assertEqual(response.content,
-                             "creator serializer error: {'people company error': "
-                             "ErrorDetail(string='people no company field', code='invalid')}".encode(response.charset))
+                             escape("creator serializer error: {'people company error': "
+                                    "ErrorDetail(string='people no company field', code='invalid')}")
+                             .encode(response.charset))
 
     def test_app_message_board_detail_with_new_message_board(self):
 
@@ -1130,8 +1132,9 @@ class ViewsMessageTest(TestCase):
             # response.charset = utf-8
             # print(response.content.decode(response.charset))
             self.assertEqual(response.content,
-                             "creator serializer error: {'people company error': "
-                             "ErrorDetail(string='people no company field', code='invalid')}".encode(response.charset))
+                             escape("creator serializer error: {'people company error': "
+                                    "ErrorDetail(string='people no company field', code='invalid')}")
+                             .encode(response.charset))
 
     def test_app_message_detail_with_category(self):
         with (
@@ -1419,8 +1422,9 @@ class ViewsCommentTest(TestCase):
             self.assertEqual(response.status_code, 400)
             # response.charset = utf-8
             self.assertEqual(response.content,
-                             "creator serializer error: {'people company error': "
-                             "ErrorDetail(string='people no company field', code='invalid')}".encode(response.charset))
+                             escape("creator serializer error: {'people company error': "
+                                    "ErrorDetail(string='people no company field', code='invalid')}")
+                             .encode(response.charset))
 
     def test_app_comment_detail_with_no_creator(self):
 
