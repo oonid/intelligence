@@ -7,7 +7,7 @@ from bc.utils import (session_get_token_and_identity, bc_api_get,
                       api_vault_get_bucket_vault_uri, api_vault_get_bucket_vault_vaults_uri,
                       api_vault_get_bucket_vault_documents_uri, api_document_get_bucket_document_uri,
                       api_vault_get_bucket_vault_uploads_uri, api_document_get_bucket_upload_uri,
-                      static_get_vault_parent_types)
+                      static_get_vault_parent_types, repr_http_response_template_string)
 
 
 def app_vault_detail(request, bucket_id, vault_id):
@@ -20,7 +20,7 @@ def app_vault_detail(request, bucket_id, vault_id):
     response = bc_api_get(uri=api_vault_get_bucket_vault, access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
-        return HttpResponse('', status=response.status_code)
+        return HttpResponse(repr_http_response_template_string(''), status=response.status_code)
 
     # if OK
     vault = response.json()
@@ -28,26 +28,26 @@ def app_vault_detail(request, bucket_id, vault_id):
     if 'bucket' in vault and vault["bucket"]["type"] == "Project" and 'creator' in vault:
 
         # process bucket first, because at processing parent still need a valid bucket
-        bucket, message = db_get_bucket(bucket_id=vault["bucket"]["id"])
-        if not bucket:  # not exists
-            return HttpResponseBadRequest(message)
+        _bucket, _exception = db_get_bucket(bucket_id=vault["bucket"]["id"])
+        if not _bucket:  # not exists
+            return HttpResponseBadRequest(_exception)  # db_get_bucket implemented XSS protection
 
         if 'parent' in vault and vault["parent"]["type"] in static_get_vault_parent_types():
             # process parent with type listed in static_get_vault_parent_types
-            parent, message = db_get_vault_parent(parent=vault["parent"], bucket_id=vault["bucket"]["id"])
-            if not parent:  # not exists
-                return HttpResponseBadRequest(message)
+            _parent, _exception = db_get_vault_parent(parent=vault["parent"], bucket_id=vault["bucket"]["id"])
+            if not _parent:  # not exists
+                return HttpResponseBadRequest(_exception)
 
             # remove 'parent' key from vault, will use model instance parent instead
             vault.pop('parent')
 
         else:  # no parent, as root vault has no parent
-            parent = None
+            _parent = None
 
         # process creator
-        creator, message = db_get_or_create_person(person=vault["creator"])
-        if not creator:  # create person error
-            return HttpResponseBadRequest(message)
+        _creator, _exception = db_get_or_create_person(person=vault["creator"])
+        if not _creator:  # create person error
+            return HttpResponseBadRequest(_exception)
 
         # remove 'bucket' key from vault. key 'bucket' still used in processing parent
         vault.pop('bucket')
@@ -59,7 +59,7 @@ def app_vault_detail(request, bucket_id, vault_id):
         try:
             _vault = BcVault.objects.get(id=vault["id"])
         except BcVault.DoesNotExist:
-            _vault = BcVault.objects.create(bucket=bucket, parent=parent, creator=creator, **vault)
+            _vault = BcVault.objects.create(bucket=_bucket, parent=_parent, creator=_creator, **vault)
             _vault.save()
 
     else:
@@ -92,7 +92,7 @@ def app_vault_vaults(request, bucket_id, vault_id):
     response = bc_api_get(uri=api_vault_get_bucket_vault_vaults, access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
-        return HttpResponse('', status=response.status_code)
+        return HttpResponse(repr_http_response_template_string(''), status=response.status_code)
 
     # if OK
     data = response.json()
@@ -100,7 +100,6 @@ def app_vault_vaults(request, bucket_id, vault_id):
     count = 0
     vault_list = ""
     for vault in data:
-        print(vault)
 
         vault_list += (f'<li><a href="' + reverse('app-vault-detail',
                                                   kwargs={'bucket_id': bucket_id, 'vault_id': vault["id"]}) +
@@ -112,8 +111,8 @@ def app_vault_vaults(request, bucket_id, vault_id):
 
         count += 1
 
-    if 'next' in response.links and 'url' in response.links["next"]:
-        print(response.links["next"]["url"])
+    # if 'next' in response.links and 'url' in response.links["next"]:
+    #     print(response.links["next"]["url"])
 
     total_count_str = ''
     if "X-Total-Count" in response.headers:
@@ -147,7 +146,7 @@ def app_document_detail(request, bucket_id, document_id):
     response = bc_api_get(uri=api_document_get_bucket_document, access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
-        return HttpResponse('', status=response.status_code)
+        return HttpResponse(repr_http_response_template_string(''), status=response.status_code)
 
     # if OK
     document = response.json()
@@ -157,19 +156,19 @@ def app_document_detail(request, bucket_id, document_id):
             'bucket' in document and document["bucket"]["type"] == "Project" and 'creator' in document):
 
         # process bucket first, because at processing parent still need a valid bucket
-        bucket, message = db_get_bucket(bucket_id=document["bucket"]["id"])
-        if not bucket:  # not exists
-            return HttpResponseBadRequest(message)
+        _bucket, _exception = db_get_bucket(bucket_id=document["bucket"]["id"])
+        if not _bucket:  # not exists
+            return HttpResponseBadRequest(_exception)  # db_get_bucket implemented XSS protection
 
         # process parent with type listed in static_get_vault_parent_types (same with document parent)
-        parent, message = db_get_vault_parent(parent=document["parent"], bucket_id=document["bucket"]["id"])
-        if not parent:  # not exists
-            return HttpResponseBadRequest(message)
+        _parent, _exception = db_get_vault_parent(parent=document["parent"], bucket_id=document["bucket"]["id"])
+        if not _parent:  # not exists
+            return HttpResponseBadRequest(_exception)
 
         # process creator
-        creator, message = db_get_or_create_person(person=document["creator"])
-        if not creator:  # create person error
-            return HttpResponseBadRequest(message)
+        _creator, _exception = db_get_or_create_person(person=document["creator"])
+        if not _creator:  # create person error
+            return HttpResponseBadRequest(_exception)
 
         # remove 'bucket' key from document. key 'bucket' still used in processing parent
         document.pop('bucket')
@@ -184,7 +183,7 @@ def app_document_detail(request, bucket_id, document_id):
         try:
             _document = BcDocument.objects.get(id=document["id"])
         except BcDocument.DoesNotExist:
-            _document = BcDocument.objects.create(bucket=bucket, parent=parent, creator=creator, **document)
+            _document = BcDocument.objects.create(bucket=_bucket, parent=_parent, creator=_creator, **document)
             _document.save()
 
     else:
@@ -219,16 +218,14 @@ def app_vault_documents(request, bucket_id, vault_id):
     response = bc_api_get(uri=api_vault_get_bucket_vault_documents, access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
-        return HttpResponse('', status=response.status_code)
+        return HttpResponse(repr_http_response_template_string(''), status=response.status_code)
 
     # if OK
     data = response.json()
-    print(data)
 
     count = 0
     document_list = ""
     for document in data:
-        print(document)
 
         document_list += (f'<li><a href="' + reverse('app-document-detail',
                                                      kwargs={'bucket_id': bucket_id, 'document_id': document["id"]}) +
@@ -237,8 +234,8 @@ def app_vault_documents(request, bucket_id, vault_id):
 
         count += 1
 
-    if 'next' in response.links and 'url' in response.links["next"]:
-        print(response.links["next"]["url"])
+    # if 'next' in response.links and 'url' in response.links["next"]:
+    #     print(response.links["next"]["url"])
 
     total_count_str = ''
     if "X-Total-Count" in response.headers:
@@ -272,7 +269,7 @@ def app_upload_detail(request, bucket_id, upload_id):
     response = bc_api_get(uri=api_document_get_bucket_upload, access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
-        return HttpResponse('', status=response.status_code)
+        return HttpResponse(repr_http_response_template_string(''), status=response.status_code)
 
     # if OK
     upload = response.json()
@@ -282,19 +279,19 @@ def app_upload_detail(request, bucket_id, upload_id):
             'bucket' in upload and upload["bucket"]["type"] == "Project" and 'creator' in upload):
 
         # process bucket first, because at processing parent still need a valid bucket
-        bucket, message = db_get_bucket(bucket_id=upload["bucket"]["id"])
-        if not bucket:  # not exists
-            return HttpResponseBadRequest(message)
+        _bucket, _exception = db_get_bucket(bucket_id=upload["bucket"]["id"])
+        if not _bucket:  # not exists
+            return HttpResponseBadRequest(_exception)  # db_get_bucket implemented XSS protection
 
         # process parent with type listed in static_get_vault_parent_types (same with upload parent)
-        parent, message = db_get_vault_parent(parent=upload["parent"], bucket_id=upload["bucket"]["id"])
-        if not parent:  # not exists
-            return HttpResponseBadRequest(message)
+        _parent, _exception = db_get_vault_parent(parent=upload["parent"], bucket_id=upload["bucket"]["id"])
+        if not _parent:  # not exists
+            return HttpResponseBadRequest(_exception)
 
         # process creator
-        creator, message = db_get_or_create_person(person=upload["creator"])
-        if not creator:  # create person error
-            return HttpResponseBadRequest(message)
+        _creator, _exception = db_get_or_create_person(person=upload["creator"])
+        if not _creator:  # create person error
+            return HttpResponseBadRequest(_exception)
 
         # remove 'bucket' key from document. key 'bucket' still used in processing parent
         upload.pop('bucket')
@@ -309,7 +306,7 @@ def app_upload_detail(request, bucket_id, upload_id):
         try:
             _upload = BcUpload.objects.get(id=upload["id"])
         except BcUpload.DoesNotExist:
-            _upload = BcUpload.objects.create(bucket=bucket, parent=parent, creator=creator, **upload)
+            _upload = BcUpload.objects.create(bucket=_bucket, parent=_parent, creator=_creator, **upload)
             _upload.save()
 
     else:
@@ -344,16 +341,14 @@ def app_vault_uploads(request, bucket_id, vault_id):
     response = bc_api_get(uri=api_vault_get_bucket_vault_uploads, access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
-        return HttpResponse('', status=response.status_code)
+        return HttpResponse(repr_http_response_template_string(''), status=response.status_code)
 
     # if OK
     data = response.json()
-    print(data)
 
     count = 0
     upload_list = ""
     for upload in data:
-        print(upload)
 
         upload_list += (f'<li><a href="' + reverse('app-upload-detail',
                                                    kwargs={'bucket_id': bucket_id, 'upload_id': upload["id"]}) +
@@ -362,8 +357,8 @@ def app_vault_uploads(request, bucket_id, vault_id):
 
         count += 1
 
-    if 'next' in response.links and 'url' in response.links["next"]:
-        print(response.links["next"]["url"])
+    # if 'next' in response.links and 'url' in response.links["next"]:
+    #     print(response.links["next"]["url"])
 
     total_count_str = ''
     if "X-Total-Count" in response.headers:

@@ -20,7 +20,7 @@ class BcProjectTool(models.Model):
 class BcProject(models.Model):
     """
     https://github.com/basecamp/bc3-api/blob/master/sections/projects.md
-    excluded field(s): bookmarked
+    excluded field(s): bookmarked, last_needle_color, last_needle_position, previous_needle_position
     """
     id = models.BigIntegerField(primary_key=True)  # Basecamp Project ID
     status = models.CharField(max_length=30)
