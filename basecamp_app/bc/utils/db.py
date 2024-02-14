@@ -76,7 +76,7 @@ def db_get_comment_parent(parent, bucket_id):
         except BcUpload.DoesNotExist:
             _parent = None
             _exception = repr_template_response_entity_not_found(
-                parent_id=parent["id"], parent_type=parent["type"],
+                entity_id=parent["id"], entity_type=parent["type"],
                 href=reverse('app-upload-detail', kwargs={'bucket_id': bucket_id, 'upload_id': parent["id"]}))
 
     elif parent['type'] == 'Todo':
@@ -87,7 +87,7 @@ def db_get_comment_parent(parent, bucket_id):
         except BcTodo.DoesNotExist:
             _parent = None
             _exception = repr_template_response_entity_not_found(
-                parent_id=parent["id"], parent_type=parent["type"],
+                entity_id=parent["id"], entity_type=parent["type"],
                 href=reverse('app-todo-detail', kwargs={'bucket_id': bucket_id, 'todo_id': parent["id"]}))
 
     elif parent['type'] == 'Todolist':
@@ -98,7 +98,7 @@ def db_get_comment_parent(parent, bucket_id):
         except BcTodolist.DoesNotExist:
             _parent = None
             _exception = repr_template_response_entity_not_found(
-                parent_id=parent["id"], parent_type=parent["type"],
+                entity_id=parent["id"], entity_type=parent["type"],
                 href=reverse('app-todolist-detail', kwargs={'bucket_id': bucket_id, 'todolist_id': parent["id"]}))
 
     elif parent['type'] == 'Schedule::Entry':
@@ -109,7 +109,7 @@ def db_get_comment_parent(parent, bucket_id):
         except BcScheduleEntry.DoesNotExist:
             _parent = None
             _exception = repr_template_response_entity_not_found(
-                parent_id=parent["id"], parent_type=parent["type"],
+                entity_id=parent["id"], entity_type=parent["type"],
                 href=reverse('app-schedule-entry-detail',
                              kwargs={'bucket_id': bucket_id, 'schedule_entry_id': parent["id"]}))
 
@@ -121,7 +121,7 @@ def db_get_comment_parent(parent, bucket_id):
         except BcQuestionAnswer.DoesNotExist:
             _parent = None
             _exception = repr_template_response_entity_not_found(
-                parent_id=parent["id"], parent_type=parent["type"],
+                entity_id=parent["id"], entity_type=parent["type"],
                 href=reverse('app-question-answer-detail',
                              kwargs={'bucket_id': bucket_id, 'question_answer_id': parent["id"]}))
 
@@ -133,7 +133,7 @@ def db_get_comment_parent(parent, bucket_id):
         except BcMessage.DoesNotExist:
             _parent = None
             _exception = repr_template_response_entity_not_found(
-                parent_id=parent["id"], parent_type=parent["type"],
+                entity_id=parent["id"], entity_type=parent["type"],
                 href=reverse('app-message-detail', kwargs={'bucket_id': bucket_id, 'message_id': parent["id"]}))
 
     elif parent['type'] == 'Document':
@@ -144,7 +144,7 @@ def db_get_comment_parent(parent, bucket_id):
         except BcDocument.DoesNotExist:
             _parent = None
             _exception = repr_template_response_entity_not_found(
-                parent_id=parent["id"], parent_type=parent["type"],
+                entity_id=parent["id"], entity_type=parent["type"],
                 href=reverse('app-document-detail', kwargs={'bucket_id': bucket_id, 'document_id': parent["id"]}))
 
     else:  # condition above has filter the type in to get_recording_parent_types, should never be here
@@ -171,28 +171,15 @@ def db_get_message_parent(parent, bucket_id):
             _exception = None
         except BcMessageBoard.DoesNotExist:
             _parent = None
-            _exception = (f'message board {parent["id"]} not found<br/>'
-                          '<a href="' + reverse('app-message-board-detail',
-                                                kwargs={'bucket_id': bucket_id,
-                                                        'message_board_id': parent["id"]}) +
-                          '">try to open message board</a> first.')
-            template_str = ('{{ parent_type }} {{ parent_id }} not found<br/>'
-                            '<a href="{{ href }}">try to open {{ parent_type }}</a> first.')
-            context_dict = {
-                'parent_id': parent["id"],
-                'parent_type': parent["type"],
-                'href': reverse('app-message-board-detail',
-                                kwargs={'bucket_id': bucket_id, 'message_board_id': parent["id"]})}
-            _exception = repr_http_response_template_string(template_str=template_str, context_dict=context_dict)
+            _exception = repr_template_response_entity_not_found(
+                entity_id=parent["id"], entity_type=parent["type"],
+                href=reverse('app-message-board-detail',
+                             kwargs={'bucket_id': bucket_id, 'message_board_id': parent["id"]}))
 
     else:  # condition above has filter the type in to get_vault_parent_types, should never be here
         _parent = None
-        template_str = 'parent {{ parent_id }} type {{ parent_type }} not in {{ list_parent_types }}.'
-        context_dict = {
-            'parent_id': parent["id"],
-            'parent_type': parent["type"],
-            'list_parent_types': static_get_message_parent_types()}
-        _exception = repr_http_response_template_string(template_str=template_str, context_dict=context_dict)
+        _exception = repr_template_response_parent_not_in_list(
+            parent_id=parent["id"], parent_type=parent["type"], list_parent_types=static_get_message_parent_types())
 
     return _parent, _exception
 
@@ -213,21 +200,13 @@ def db_get_vault_parent(parent, bucket_id):
             _exception = None
         except BcVault.DoesNotExist:
             _parent = None
-            template_str = ('{{ parent_type }} {{ parent_id }} not found<br/>'
-                            '<a href="{{ href }}">try to open {{ parent_type }}</a> first.')
-            context_dict = {
-                'parent_id': parent["id"],
-                'parent_type': parent["type"],
-                'href': reverse('app-vault-detail', kwargs={'bucket_id': bucket_id, 'vault_id': parent["id"]})}
-            _exception = repr_http_response_template_string(template_str=template_str, context_dict=context_dict)
+            _exception = repr_template_response_entity_not_found(
+                entity_id=parent["id"], entity_type=parent["type"],
+                href=reverse('app-vault-detail', kwargs={'bucket_id': bucket_id, 'vault_id': parent["id"]}))
 
     else:  # condition above has filter the type in to get_vault_parent_types, should never be here
         _parent = None
-        template_str = 'parent {{ parent_id }} type {{ parent_type }} not in {{ list_parent_types }}.'
-        context_dict = {
-            'parent_id': parent["id"],
-            'parent_type': parent["type"],
-            'list_parent_types': static_get_vault_parent_types()}
-        _exception = repr_http_response_template_string(template_str=template_str, context_dict=context_dict)
+        _exception = repr_template_response_parent_not_in_list(
+            parent_id=parent["id"], parent_type=parent["type"], list_parent_types=static_get_vault_parent_types())
 
     return _parent, _exception

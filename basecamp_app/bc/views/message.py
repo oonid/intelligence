@@ -5,7 +5,8 @@ from bc.models import BcMessageCategory, BcMessageBoard, BcMessage
 from bc.utils import (session_get_token_and_identity, bc_api_get, repr_message_detail,
                       db_get_bucket, db_get_message, db_get_or_create_person,
                       api_message_get_bucket_message_types_uri, api_message_get_bucket_message_board_uri,
-                      api_message_get_bucket_message_board_messages_uri, api_message_get_bucket_message_uri)
+                      api_message_get_bucket_message_board_messages_uri, api_message_get_bucket_message_uri,
+                      repr_http_response_template_string, repr_template_response_entity_not_found)
 
 
 def app_message_type(request, bucket_id):
@@ -63,7 +64,7 @@ def app_message_board_detail(request, bucket_id, message_board_id):
     response = bc_api_get(uri=api_message_get_bucket_message_board, access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
-        return HttpResponse('', status=response.status_code)
+        return HttpResponse(repr_http_response_template_string(''), status=response.status_code)
 
     # if OK
     message_board = response.json()
@@ -112,7 +113,7 @@ def app_message_board_message(request, bucket_id, message_board_id):
     response = bc_api_get(uri=api_message_get_bucket_message_board_message, access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
-        return HttpResponse('', status=response.status_code)
+        return HttpResponse(repr_http_response_template_string(''), status=response.status_code)
 
     # if OK
     data = response.json()
@@ -130,13 +131,11 @@ def app_message_board_message(request, bucket_id, message_board_id):
             _message_board = BcMessageBoard.objects.get(id=message_board_id)
         except BcMessageBoard.DoesNotExist:
             # message board save only at message_board_detail
-            return HttpResponseBadRequest(
-                f'message board not found, id: {message_board_id}<br/>'
-                '<a href="' + reverse('app-message-board-detail',
-                                      kwargs={'bucket_id': bucket_id,
-                                              'message_board_id': message_board_id}) +
-                '">try to open message board</a> first.'
-            )
+            _exception = repr_template_response_entity_not_found(
+                entity_id=message_board_id, entity_type=message["parent"]["type"],
+                href=reverse('app-message-board-detail',
+                             kwargs={'bucket_id': bucket_id, 'message_board_id': message_board_id}))
+            return HttpResponseBadRequest(_exception)
 
         # process message
         _message, _exception = db_get_message(message=message, bucket_id=_bucket.id)
@@ -170,7 +169,7 @@ def app_message_detail(request, bucket_id, message_id):
     response = bc_api_get(uri=api_message_get_bucket_message, access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
-        return HttpResponse('', status=response.status_code)
+        return HttpResponse(repr_http_response_template_string(''), status=response.status_code)
 
     # if OK
     message = response.json()
@@ -188,13 +187,12 @@ def app_message_detail(request, bucket_id, message_id):
             parent = BcMessageBoard.objects.get(id=message["parent"]["id"])
         except BcMessageBoard.DoesNotExist:
             # can not insert new BcMessageBoard with limited data of message["parent"]
-            return HttpResponseBadRequest(
-                f'message board not found: {message["parent"]}<br/>'
-                '<a href="' + reverse('app-message-board-detail',
-                                      kwargs={'bucket_id': message["bucket"]["id"],
-                                              'message_board_id': message["parent"]["id"]}) +
-                '">try to open message board</a> first.'
-            )
+            _exception = repr_template_response_entity_not_found(
+                entity_id=message["parent"]["id"], entity_type=message["parent"]["type"],
+                href=reverse('app-message-board-detail',
+                             kwargs={'bucket_id': message["bucket"]["id"],
+                                     'message_board_id': message["parent"]["id"]}))
+            return HttpResponseBadRequest(_exception)
 
         # remove 'parent' key from message, will use model instance parent instead
         message.pop('parent')

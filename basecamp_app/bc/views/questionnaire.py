@@ -7,7 +7,8 @@ from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket,
                       api_questionnaire_get_bucket_questionnaire_uri,
                       api_questionnaire_get_bucket_questionnaire_questions_uri,
                       api_questionnaire_get_bucket_question_uri, api_questionnaire_get_bucket_question_answers_uri,
-                      api_questionnaire_get_bucket_question_answer_uri)
+                      api_questionnaire_get_bucket_question_answer_uri,
+                      repr_http_response_template_string, repr_template_response_entity_not_found)
 
 
 def app_questionnaire_detail(request, bucket_id, questionnaire_id):
@@ -21,7 +22,7 @@ def app_questionnaire_detail(request, bucket_id, questionnaire_id):
     response = bc_api_get(uri=api_questionnaire_get_questionnaire, access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
-        return HttpResponse('', status=response.status_code)
+        return HttpResponse(repr_http_response_template_string(''), status=response.status_code)
 
     # if OK
     questionnaire = response.json()
@@ -78,7 +79,7 @@ def app_questionnaire_question(request, bucket_id, questionnaire_id):
     response = bc_api_get(uri=api_questionnaire_get_bucket_questionnaire_question, access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
-        return HttpResponse('', status=response.status_code)
+        return HttpResponse(repr_http_response_template_string(''), status=response.status_code)
 
     # if OK
     data = response.json()
@@ -126,7 +127,7 @@ def app_question_detail(request, bucket_id, question_id):
     response = bc_api_get(uri=api_questionnaire_get_bucket_question, access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
-        return HttpResponse('', status=response.status_code)
+        return HttpResponse(repr_http_response_template_string(''), status=response.status_code)
 
     # if OK
     question = response.json()
@@ -146,13 +147,12 @@ def app_question_detail(request, bucket_id, question_id):
                 parent = BcQuestionnaire.objects.get(id=question["parent"]["id"])
             except BcQuestionnaire.DoesNotExist:
                 # can not insert new Questionnaire with limited data of question["parent"]
-                return HttpResponseBadRequest(
-                    f'questionnaire not found: {question["parent"]}<br/>'
-                    '<a href="' + reverse('app-questionnaire-detail',
-                                          kwargs={'bucket_id': question["bucket"]["id"],
-                                                  'questionnaire_id': question["parent"]["id"]}) +
-                    '">try to open questionnaire</a> first.'
-                )
+                _exception = repr_template_response_entity_not_found(
+                    entity_id=question["parent"]["id"], entity_type=question["parent"]["type"],
+                    href=reverse('app-questionnaire-detail',
+                                 kwargs={'bucket_id': question["bucket"]["id"],
+                                         'questionnaire_id': question["parent"]["id"]}))
+                return HttpResponseBadRequest(_exception)
 
         else:  # condition above has filter the type in to Questionnaire, should never be here
             parent = None
@@ -214,7 +214,7 @@ def app_question_answer(request, bucket_id, question_id):
     response = bc_api_get(uri=api_questionnaire_get_bucket_question_answer, access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
-        return HttpResponse('', status=response.status_code)
+        return HttpResponse(repr_http_response_template_string(''), status=response.status_code)
 
     # if OK
     data = response.json()
@@ -263,7 +263,7 @@ def app_question_answer_detail(request, bucket_id, question_answer_id):
     response = bc_api_get(uri=api_questionnaire_get_bucket_question_answer, access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
-        return HttpResponse('', status=response.status_code)
+        return HttpResponse(repr_http_response_template_string(''), status=response.status_code)
 
     # if OK
     answer = response.json()
@@ -282,13 +282,11 @@ def app_question_answer_detail(request, bucket_id, question_answer_id):
                 parent = BcQuestion.objects.get(id=answer["parent"]["id"])
             except BcQuestion.DoesNotExist:
                 # can not insert new Question with limited data of answer["parent"]
-                return HttpResponseBadRequest(
-                    f'question not found: {answer["parent"]}<br/>'
-                    '<a href="' + reverse('app-question-detail',
-                                          kwargs={'bucket_id': answer["bucket"]["id"],
-                                                  'question_id': answer["parent"]["id"]}) +
-                    '">try to open question</a> first.'
-                )
+                _exception = repr_template_response_entity_not_found(
+                    entity_id=answer["parent"]["id"], entity_type=answer["parent"]["type"],
+                    href=reverse('app-question-detail',
+                                 kwargs={'bucket_id': answer["bucket"]["id"], 'question_id': answer["parent"]["id"]}))
+                return HttpResponseBadRequest(_exception)
 
         else:  # condition above has filter the type in to Question, should never be here
             parent = None

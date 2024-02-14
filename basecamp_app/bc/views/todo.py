@@ -3,7 +3,8 @@ from django.urls import reverse
 
 from bc.models import BcTodoset, BcTodolist, BcTodo, BcTodoCompletion
 from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, db_get_or_create_person,
-                      api_todo_get_bucket_todolist_todos_uri, api_todo_get_bucket_todo_uri)
+                      api_todo_get_bucket_todolist_todos_uri, api_todo_get_bucket_todo_uri,
+                      repr_http_response_template_string, repr_template_response_entity_not_found)
 
 
 def app_todo_main(request, bucket_id, todolist_id):
@@ -16,7 +17,7 @@ def app_todo_main(request, bucket_id, todolist_id):
     response = bc_api_get(uri=api_todo_get_todos, access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
-        return HttpResponse('', status=response.status_code)
+        return HttpResponse(repr_http_response_template_string(''), status=response.status_code)
 
     # if OK
     data = response.json()
@@ -76,7 +77,7 @@ def app_todo_detail(request, bucket_id, todo_id):
     response = bc_api_get(uri=api_todo_get_todo, access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
-        return HttpResponse('', status=response.status_code)
+        return HttpResponse(repr_http_response_template_string(''), status=response.status_code)
 
     # if OK
     todo = response.json()
@@ -96,13 +97,11 @@ def app_todo_detail(request, bucket_id, todo_id):
                 parent = BcTodoset.objects.get(id=todo["parent"]["id"])
             except BcTodoset.DoesNotExist:
                 # can not insert new Todoset with limited data of todolist["parent"]
-                return HttpResponseBadRequest(
-                    f'todoset not found: {todo["parent"]}<br/>'
-                    '<a href="' + reverse('app-todoset-detail',
-                                          kwargs={'bucket_id': todo["bucket"]["id"],
-                                                  'todoset_id': todo["parent"]["id"]}) +
-                    '">try to open todoset</a> first.'
-                )
+                _exception = repr_template_response_entity_not_found(
+                    entity_id=todo["parent"]["id"], entity_type=todo["parent"]["type"],
+                    href=reverse('app-todoset-detail',
+                                 kwargs={'bucket_id': todo["bucket"]["id"], 'todoset_id': todo["parent"]["id"]}))
+                return HttpResponseBadRequest(_exception)
 
         elif todo["parent"]["type"] == "Todolist":
             # process parent BcTodolist
@@ -110,13 +109,11 @@ def app_todo_detail(request, bucket_id, todo_id):
                 parent = BcTodolist.objects.get(id=todo["parent"]["id"])
             except BcTodolist.DoesNotExist:
                 # can not insert new Todolist with limited data of todolist["parent"]
-                return HttpResponseBadRequest(
-                    f'todolist not found: {todo["parent"]}<br/>'
-                    '<a href="' + reverse('app-todolist-detail',
-                                          kwargs={'bucket_id': todo["bucket"]["id"],
-                                                  'todolist_id': todo["parent"]["id"]}) +
-                    '">try to open todolist</a> first.'
-                )
+                _exception = repr_template_response_entity_not_found(
+                    entity_id=todo["parent"]["id"], entity_type=todo["parent"]["type"],
+                    href=reverse('app-todolist-detail',
+                                 kwargs={'bucket_id': todo["bucket"]["id"], 'todolist_id': todo["parent"]["id"]}))
+                return HttpResponseBadRequest(_exception)
 
         else:  # condition above has filter the type in to Todoset or Todolist, should never be here
             parent = None

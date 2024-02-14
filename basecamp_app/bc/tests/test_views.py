@@ -876,9 +876,9 @@ class ViewsMessageTest(TestCase):
             # response.charset = utf-8
             # print(response.content.decode(response.charset))
             self.assertEqual(response.content,
-                             f'message board not found, id: {not_exist_message_board_id}<br/>'
+                             f'Message::Board {not_exist_message_board_id} not found<br/>'
                              f'<a href="/bc/project/{bucket_id}/message_board/{not_exist_message_board_id}">'
-                             f'try to open message board</a> first.'.encode(response.charset))
+                             f'try to open Message::Board</a> first.'.encode(response.charset))
 
     def test_app_message_board_message_with_header_x_total_count(self):
 
@@ -1096,9 +1096,9 @@ class ViewsMessageTest(TestCase):
             # response.charset = utf-8
             # print(response.content.decode(response.charset))
             self.assertEqual(response.content,
-                             f'message board not found: {self.message["parent"]}<br/>'
+                             f'Message::Board {self.message["parent"]["id"]} not found<br/>'
                              f'<a href="/bc/project/{bucket_id}/message_board/{not_exist_message_board_id}">'
-                             f'try to open message board</a> first.'.encode(response.charset))
+                             'try to open Message::Board</a> first.'.encode(response.charset))
 
     def test_app_message_detail_with_not_exist_creator(self):
 

@@ -25,10 +25,10 @@ def repr_http_response_template_string(template_str, context_dict=None):
     return t.render(context=c)
 
 
-def repr_template_response_entity_not_found(parent_id, parent_type, href):
-    template_str = ('{{ parent_type }} {{ parent_id }} not found<br/>'
-                    '<a href="{{ href }}">try to open {{ parent_type }}</a> first.')
-    context_dict = {'parent_id': parent_id, 'parent_type': parent_type, 'href': href}
+def repr_template_response_entity_not_found(entity_id, entity_type, href):
+    template_str = ('{{ entity_type }} {{ entity_id }} not found<br/>'
+                    '<a href="{{ href }}">try to open {{ entity_type }}</a> first.')
+    context_dict = {'entity_id': entity_id, 'entity_type': entity_type, 'href': href}
     return repr_http_response_template_string(template_str=template_str, context_dict=context_dict)
 
 

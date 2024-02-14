@@ -5,7 +5,8 @@ from json import dumps as json_dumps
 from bc.models import BcSchedule, BcScheduleEntry, BcRecurrenceSchedule
 from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, db_get_or_create_person,
                       api_schedule_get_bucket_schedule_uri, api_schedule_get_bucket_schedule_entries_uri,
-                      api_schedule_get_bucket_schedule_entry_uri)
+                      api_schedule_get_bucket_schedule_entry_uri,
+                      repr_http_response_template_string, repr_template_response_entity_not_found)
 
 
 def app_schedule_detail(request, bucket_id, schedule_id):
@@ -19,7 +20,7 @@ def app_schedule_detail(request, bucket_id, schedule_id):
     response = bc_api_get(uri=api_schedule_get_bucket_schedule, access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
-        return HttpResponse('', status=response.status_code)
+        return HttpResponse(repr_http_response_template_string(''), status=response.status_code)
 
     # if OK
     schedule = response.json()
@@ -76,7 +77,7 @@ def app_schedule_entry(request, bucket_id, schedule_id):
     response = bc_api_get(uri=api_schedule_get_bucket_schedule_entries, access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
-        return HttpResponse('', status=response.status_code)
+        return HttpResponse(repr_http_response_template_string(''), status=response.status_code)
 
     # if OK
     data = response.json()
@@ -124,7 +125,7 @@ def app_schedule_entry_detail(request, bucket_id, schedule_entry_id):
     response = bc_api_get(uri=api_schedule_get_bucket_schedule_entry, access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
-        return HttpResponse('', status=response.status_code)
+        return HttpResponse(repr_http_response_template_string(''), status=response.status_code)
 
     # if OK
     schedule_entry = response.json()
@@ -144,13 +145,12 @@ def app_schedule_entry_detail(request, bucket_id, schedule_entry_id):
                 parent = BcSchedule.objects.get(id=schedule_entry["parent"]["id"])
             except BcSchedule.DoesNotExist:
                 # can not insert new Schedule with limited data of schedule_entry["parent"]
-                return HttpResponseBadRequest(
-                    f'schedule not found: {schedule_entry["parent"]}<br/>'
-                    '<a href="' + reverse('app-schedule-detail',
-                                          kwargs={'bucket_id': schedule_entry["bucket"]["id"],
-                                                  'schedule_id': schedule_entry["parent"]["id"]}) +
-                    '">try to open schedule</a> first.'
-                )
+                _exception = repr_template_response_entity_not_found(
+                    entity_id=schedule_entry["parent"]["id"], entity_type=schedule_entry["parent"]["type"],
+                    href=reverse('app-schedule-detail',
+                                 kwargs={'bucket_id': schedule_entry["bucket"]["id"],
+                                         'schedule_id': schedule_entry["parent"]["id"]}))
+                return HttpResponseBadRequest(_exception)
 
         else:  # condition above has filter the type in to Schedule, should never be here
             parent = None
