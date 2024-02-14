@@ -89,9 +89,9 @@ def app_todo_detail(request, bucket_id, todo_id):
             'creator' in todo and 'assignees' in todo and 'completion_subscribers' in todo):
 
         # process bucket first, because at processing parent still need a valid bucket
-        bucket, message = db_get_bucket(bucket_id=todo["bucket"]["id"])
-        if not bucket:  # not exists
-            return HttpResponseBadRequest(message)
+        _bucket, _exception = db_get_bucket(bucket_id=todo["bucket"]["id"])
+        if not _bucket:  # not exists
+            return HttpResponseBadRequest(_exception)
 
         if todo["parent"]["type"] == "Todoset":
             # process parent BcTodoset
@@ -121,9 +121,9 @@ def app_todo_detail(request, bucket_id, todo_id):
             parent = None
 
         # process creator
-        creator, message = db_get_or_create_person(person=todo["creator"])
-        if not creator:  # create person error
-            return HttpResponseBadRequest(message)
+        _creator, _exception = db_get_or_create_person(person=todo["creator"])
+        if not _creator:  # create person error
+            return HttpResponseBadRequest(_exception)
 
         # remove 'bucket' key from todo. key 'bucket' still used in processing parent
         todo.pop('bucket')
@@ -138,15 +138,15 @@ def app_todo_detail(request, bucket_id, todo_id):
         completion = None
         if 'completion' in todo:
             # process completion creator
-            completion_creator, message = db_get_or_create_person(person=todo["completion"]["creator"])
-            if not completion_creator:  # create person error
-                return HttpResponseBadRequest(message)
+            _completion_creator, _exception = db_get_or_create_person(person=todo["completion"]["creator"])
+            if not _completion_creator:  # create person error
+                return HttpResponseBadRequest(_exception)
 
             # remove 'creator' key from completion, will use model instance creator instead
             todo["completion"].pop('creator')
 
             # process completion
-            completion = BcTodoCompletion.objects.create(creator=completion_creator, **todo["completion"])
+            completion = BcTodoCompletion.objects.create(creator=_completion_creator, **todo["completion"])
             completion.save()
 
             # remove 'completion' key from todo
@@ -155,9 +155,9 @@ def app_todo_detail(request, bucket_id, todo_id):
         # process assignees
         assignees = []
         for assignee in todo["assignees"]:
-            _assignee, message = db_get_or_create_person(person=assignee)
+            _assignee, _exception = db_get_or_create_person(person=assignee)
             if not _assignee:  # create person error
-                return HttpResponseBadRequest(message)
+                return HttpResponseBadRequest(_exception)
 
             # list of assignee objects, will be appended later as many-to-many
             assignees.append(_assignee)
@@ -168,9 +168,9 @@ def app_todo_detail(request, bucket_id, todo_id):
         # process completion_subscribers
         completion_subscribers = []
         for subscriber in todo["completion_subscribers"]:
-            _subscriber, message = db_get_or_create_person(person=subscriber)
+            _subscriber, _exception = db_get_or_create_person(person=subscriber)
             if not _subscriber:  # create person error
-                return HttpResponseBadRequest(message)
+                return HttpResponseBadRequest(_exception)
 
             # list of subscriber objects, will be appended later as many-to-many
             completion_subscribers.append(_subscriber)
@@ -183,10 +183,10 @@ def app_todo_detail(request, bucket_id, todo_id):
             _todo = BcTodo.objects.get(id=todo["id"])
         except BcTodo.DoesNotExist:
             if completion:  # completion exists
-                _todo = BcTodo.objects.create(parent=parent, bucket=bucket, creator=creator, completion=completion,
+                _todo = BcTodo.objects.create(parent=parent, bucket=_bucket, creator=_creator, completion=completion,
                                               **todo)
             else:  # undefined completion
-                _todo = BcTodo.objects.create(parent=parent, bucket=bucket, creator=creator, **todo)
+                _todo = BcTodo.objects.create(parent=parent, bucket=_bucket, creator=_creator, **todo)
 
             # save todo model
             _todo.save()

@@ -109,9 +109,9 @@ def app_people_load_all_to_db(request):
                 print(person)
             # process company
             if "company" in person and "id" in person["company"]:
-                people, message = db_get_or_create_person(person=person)
-                if not people:  # create person error
-                    return HttpResponseBadRequest(message)
+                _people, _exception = db_get_or_create_person(person=person)
+                if not _people:  # create person error
+                    return HttpResponseBadRequest(_exception)
 
             else:
                 print(f'person {person["name"]} <{person["email_address"]}> has no company information.')
@@ -138,9 +138,9 @@ def app_people_load_all_to_db(request):
                     print(person)
                 # process company
                 if "company" in person and "id" in person["company"]:
-                    people, message = db_get_or_create_person(person=person)
-                    if not people:  # create person error
-                        return HttpResponseBadRequest(message)
+                    _people, _exception = db_get_or_create_person(person=person)
+                    if not _people:  # create person error
+                        return HttpResponseBadRequest(_exception)
 
                 else:
                     print(f'person {person["name"]} <{person["email_address"]}> has no company information.')

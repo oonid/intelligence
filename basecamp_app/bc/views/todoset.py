@@ -24,17 +24,17 @@ def app_todoset_detail(request, bucket_id, todoset_id):
     if 'bucket' in todoset and todoset["bucket"]["type"] == "Project" and 'creator' in todoset:
 
         # process bucket
-        bucket, message = db_get_bucket(bucket_id=todoset["bucket"]["id"])
-        if not bucket:  # not exists
-            return HttpResponseBadRequest(message)
+        _bucket, _exception = db_get_bucket(bucket_id=todoset["bucket"]["id"])
+        if not _bucket:  # not exists
+            return HttpResponseBadRequest(_exception)
 
         # remove 'bucket' key from todoset, will use model instance bucket instead
         todoset.pop('bucket')
 
         # process creator
-        creator, message = db_get_or_create_person(person=todoset["creator"])
-        if not creator:  # create person error
-            return HttpResponseBadRequest(message)
+        _creator, _exception = db_get_or_create_person(person=todoset["creator"])
+        if not _creator:  # create person error
+            return HttpResponseBadRequest(_exception)
 
         # remove 'creator' key from todoset, will use model instance creator instead
         todoset.pop('creator')
@@ -43,7 +43,7 @@ def app_todoset_detail(request, bucket_id, todoset_id):
         try:
             _todoset = BcTodoset.objects.get(id=todoset["id"])
         except BcTodoset.DoesNotExist:
-            _todoset = BcTodoset.objects.create(bucket=bucket, creator=creator, **todoset)
+            _todoset = BcTodoset.objects.create(bucket=_bucket, creator=_creator, **todoset)
             _todoset.save()
 
     else:

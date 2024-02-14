@@ -215,12 +215,12 @@ def app_message_detail(request, bucket_id, message_id):
                 category = BcMessageCategory.objects.get(id=message["category"]["id"])
             except BcMessageCategory.DoesNotExist:
                 # can not insert new Message Category with limited data of message["category"]
+                template_str = ('Message category not found: {{ entity_category }}<br/>'
+                                '<a href="{{ href }}">save message types to db</a> first.')
+                context_dict = {'entity_category': message["category"],
+                                'href': reverse('app-message-type', kwargs={'bucket_id': bucket_id})}
                 return HttpResponseBadRequest(
-                    f'message category not found: {message["category"]}<br/>'
-                    '<a href="' + reverse('app-message-type',
-                                          kwargs={'bucket_id': bucket_id}) +
-                    '">save message types to db</a> first.'
-                )
+                    repr_http_response_template_string(template_str=template_str, context_dict=context_dict))
 
             # remove 'category' key from message, will use model instance of category instead
             message.pop('category')

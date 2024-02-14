@@ -38,6 +38,12 @@ def repr_template_response_parent_not_in_list(parent_id, parent_type, list_paren
     return repr_http_response_template_string(template_str=template_str, context_dict=context_dict)
 
 
+def repr_template_response_entity_creator_bucket(entity_type, entity_title):
+    template_str = '{{ entity_type }} {{ entity_title }} has no creator or bucket type Project'
+    context_dict = {'entity_type': entity_type, 'entity_title': entity_title}
+    return repr_http_response_template_string(template_str=template_str, context_dict=context_dict)
+
+
 def repr_template_response_entity_creator_bucket_parent(entity_type, entity_title, list_parent_types):
     template_str = ('{{ entity_type }} {{ entity_title }} has no creator or bucket type Project or parent type in '
                     '{{ list_parent_types }}')

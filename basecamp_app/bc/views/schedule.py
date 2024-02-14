@@ -6,7 +6,8 @@ from bc.models import BcSchedule, BcScheduleEntry, BcRecurrenceSchedule
 from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, db_get_or_create_person,
                       api_schedule_get_bucket_schedule_uri, api_schedule_get_bucket_schedule_entries_uri,
                       api_schedule_get_bucket_schedule_entry_uri,
-                      repr_http_response_template_string, repr_template_response_entity_not_found)
+                      repr_http_response_template_string, repr_template_response_entity_not_found,
+                      repr_template_response_entity_creator_bucket)
 
 
 def app_schedule_detail(request, bucket_id, schedule_id):
@@ -28,17 +29,17 @@ def app_schedule_detail(request, bucket_id, schedule_id):
     if 'bucket' in schedule and schedule["bucket"]["type"] == "Project" and 'creator' in schedule:
 
         # process bucket
-        bucket, message = db_get_bucket(bucket_id=schedule["bucket"]["id"])
-        if not bucket:  # not exists
-            return HttpResponseBadRequest(message)
+        _bucket, _exception = db_get_bucket(bucket_id=schedule["bucket"]["id"])
+        if not _bucket:  # not exists
+            return HttpResponseBadRequest(_exception)
 
         # remove 'bucket' key from schedule, will use model instance bucket instead
         schedule.pop('bucket')
 
         # process creator
-        creator, message = db_get_or_create_person(person=schedule["creator"])
-        if not creator:  # create person error
-            return HttpResponseBadRequest(message)
+        _creator, _exception = db_get_or_create_person(person=schedule["creator"])
+        if not _creator:  # create person error
+            return HttpResponseBadRequest(_exception)
 
         # remove 'creator' key from schedule, will use model instance creator instead
         schedule.pop('creator')
@@ -47,12 +48,13 @@ def app_schedule_detail(request, bucket_id, schedule_id):
         try:
             _schedule = BcSchedule.objects.get(id=schedule["id"])
         except BcSchedule.DoesNotExist:
-            _schedule = BcSchedule.objects.create(bucket=bucket, creator=creator, **schedule)
+            _schedule = BcSchedule.objects.create(bucket=_bucket, creator=_creator, **schedule)
             _schedule.save()
 
     else:
-        return HttpResponseBadRequest(
-            f'todolist {schedule["title"]} has no creator or bucket type Project')
+        _exception = repr_template_response_entity_creator_bucket(entity_type=schedule["type"],
+                                                                  entity_title=schedule["title"])
+        return HttpResponseBadRequest(_exception)
 
     _schedule_title = _schedule.title if _schedule else schedule["title"]
 
@@ -135,9 +137,9 @@ def app_schedule_entry_detail(request, bucket_id, schedule_entry_id):
             'creator' in schedule_entry and 'participants' in schedule_entry):
 
         # process bucket first, because at processing parent still need a valid bucket
-        bucket, message = db_get_bucket(bucket_id=schedule_entry["bucket"]["id"])
-        if not bucket:  # not exists
-            return HttpResponseBadRequest(message)
+        _bucket, _exception = db_get_bucket(bucket_id=schedule_entry["bucket"]["id"])
+        if not _bucket:  # not exists
+            return HttpResponseBadRequest(_exception)
 
         if schedule_entry["parent"]["type"] == "Schedule":
             # process parent BcSchedule
@@ -162,9 +164,9 @@ def app_schedule_entry_detail(request, bucket_id, schedule_entry_id):
         schedule_entry.pop('bucket')
 
         # process creator
-        creator, message = db_get_or_create_person(person=schedule_entry["creator"])
-        if not creator:  # create person error
-            return HttpResponseBadRequest(message)
+        _creator, _exception = db_get_or_create_person(person=schedule_entry["creator"])
+        if not _creator:  # create person error
+            return HttpResponseBadRequest(_exception)
 
         # remove 'creator' key from schedule entry, will use model instance creator instead
         schedule_entry.pop('creator')
@@ -173,9 +175,9 @@ def app_schedule_entry_detail(request, bucket_id, schedule_entry_id):
         participants = []
         for participant in schedule_entry["participants"]:
 
-            _participant, message = db_get_or_create_person(person=participant)
+            _participant, _exception = db_get_or_create_person(person=participant)
             if not _participant:  # create person error
-                return HttpResponseBadRequest(message)
+                return HttpResponseBadRequest(_exception)
 
             # list of assignee objects, will be appended later as many-to-many
             participants.append(_participant)
@@ -197,7 +199,7 @@ def app_schedule_entry_detail(request, bucket_id, schedule_entry_id):
             try:
                 _schedule_entry = BcScheduleEntry.objects.get(id=schedule_entry["id"])
             except BcScheduleEntry.DoesNotExist:
-                _schedule_entry = BcScheduleEntry.objects.create(parent=parent, bucket=bucket, creator=creator,
+                _schedule_entry = BcScheduleEntry.objects.create(parent=parent, bucket=_bucket, creator=_creator,
                                                                  recurrence_schedule=schedule, **schedule_entry)
                 _schedule_entry.save()
 
@@ -207,7 +209,7 @@ def app_schedule_entry_detail(request, bucket_id, schedule_entry_id):
             try:
                 _schedule_entry = BcScheduleEntry.objects.get(id=schedule_entry["id"])
             except BcScheduleEntry.DoesNotExist:
-                _schedule_entry = BcScheduleEntry.objects.create(parent=parent, bucket=bucket, creator=creator,
+                _schedule_entry = BcScheduleEntry.objects.create(parent=parent, bucket=_bucket, creator=_creator,
                                                                  **schedule_entry)
                 _schedule_entry.save()
 

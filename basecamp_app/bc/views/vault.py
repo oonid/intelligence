@@ -8,7 +8,8 @@ from bc.utils import (session_get_token_and_identity, bc_api_get,
                       api_vault_get_bucket_vault_documents_uri, api_document_get_bucket_document_uri,
                       api_vault_get_bucket_vault_uploads_uri, api_document_get_bucket_upload_uri,
                       static_get_vault_parent_types,
-                      repr_http_response_template_string, repr_template_response_entity_creator_bucket_parent)
+                      repr_http_response_template_string, repr_template_response_entity_creator_bucket_parent,
+                      repr_template_response_entity_creator_bucket)
 
 
 def app_vault_detail(request, bucket_id, vault_id):
@@ -64,8 +65,9 @@ def app_vault_detail(request, bucket_id, vault_id):
             _vault.save()
 
     else:
-        return HttpResponseBadRequest(
-            f'vault {vault["title"]} has no creator or bucket type Project')
+        _exception = repr_template_response_entity_creator_bucket(entity_type=vault["type"],
+                                                                  entity_title=vault["title"])
+        return HttpResponseBadRequest(_exception)
 
     _vault_title = _vault.title if _vault else vault["title"]
 

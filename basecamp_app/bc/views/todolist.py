@@ -105,9 +105,9 @@ def app_todolist_detail(request, bucket_id, todolist_id):
             'bucket' in todolist and todolist["bucket"]["type"] == "Project" and 'creator' in todolist):
 
         # process bucket first, because at processing parent still need a valid bucket
-        bucket, message = db_get_bucket(bucket_id=todolist["bucket"]["id"])
-        if not bucket:  # not exists
-            return HttpResponseBadRequest(message)
+        _bucket, _exception = db_get_bucket(bucket_id=todolist["bucket"]["id"])
+        if not _bucket:  # not exists
+            return HttpResponseBadRequest(_exception)
 
         if todolist["parent"]["type"] == "Todoset":
             # process parent BcTodoset
@@ -145,9 +145,9 @@ def app_todolist_detail(request, bucket_id, todolist_id):
         todolist.pop('bucket')
 
         # process creator
-        creator, message = db_get_or_create_person(person=todolist["creator"])
-        if not creator:  # create person error
-            return HttpResponseBadRequest(message)
+        _creator, _exception = db_get_or_create_person(person=todolist["creator"])
+        if not _creator:  # create person error
+            return HttpResponseBadRequest(_exception)
 
         # remove 'creator' key from todolist, will use model instance creator instead
         todolist.pop('creator')
@@ -171,7 +171,7 @@ def app_todolist_detail(request, bucket_id, todolist_id):
         try:
             _todolist = BcTodolist.objects.get(id=todolist["id"])
         except BcTodolist.DoesNotExist:
-            _todolist = BcTodolist.objects.create(parent=parent, bucket=bucket, creator=creator,
+            _todolist = BcTodolist.objects.create(parent=parent, bucket=_bucket, creator=_creator,
                                                   is_todolist_group=is_todolist_group, **todolist)
             _todolist.save()
 

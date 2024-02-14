@@ -1201,10 +1201,11 @@ class ViewsMessageTest(TestCase):
             self.assertEqual(response.status_code, 400)
             # response.charset = utf-8
             # print(response.content.decode(response.charset))
+            _escape_message_category = escape(f'{self.message_category}')
             self.assertEqual(response.content,
-                             f'message category not found: {self.message_category}<br/>'
-                             f'<a href="/bc/project/{bucket_id}/message/type">save message types to db</a>'
-                             f' first.'.encode(response.charset))
+                             f'Message category not found: {_escape_message_category}<br/>'
+                             f'<a href="/bc/project/{bucket_id}/message/type">save message types to db</a> first.'
+                             .encode(response.charset))
 
     def test_app_message_detail_with_not_exist_message(self):
         with (

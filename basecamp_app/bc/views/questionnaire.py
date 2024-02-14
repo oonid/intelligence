@@ -9,7 +9,8 @@ from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket,
                       api_questionnaire_get_bucket_question_uri, api_questionnaire_get_bucket_question_answers_uri,
                       api_questionnaire_get_bucket_question_answer_uri,
                       repr_http_response_template_string, repr_template_response_entity_not_found,
-                      repr_template_response_entity_creator_bucket_parent)
+                      repr_template_response_entity_creator_bucket_parent,
+                      repr_template_response_entity_creator_bucket)
 
 
 def app_questionnaire_detail(request, bucket_id, questionnaire_id):
@@ -31,17 +32,17 @@ def app_questionnaire_detail(request, bucket_id, questionnaire_id):
     if 'bucket' in questionnaire and questionnaire["bucket"]["type"] == "Project" and 'creator' in questionnaire:
 
         # process bucket
-        bucket, message = db_get_bucket(bucket_id=questionnaire["bucket"]["id"])
-        if not bucket:  # not exists
-            return HttpResponseBadRequest(message)
+        _bucket, _exception = db_get_bucket(bucket_id=questionnaire["bucket"]["id"])
+        if not _bucket:  # not exists
+            return HttpResponseBadRequest(_exception)
 
         # remove 'bucket' key from questionnaire, will use model instance bucket instead
         questionnaire.pop('bucket')
 
         # process creator
-        creator, message = db_get_or_create_person(person=questionnaire["creator"])
-        if not creator:  # create person error
-            return HttpResponseBadRequest(message)
+        _creator, _exception = db_get_or_create_person(person=questionnaire["creator"])
+        if not _creator:  # create person error
+            return HttpResponseBadRequest(_exception)
 
         # remove 'creator' key from questionnaire, will use model instance creator instead
         questionnaire.pop('creator')
@@ -51,12 +52,13 @@ def app_questionnaire_detail(request, bucket_id, questionnaire_id):
         try:
             _questionnaire = BcQuestionnaire.objects.get(id=questionnaire["id"])
         except BcQuestionnaire.DoesNotExist:
-            _questionnaire = BcQuestionnaire.objects.create(bucket=bucket, creator=creator, **questionnaire)
+            _questionnaire = BcQuestionnaire.objects.create(bucket=_bucket, creator=_creator, **questionnaire)
             _questionnaire.save()
 
     else:
-        return HttpResponseBadRequest(
-            f'todolist {questionnaire["title"]} has no creator or bucket type Project')
+        _exception = repr_template_response_entity_creator_bucket(entity_type=questionnaire["type"],
+                                                                  entity_title=questionnaire["title"])
+        return HttpResponseBadRequest(_exception)
 
     return HttpResponse(
         '<a href="' + reverse('app-project-detail', kwargs={'project_id': bucket_id}) + '">back</a><br/>'
@@ -138,9 +140,9 @@ def app_question_detail(request, bucket_id, question_id):
             'creator' in question and 'schedule' in question):
 
         # process bucket first, because at processing parent still need a valid bucket
-        bucket, message = db_get_bucket(bucket_id=question["bucket"]["id"])
-        if not bucket:  # not exists
-            return HttpResponseBadRequest(message)
+        _bucket, _exception = db_get_bucket(bucket_id=question["bucket"]["id"])
+        if not _bucket:  # not exists
+            return HttpResponseBadRequest(_exception)
 
         if question["parent"]["type"] == "Questionnaire":
             # process parent BcQuestionnaire
@@ -165,9 +167,9 @@ def app_question_detail(request, bucket_id, question_id):
         question.pop('bucket')
 
         # process creator
-        creator, message = db_get_or_create_person(person=question["creator"])
-        if not creator:  # create person error
-            return HttpResponseBadRequest(message)
+        _creator, _exception = db_get_or_create_person(person=question["creator"])
+        if not _creator:  # create person error
+            return HttpResponseBadRequest(_exception)
 
         # remove 'creator' key from question, will use model instance creator instead
         question.pop('creator')
@@ -185,7 +187,7 @@ def app_question_detail(request, bucket_id, question_id):
             # remove 'schedule' key from question, will use model instance question instead
             question.pop('schedule')
 
-            _question = BcQuestion.objects.create(parent=parent, bucket=bucket, creator=creator,
+            _question = BcQuestion.objects.create(parent=parent, bucket=_bucket, creator=_creator,
                                                   schedule=schedule, **question)
             _question.save()
 
@@ -273,9 +275,9 @@ def app_question_answer_detail(request, bucket_id, question_answer_id):
             'bucket' in answer and answer["bucket"]["type"] == "Project" and 'creator' in answer):
 
         # process bucket first, because at processing parent still need a valid bucket
-        bucket, message = db_get_bucket(bucket_id=answer["bucket"]["id"])
-        if not bucket:  # not exists
-            return HttpResponseBadRequest(message)
+        _bucket, _exception = db_get_bucket(bucket_id=answer["bucket"]["id"])
+        if not _bucket:  # not exists
+            return HttpResponseBadRequest(_exception)
 
         if answer["parent"]["type"] == "Question":
             # process parent BcQuestion
@@ -299,9 +301,9 @@ def app_question_answer_detail(request, bucket_id, question_answer_id):
         answer.pop('bucket')
 
         # process creator
-        creator, message = db_get_or_create_person(person=answer["creator"])
-        if not creator:  # create person error
-            return HttpResponseBadRequest(message)
+        _creator, _exception = db_get_or_create_person(person=answer["creator"])
+        if not _creator:  # create person error
+            return HttpResponseBadRequest(_exception)
 
         # remove 'creator' key from question, will use model instance creator instead
         answer.pop('creator')
@@ -310,7 +312,8 @@ def app_question_answer_detail(request, bucket_id, question_answer_id):
         try:
             _question_answer = BcQuestionAnswer.objects.get(id=answer["id"])
         except BcQuestionAnswer.DoesNotExist:
-            _question_answer = BcQuestionAnswer.objects.create(parent=parent, bucket=bucket, creator=creator, **answer)
+            _question_answer = BcQuestionAnswer.objects.create(parent=parent, bucket=_bucket, creator=_creator,
+                                                               **answer)
             _question_answer.save()
 
     else:
