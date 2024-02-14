@@ -1060,8 +1060,8 @@ class ViewsMessageTest(TestCase):
             # response.charset = utf-8
             # print(response.content.decode(response.charset))
             self.assertEqual(response.content,
-                             f'message {self.message["title"]} has no creator or bucket type Project or '
-                             f'parent type Message::Board'.encode(response.charset))
+                             escape(f'Message {self.message["title"]} has no creator or bucket type Project or '
+                                    "parent type in ['Message::Board']").encode(response.charset))
 
     def test_app_message_detail_with_not_exist_message_board(self):
 

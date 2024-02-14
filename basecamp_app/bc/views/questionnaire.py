@@ -8,7 +8,8 @@ from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket,
                       api_questionnaire_get_bucket_questionnaire_questions_uri,
                       api_questionnaire_get_bucket_question_uri, api_questionnaire_get_bucket_question_answers_uri,
                       api_questionnaire_get_bucket_question_answer_uri,
-                      repr_http_response_template_string, repr_template_response_entity_not_found)
+                      repr_http_response_template_string, repr_template_response_entity_not_found,
+                      repr_template_response_entity_creator_bucket_parent)
 
 
 def app_questionnaire_detail(request, bucket_id, questionnaire_id):
@@ -100,8 +101,8 @@ def app_questionnaire_question(request, bucket_id, questionnaire_id):
                                                      kwargs={'bucket_id': bucket_id, 'question_id': question["id"]}) +
                           f'">{question["id"]}</a> {question["title"]} {_saved_on_db}</li>')
 
-    if 'next' in response.links and 'url' in response.links["next"]:
-        print(response.links["next"]["url"])
+    # if 'next' in response.links and 'url' in response.links["next"]:
+    #     print(response.links["next"]["url"])
 
     total_count = 0
     if "X-Total-Count" in response.headers:
@@ -236,8 +237,8 @@ def app_question_answer(request, bucket_id, question_id):
                                 kwargs={'bucket_id': bucket_id, 'question_answer_id': answer["id"]}) +
                         f'">{answer["id"]}</a> {answer["title"]}</li>')
 
-    if 'next' in response.links and 'url' in response.links["next"]:
-        print(response.links["next"]["url"])
+    # if 'next' in response.links and 'url' in response.links["next"]:
+    #     print(response.links["next"]["url"])
 
     total_count = 0
     if "X-Total-Count" in response.headers:
@@ -313,8 +314,9 @@ def app_question_answer_detail(request, bucket_id, question_answer_id):
             _question_answer.save()
 
     else:
-        return HttpResponseBadRequest(
-            f'answer {answer["title"]} has no creator or bucket type Project or parent type Question')
+        _exception = repr_template_response_entity_creator_bucket_parent(
+            entity_type=answer["type"], entity_title=answer["title"], list_parent_types=["Question"])
+        return HttpResponseBadRequest(_exception)
 
     _question_answer_title = _question_answer.title if _question_answer else answer["title"]
 

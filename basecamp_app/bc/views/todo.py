@@ -4,7 +4,8 @@ from django.urls import reverse
 from bc.models import BcTodoset, BcTodolist, BcTodo, BcTodoCompletion
 from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, db_get_or_create_person,
                       api_todo_get_bucket_todolist_todos_uri, api_todo_get_bucket_todo_uri,
-                      repr_http_response_template_string, repr_template_response_entity_not_found)
+                      repr_http_response_template_string, repr_template_response_entity_not_found,
+                      repr_template_response_entity_creator_bucket_parent)
 
 
 def app_todo_main(request, bucket_id, todolist_id):
@@ -37,8 +38,9 @@ def app_todo_main(request, bucket_id, todolist_id):
                 _todo = None
 
         else:
-            return HttpResponseBadRequest(
-                f'todolist {todo["title"]} has no creator or bucket type Project or parent type Todoset/Todolist')
+            _exception = repr_template_response_entity_creator_bucket_parent(
+                entity_type=todo["type"], entity_title=todo["title"], list_parent_types=["Todoset", "Todolist"])
+            return HttpResponseBadRequest(_exception)
 
         _todo_title = _todo.title if _todo else todo["title"]
         _saved_on_db = " (db)" if _todo else ""
@@ -51,8 +53,8 @@ def app_todo_main(request, bucket_id, todolist_id):
                       f'{todo["comments_count"]} comments {_saved_on_db}</li>')
         count += 1
 
-    if 'next' in response.links and 'url' in response.links["next"]:
-        print(response.links["next"]["url"])
+    # if 'next' in response.links and 'url' in response.links["next"]:
+    #     print(response.links["next"]["url"])
 
     total_count_str = ''
     if "X-Total-Count" in response.headers:
@@ -194,8 +196,9 @@ def app_todo_detail(request, bucket_id, todo_id):
         _todo.completion_subscribers.set(completion_subscribers)
 
     else:
-        return HttpResponseBadRequest(
-            f'todo {todo["title"]} has no creator or bucket type Project or parent type Todoset/Todolist')
+        _exception = repr_template_response_entity_creator_bucket_parent(
+            entity_type=todo["type"], entity_title=todo["title"], list_parent_types=["Todoset", "Todolist"])
+        return HttpResponseBadRequest(_exception)
 
     assignees_str = [assignee.name for assignee in assignees]
     completion_subscribers_str = [subscriber.name for subscriber in completion_subscribers]

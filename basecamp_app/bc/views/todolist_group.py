@@ -1,7 +1,9 @@
 from django.http import HttpResponse, HttpResponseRedirect, HttpResponseBadRequest
 from django.urls import reverse
-from bc.utils import (session_get_token_and_identity, bc_api_get, api_todolist_group_get_todolist_groups_uri)
+
 from bc.models import BcTodolist
+from bc.utils import (session_get_token_and_identity, bc_api_get, api_todolist_group_get_todolist_groups_uri,
+                      repr_http_response_template_string, repr_template_response_entity_creator_bucket_parent)
 
 
 def app_todolist_group_main(request, bucket_id, todolist_id):
@@ -15,7 +17,7 @@ def app_todolist_group_main(request, bucket_id, todolist_id):
     response = bc_api_get(uri=api_todolist_group_get_todolist_group, access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
-        return HttpResponse('', status=response.status_code)
+        return HttpResponse(repr_http_response_template_string(''), status=response.status_code)
 
     # if OK
     data = response.json()
@@ -36,9 +38,10 @@ def app_todolist_group_main(request, bucket_id, todolist_id):
                 _todolist_group = None
 
         else:
-            return HttpResponseBadRequest(
-                f'todolist {todolist_group["title"]} '
-                f'has no creator or bucket type Project or parent type Todoset/Todolist')
+            _exception = repr_template_response_entity_creator_bucket_parent(
+                entity_type=todolist_group["type"], entity_title=todolist_group["title"],
+                list_parent_types=["Todoset", "Todolist"])
+            return HttpResponseBadRequest(_exception)
 
         _todolist_group_title = _todolist_group.title if _todolist_group else todolist_group["title"]
         _saved_on_db = " (db)" if _todolist_group else ""
@@ -54,8 +57,8 @@ def app_todolist_group_main(request, bucket_id, todolist_id):
                                 f'{todolist_group["comments_count"]} comments {_saved_on_db}</li>')
         count += 1
 
-    if 'next' in response.links and 'url' in response.links["next"]:
-        print(response.links["next"]["url"])
+    # if 'next' in response.links and 'url' in response.links["next"]:
+    #     print(response.links["next"]["url"])
 
     total_count_str = ''
     if "X-Total-Count" in response.headers:

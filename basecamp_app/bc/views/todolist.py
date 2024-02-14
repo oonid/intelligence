@@ -4,7 +4,8 @@ from django.urls import reverse
 from bc.models import BcTodoset, BcTodolist
 from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, db_get_or_create_person,
                       api_todolist_get_bucket_todoset_todolists_uri, api_todolist_get_bucket_todolist_uri,
-                      repr_http_response_template_string, repr_template_response_entity_not_found)
+                      repr_http_response_template_string, repr_template_response_entity_not_found,
+                      repr_template_response_entity_creator_bucket_parent)
 
 
 def app_todolist_main(request, bucket_id, todoset_id):
@@ -45,8 +46,9 @@ def app_todolist_main(request, bucket_id, todoset_id):
                 _todolist = None
 
         else:
-            return HttpResponseBadRequest(
-                f'todolist {todolist["title"]} has no creator or bucket type Project or parent type Todoset/Todolist')
+            _exception = repr_template_response_entity_creator_bucket_parent(
+                entity_type=todolist["type"], entity_title=todolist["title"], list_parent_types=["Todoset", "Todolist"])
+            return HttpResponseBadRequest(_exception)
 
         _todolist_title = _todolist.title if _todolist else todolist["title"]
         _saved_on_db = " (db)" if _todolist else ""
@@ -60,8 +62,8 @@ def app_todolist_main(request, bucket_id, todoset_id):
 
         count += 1
 
-    if 'next' in response.links and 'url' in response.links["next"]:
-        print(response.links["next"]["url"])
+    # if 'next' in response.links and 'url' in response.links["next"]:
+    #     print(response.links["next"]["url"])
 
     total_count_str = ''
     if "X-Total-Count" in response.headers:
@@ -174,8 +176,9 @@ def app_todolist_detail(request, bucket_id, todolist_id):
             _todolist.save()
 
     else:
-        return HttpResponseBadRequest(
-            f'todolist {todolist["title"]} has no creator or bucket type Project or parent type Todoset/Todolist')
+        _exception = repr_template_response_entity_creator_bucket_parent(
+            entity_type=todolist["type"], entity_title=todolist["title"], list_parent_types=["Todoset", "Todolist"])
+        return HttpResponseBadRequest(_exception)
 
     return HttpResponse(
         '<a href="' + reverse('app-project-detail', kwargs={'project_id': bucket_id}) + '">back</a><br/>'

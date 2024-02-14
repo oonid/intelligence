@@ -6,7 +6,8 @@ from bc.utils import (session_get_token_and_identity, bc_api_get, repr_message_d
                       db_get_bucket, db_get_message, db_get_or_create_person,
                       api_message_get_bucket_message_types_uri, api_message_get_bucket_message_board_uri,
                       api_message_get_bucket_message_board_messages_uri, api_message_get_bucket_message_uri,
-                      repr_http_response_template_string, repr_template_response_entity_not_found)
+                      repr_http_response_template_string, repr_template_response_entity_not_found,
+                      repr_template_response_entity_creator_bucket_parent)
 
 
 def app_message_type(request, bucket_id):
@@ -20,7 +21,7 @@ def app_message_type(request, bucket_id):
     response = bc_api_get(uri=api_message_get_message_types, access_token=token["access_token"])
 
     if response.status_code != 200:  # not OK
-        return HttpResponse('', status=response.status_code)
+        return HttpResponse(repr_http_response_template_string(''), status=response.status_code)
 
     # if OK
     data = response.json()
@@ -237,8 +238,9 @@ def app_message_detail(request, bucket_id, message_id):
             _message.save()
 
     else:
-        return HttpResponseBadRequest(
-            f'message {message["title"]} has no creator or bucket type Project or parent type Message::Board')
+        _exception = repr_template_response_entity_creator_bucket_parent(
+            entity_type=message["type"], entity_title=message["title"], list_parent_types=["Message::Board"])
+        return HttpResponseBadRequest(_exception)
 
     return HttpResponse(
         '<a href="' + reverse('app-project-detail', kwargs={'project_id': bucket_id}) + '">back</a><br/>'
