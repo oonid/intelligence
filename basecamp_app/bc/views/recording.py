@@ -6,7 +6,8 @@ from bc.utils import (session_get_token_and_identity, bc_api_get, repr_message_d
                       db_get_message, db_get_message_parent,
                       api_recording_get_recordings_uri, api_recording_get_bucket_recording_parent_comment_uri,
                       static_get_recording_types, static_get_comment_parent_types, static_get_message_parent_types,
-                      repr_http_response_template_string, repr_template_response_entity_creator_bucket_parent)
+                      repr_http_response_template_string, repr_template_response_entity_creator_bucket_parent,
+                      repr_template_response_simple_with_back)
 
 
 def app_recording_main(request):
@@ -56,11 +57,11 @@ def app_recording_by_type(request, recording_type):
     if "X-Total-Count" in response.headers:
         total_count = int(response.headers["X-Total-Count"])
 
-    return HttpResponse(
-        '<a href="' + reverse('app-recording-main') + '">back</a><br/>'
-        f'{recording_type}: got {recording_total} of {total_count} recordings (with {len(recording_keys)} keys)<br/>'
-        f'{recording_keys}'
-    )
+    _response = repr_template_response_simple_with_back(
+        back_href=reverse('app-recording-main'),
+        body=f'{recording_type}: got {recording_total} of {total_count} recordings (with {len(recording_keys)} keys)'
+             f'<br/>{recording_keys}')
+    return HttpResponse(_response)
 
 
 def app_project_recording_by_type(request, bucket_id, recording_type):
@@ -187,12 +188,11 @@ def app_project_recording_by_type(request, bucket_id, recording_type):
     if "X-Total-Count" in response.headers:
         total_count = int(response.headers["X-Total-Count"])
 
-    return HttpResponse(
-        '<a href="' + reverse('app-project-detail', kwargs={'project_id': _bucket.id}) + '">back</a><br/>'
-        f'recording {recording_type}: {recording_total}/{total_count} recordings<br/>'
-        f'with {len(recording_keys)} keys: {recording_keys}<br/>'
-        f'{recording_list}<br/>'
-    )
+    _response = repr_template_response_simple_with_back(
+        back_href=reverse('app-project-detail', kwargs={'project_id': _bucket.id}),
+        body=f'recording {recording_type}: {recording_total}/{total_count} recordings<br/>'
+             f'with {len(recording_keys)} keys: {recording_keys}<br/>{recording_list}')
+    return HttpResponse(_response)
 
 
 def app_project_recording_parent_comment(request, bucket_id, parent_id):
@@ -229,8 +229,7 @@ def app_project_recording_parent_comment(request, bucket_id, parent_id):
         total_count = int(response.headers["X-Total-Count"])
         total_count_str = f'shows {count}/{total_count} comments'
 
-    return HttpResponse(
-        '<a href="' + reverse('app-project-detail', kwargs={'project_id': bucket_id}) + '">back</a><br/>'
-        f'{total_count_str}<br/>'
-        f'{comment_list}<br/>'
-    )
+    _response = repr_template_response_simple_with_back(
+        back_href=reverse('app-project-detail', kwargs={'project_id': bucket_id}),
+        body=f'{total_count_str}<br/>{comment_list}')
+    return HttpResponse(_response)

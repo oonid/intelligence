@@ -7,7 +7,7 @@ from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket,
                       api_schedule_get_bucket_schedule_uri, api_schedule_get_bucket_schedule_entries_uri,
                       api_schedule_get_bucket_schedule_entry_uri,
                       repr_http_response_template_string, repr_template_response_entity_not_found,
-                      repr_template_response_entity_creator_bucket)
+                      repr_template_response_entity_creator_bucket, repr_template_response_simple_with_back)
 
 
 def app_schedule_detail(request, bucket_id, schedule_id):
@@ -58,14 +58,14 @@ def app_schedule_detail(request, bucket_id, schedule_id):
 
     _schedule_title = _schedule.title if _schedule else schedule["title"]
 
-    return HttpResponse(
-        '<a href="' + reverse('app-project-detail', kwargs={'project_id': bucket_id}) + '">back</a><br/>'
-        f'title: {_schedule_title}<br/>'
+    _response = repr_template_response_simple_with_back(
+        back_href=reverse('app-project-detail', kwargs={'project_id': bucket_id}),
+        body=f'title: {_schedule_title}<br/>'
         f'type: {schedule["type"]}<br/>'
         f'<a href="' + reverse('app-schedule-entry',
                                kwargs={'bucket_id': bucket_id, 'schedule_id': schedule_id}) +
-        f'">{schedule["entries_count"]} entries</a><br/>'
-    )
+        f'">{schedule["entries_count"]} entries</a>')
+    return HttpResponse(_response)
 
 
 def app_schedule_entry(request, bucket_id, schedule_id):
@@ -109,11 +109,10 @@ def app_schedule_entry(request, bucket_id, schedule_id):
 
     total_count_str = f'total entries: {total_count}' if total_count > 0 else ''
 
-    return HttpResponse(
-        '<a href="' + reverse('app-schedule-detail',
-                              kwargs={'bucket_id': bucket_id, 'schedule_id': schedule_id}) + '">back</a><br/>'
-        f'{total_count_str}'
-        f'{entry_list}')
+    _response = repr_template_response_simple_with_back(
+        back_href=reverse('app-schedule-detail', kwargs={'bucket_id': bucket_id, 'schedule_id': schedule_id}),
+        body=f'{total_count_str}<br/>{entry_list}')
+    return HttpResponse(_response)
 
 
 def app_schedule_entry_detail(request, bucket_id, schedule_entry_id):
@@ -221,11 +220,11 @@ def app_schedule_entry_detail(request, bucket_id, schedule_entry_id):
             f'question {schedule_entry["title"]} has no participants or creator or '
             f'bucket type Project or parent type Schedule')
 
-    return HttpResponse(
-        '<a href="' + reverse('app-project-detail', kwargs={'project_id': bucket_id}) + '">back</a><br/>'
-        f'title: {schedule_entry["title"]}<br/>'
+    _response = repr_template_response_simple_with_back(
+        back_href=reverse('app-project-detail', kwargs={'project_id': bucket_id}),
+        body=f'title: {schedule_entry["title"]}<br/>'
         f'type: {schedule_entry["type"]}<br/>'
         f'starts_at: {schedule_entry["starts_at"]}<br/>'
         f'ends_at: {schedule_entry["ends_at"]}<br/>'
-        f'comments_count: {schedule_entry["comments_count"]}<br/>'
-    )
+        f'comments_count: {schedule_entry["comments_count"]}')
+    return HttpResponse(_response)

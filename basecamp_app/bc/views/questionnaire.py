@@ -9,8 +9,8 @@ from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket,
                       api_questionnaire_get_bucket_question_uri, api_questionnaire_get_bucket_question_answers_uri,
                       api_questionnaire_get_bucket_question_answer_uri,
                       repr_http_response_template_string, repr_template_response_entity_not_found,
-                      repr_template_response_entity_creator_bucket_parent,
-                      repr_template_response_entity_creator_bucket)
+                      repr_template_response_entity_creator_bucket_parent, repr_template_response_entity_creator_bucket,
+                      repr_template_response_simple_with_back)
 
 
 def app_questionnaire_detail(request, bucket_id, questionnaire_id):
@@ -60,14 +60,14 @@ def app_questionnaire_detail(request, bucket_id, questionnaire_id):
                                                                   entity_title=questionnaire["title"])
         return HttpResponseBadRequest(_exception)
 
-    return HttpResponse(
-        '<a href="' + reverse('app-project-detail', kwargs={'project_id': bucket_id}) + '">back</a><br/>'
-        f'title: {_questionnaire.title}<br/>'
+    _response = repr_template_response_simple_with_back(
+        back_href=reverse('app-project-detail', kwargs={'project_id': bucket_id}),
+        body=f'title: {_questionnaire.title}<br/>'
         f'type: {questionnaire["type"]}<br/>'
         f'<a href="' + reverse('app-questionnaire-question',
                                kwargs={'bucket_id': bucket_id, 'questionnaire_id': questionnaire_id}) +
-        f'">{questionnaire["questions_count"]} questions</a><br/>'
-    )
+        f'">{questionnaire["questions_count"]} questions</a>')
+    return HttpResponse(_response)
 
 
 def app_questionnaire_question(request, bucket_id, questionnaire_id):
@@ -112,11 +112,11 @@ def app_questionnaire_question(request, bucket_id, questionnaire_id):
 
     total_count_str = f'total questions: {total_count}' if total_count > 0 else ''
 
-    return HttpResponse(
-        '<a href="' + reverse('app-questionnaire-detail',
-                              kwargs={'bucket_id': bucket_id, 'questionnaire_id': questionnaire_id}) + '">back</a><br/>'
-        f'{total_count_str}'
-        f'{question_list}')
+    _response = repr_template_response_simple_with_back(
+        back_href=reverse('app-questionnaire-detail',
+                          kwargs={'bucket_id': bucket_id, 'questionnaire_id': questionnaire_id}),
+        body=f'{total_count_str}<br/>{question_list}')
+    return HttpResponse(_response)
 
 
 def app_question_detail(request, bucket_id, question_id):
@@ -196,14 +196,14 @@ def app_question_detail(request, bucket_id, question_id):
             f'question {question["title"]} has no schedule or creator or '
             f'bucket type Project or parent type Questionnaire')
 
-    return HttpResponse(
-        '<a href="' + reverse('app-project-detail', kwargs={'project_id': bucket_id}) + '">back</a><br/>'
-        f'title: {question["title"]}<br/>'
+    _response = repr_template_response_simple_with_back(
+        back_href=reverse('app-project-detail', kwargs={'project_id': bucket_id}),
+        body=f'title: {question["title"]}<br/>'
         f'type: {question["type"]}<br/>'
         f'<a href="' + reverse('app-question-answer',
                                kwargs={'bucket_id': bucket_id, 'question_id': question["id"]}) +
-        f'">{question["answers_count"]} answers</a><br/>'
-    )
+        f'">{question["answers_count"]} answers</a>')
+    return HttpResponse(_response)
 
 
 def app_question_answer(request, bucket_id, question_id):
@@ -248,11 +248,10 @@ def app_question_answer(request, bucket_id, question_id):
 
     total_count_str = f'total answers: {total_count}' if total_count > 0 else ''
 
-    return HttpResponse(
-        '<a href="' + reverse('app-question-detail',
-                              kwargs={'bucket_id': bucket_id, 'question_id': question_id}) + '">back</a><br/>'
-        f'{total_count_str}'
-        f'{answer_list}')
+    _response = repr_template_response_simple_with_back(
+        back_href=reverse('app-question-detail', kwargs={'bucket_id': bucket_id, 'question_id': question_id}),
+        body=f'{total_count_str}<br/>{answer_list}')
+    return HttpResponse(_response)
 
 
 def app_question_answer_detail(request, bucket_id, question_answer_id):
@@ -323,9 +322,9 @@ def app_question_answer_detail(request, bucket_id, question_answer_id):
 
     _question_answer_title = _question_answer.title if _question_answer else answer["title"]
 
-    return HttpResponse(
-        '<a href="' + reverse('app-project-detail', kwargs={'project_id': bucket_id}) + '">back</a><br/>'
-        f'title: {_question_answer_title}<br/>'
+    _response = repr_template_response_simple_with_back(
+        back_href=reverse('app-project-detail', kwargs={'project_id': bucket_id}),
+        body=f'title: {_question_answer_title}<br/>'
         f'type: {answer["type"]}<br/>'
-        f'comments_count: {answer["comments_count"]}<br/>'
-    )
+        f'comments_count: {answer["comments_count"]}')
+    return HttpResponse(_response)

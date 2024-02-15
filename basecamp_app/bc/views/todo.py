@@ -5,7 +5,7 @@ from bc.models import BcTodoset, BcTodolist, BcTodo, BcTodoCompletion
 from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, db_get_or_create_person,
                       api_todo_get_bucket_todolist_todos_uri, api_todo_get_bucket_todo_uri,
                       repr_http_response_template_string, repr_template_response_entity_not_found,
-                      repr_template_response_entity_creator_bucket_parent)
+                      repr_template_response_entity_creator_bucket_parent, repr_template_response_simple_with_back)
 
 
 def app_todo_main(request, bucket_id, todolist_id):
@@ -61,12 +61,10 @@ def app_todo_main(request, bucket_id, todolist_id):
         total_count = int(response.headers["X-Total-Count"])
         total_count_str = f'shows {count}/{total_count} todos'
 
-    return HttpResponse(
-        '<a href="' + reverse('app-todolist-detail',
-                              kwargs={'bucket_id': bucket_id, 'todolist_id': todolist_id}) + '">back</a><br/>'
-        f'{total_count_str}<br/>'
-        f'{todo_list}<br/>'
-    )
+    _response = repr_template_response_simple_with_back(
+        back_href=reverse('app-todolist-detail', kwargs={'bucket_id': bucket_id, 'todolist_id': todolist_id}),
+        body=f'{total_count_str}<br/>{todo_list}')
+    return HttpResponse(_response)
 
 
 def app_todo_detail(request, bucket_id, todo_id):
@@ -203,11 +201,11 @@ def app_todo_detail(request, bucket_id, todo_id):
     assignees_str = [assignee.name for assignee in assignees]
     completion_subscribers_str = [subscriber.name for subscriber in completion_subscribers]
 
-    return HttpResponse(
-        '<a href="' + reverse('app-project-detail', kwargs={'project_id': bucket_id}) + '">back</a><br/>'
-        f'title: {todo["title"]}<br/>'
+    _response = repr_template_response_simple_with_back(
+        back_href=reverse('app-project-detail', kwargs={'project_id': bucket_id}),
+        body=f'title: {todo["title"]}<br/>'
         f'due_on: {todo["due_on"]}<br/>'
         f'assignees: {assignees_str}<br/>'
         f'completion_subscribers: {completion_subscribers_str}<br/>'
-        f'{todo["comments_count"]} comment(s)<br/>'
-    )
+        f'{todo["comments_count"]} comment(s)')
+    return HttpResponse(_response)

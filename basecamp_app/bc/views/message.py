@@ -7,7 +7,7 @@ from bc.utils import (session_get_token_and_identity, bc_api_get, repr_message_d
                       api_message_get_bucket_message_types_uri, api_message_get_bucket_message_board_uri,
                       api_message_get_bucket_message_board_messages_uri, api_message_get_bucket_message_uri,
                       repr_http_response_template_string, repr_template_response_entity_not_found,
-                      repr_template_response_entity_creator_bucket_parent)
+                      repr_template_response_entity_creator_bucket_parent, repr_template_response_simple_with_back)
 
 
 def app_message_type(request, bucket_id):
@@ -48,10 +48,10 @@ def app_message_type(request, bucket_id):
 
     total_count_str = f'total message types: {total_count}' if total_count > 0 else ''
 
-    return HttpResponse(
-        '<a href="' + reverse('app-project-detail', kwargs={'project_id': bucket_id}) + '">back</a><br/>'
-        f'{total_count_str}'
-        f'{message_type_list}')
+    _response = repr_template_response_simple_with_back(
+        back_href=reverse('app-project-detail', kwargs={'project_id': bucket_id}),
+        body=f'{total_count_str}<br/>{message_type_list}')
+    return HttpResponse(_response)
 
 
 def app_message_board_detail(request, bucket_id, message_board_id):
@@ -94,13 +94,14 @@ def app_message_board_detail(request, bucket_id, message_board_id):
         _message_board = BcMessageBoard.objects.create(bucket=_bucket, creator=_creator, **message_board)
         _message_board.save()
 
-    return HttpResponse(
-        '<a href="' + reverse('app-project-detail', kwargs={'project_id': bucket_id}) + '">back</a><br/>'
-        f'title: {_message_board.title}<br/>'
+    _response = repr_template_response_simple_with_back(
+        back_href=reverse('app-project-detail', kwargs={'project_id': bucket_id}),
+        body=f'title: {_message_board.title}<br/>'
         f'type: {message_board["type"]}<br/>'
         '<a href="' + reverse('app-message-board-message',
                               kwargs={'bucket_id': bucket_id, 'message_board_id': message_board_id}) +
-        f'">{message_board["messages_count"]} messages</a><br/>')
+        f'">{message_board["messages_count"]} messages</a>')
+    return HttpResponse(_response)
 
 
 def app_message_board_message(request, bucket_id, message_board_id):
@@ -153,11 +154,11 @@ def app_message_board_message(request, bucket_id, message_board_id):
 
     total_count_str = f'total messages: {total_count}' if total_count > 0 else ''
 
-    return HttpResponse(
-        '<a href="' + reverse('app-message-board-detail',
-                              kwargs={'bucket_id': bucket_id, 'message_board_id': message_board_id}) + '">back</a><br/>'
-        f'{total_count_str}'
-        f'{message_list}')
+    _response = repr_template_response_simple_with_back(
+        back_href=reverse('app-message-board-detail',
+                          kwargs={'bucket_id': bucket_id, 'message_board_id': message_board_id}),
+        body=f'{total_count_str}<br/>{message_list}')
+    return HttpResponse(_response)
 
 
 def app_message_detail(request, bucket_id, message_id):
@@ -242,9 +243,9 @@ def app_message_detail(request, bucket_id, message_id):
             entity_type=message["type"], entity_title=message["title"], list_parent_types=["Message::Board"])
         return HttpResponseBadRequest(_exception)
 
-    return HttpResponse(
-        '<a href="' + reverse('app-project-detail', kwargs={'project_id': bucket_id}) + '">back</a><br/>'
-        f'title: {_message.title}<br/>'
+    _response = repr_template_response_simple_with_back(
+        back_href=reverse('app-project-detail', kwargs={'project_id': bucket_id}),
+        body=f'title: {_message.title}<br/>'
         f'type: {message["type"]}<br/>'
-        f'comments_count: {message["comments_count"]}<br/>'
-    )
+        f'comments_count: {message["comments_count"]}')
+    return HttpResponse(_response)

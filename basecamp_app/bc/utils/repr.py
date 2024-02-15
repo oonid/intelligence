@@ -25,6 +25,12 @@ def repr_http_response_template_string(template_str, context_dict=None):
     return t.render(context=c)
 
 
+def repr_template_response_simple_with_back(back_href, body):
+    template_str = '<a href="{{ back_href}}">back</a><br/>{{ body}}<br/>'
+    context_dict = {'back_href': back_href, 'body': body}
+    return repr_http_response_template_string(template_str=template_str, context_dict=context_dict)
+
+
 def repr_template_response_entity_not_found(entity_id, entity_type, href):
     template_str = ('{{ entity_type }} {{ entity_id }} not found<br/>'
                     '<a href="{{ href }}">try to open {{ entity_type }}</a> first.')

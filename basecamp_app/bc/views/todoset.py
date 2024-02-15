@@ -3,7 +3,8 @@ from django.urls import reverse
 
 from bc.models import BcTodoset
 from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, db_get_or_create_person,
-                      api_todoset_get_bucket_todoset_uri)
+                      api_todoset_get_bucket_todoset_uri,
+                      repr_template_response_simple_with_back)
 
 
 def app_todoset_detail(request, bucket_id, todoset_id):
@@ -49,14 +50,14 @@ def app_todoset_detail(request, bucket_id, todoset_id):
     else:
         return HttpResponseBadRequest(f'todoset {todoset["title"]} has no creator or bucket with type Project')
 
-    return HttpResponse(
-        '<a href="' + reverse('app-project-detail', kwargs={'project_id': bucket_id}) + '">back</a><br/>'
-        f'title: {_todoset.title}<br/>'
-        f'name: {_todoset.name}<br/>'
-        f'type: {_todoset.type}<br/>'
-        f'todolists_count: <a href="'+reverse('app-todolist-main',
-                                              kwargs={'bucket_id': bucket_id, 'todoset_id': todoset_id}) +
-        f'">{todoset["todolists_count"]} todolists</a><br/>'
-        f'completed: {todoset["completed"]}<br/>'
-        f'completed_ratio: {todoset["completed_ratio"]}<br/>'
-    )
+    _response = repr_template_response_simple_with_back(
+        back_href=reverse('app-project-detail', kwargs={'project_id': bucket_id}),
+        body=f'title: {_todoset.title}<br/>'
+             f'name: {_todoset.name}<br/>'
+             f'type: {_todoset.type}<br/>'
+             f'todolists_count: <a href="'+reverse('app-todolist-main',
+                                                   kwargs={'bucket_id': bucket_id, 'todoset_id': todoset_id}) +
+             f'">{todoset["todolists_count"]} todolists</a><br/>'
+             f'completed: {todoset["completed"]}<br/>'
+             f'completed_ratio: {todoset["completed_ratio"]}')
+    return HttpResponse(_response)

@@ -438,8 +438,8 @@ class ViewsMessageTest(TestCase):
             # response.charset = utf-8
             self.assertEqual(response.content,
                              f'<a href="/bc/project/{bucket_id}">back</a><br/>'
-                             '<li>📢 Announcement</li>'
-                             '<li>❤️ Update</li>'.encode(response.charset))
+                             f'&lt;br/&gt;&lt;li&gt;📢 Announcement&lt;/li&gt;&lt;li&gt;❤️ Update&lt;/li&gt;<br/>'
+                             .encode(response.charset))
 
     def test_app_message_type_with_no_token(self):
 
@@ -529,11 +529,10 @@ class ViewsMessageTest(TestCase):
 
             self.assertEqual(response.status_code, 200)
             # response.charset = utf-8
-            # print(response.content.decode(response.charset))
             self.assertEqual(response.content,
                              f'<a href="/bc/project/{bucket_id}">back</a><br/>total message types: {x_total_count}'
-                             '<li>📢 Announcement</li>'
-                             '<li>❤️ Update</li>'.encode(response.charset))
+                             f'&lt;br/&gt;&lt;li&gt;📢 Announcement&lt;/li&gt;&lt;li&gt;❤️ Update&lt;/li&gt;<br/>'
+                             .encode(response.charset))
 
     def test_app_message_board_detail(self):
 
@@ -566,10 +565,11 @@ class ViewsMessageTest(TestCase):
             # print(response.content.decode(response.charset))
             self.assertEqual(response.content,
                              f'<a href="/bc/project/{bucket_id}">back</a><br/>'
-                             f'title: {self.message_board["title"]}<br/>'
-                             f'type: {self.message_board["type"]}<br/>'
-                             f'<a href="/bc/project/{bucket_id}/message_board/'
-                             f'{self.message_board["id"]}/message">{self.message_board["messages_count"]} messages</a>'
+                             f'title: {self.message_board["title"]}&lt;br/&gt;'
+                             f'type: {self.message_board["type"]}&lt;br/&gt;'
+                             f'&lt;a href=&quot;/bc/project/{bucket_id}/message_board/'
+                             f'{self.message_board["id"]}/message&quot;&gt;'
+                             f'{self.message_board["messages_count"]} messages&lt;/a&gt;'
                              f'<br/>'.encode(response.charset))
 
     def test_app_message_board_detail_with_no_token(self):
@@ -721,10 +721,11 @@ class ViewsMessageTest(TestCase):
             # print(response.content.decode(response.charset))
             self.assertEqual(response.content,
                              f'<a href="/bc/project/{bucket_id}">back</a><br/>'
-                             f'title: {self.message_board["title"]}<br/>'
-                             f'type: {self.message_board["type"]}<br/>'
-                             f'<a href="/bc/project/{bucket_id}/message_board/'
-                             f'{self.message_board["id"]}/message">{self.message_board["messages_count"]} messages</a>'
+                             f'title: {self.message_board["title"]}&lt;br/&gt;'
+                             f'type: {self.message_board["type"]}&lt;br/&gt;'
+                             f'&lt;a href=&quot;/bc/project/{bucket_id}/message_board/'
+                             f'{self.message_board["id"]}/message&quot;&gt;'
+                             f'{self.message_board["messages_count"]} messages&lt;/a&gt;'
                              f'<br/>'.encode(response.charset))
 
     def test_app_message_board_message(self):
@@ -759,8 +760,9 @@ class ViewsMessageTest(TestCase):
             # print(response.content.decode(response.charset))
             self.assertEqual(response.content,
                              f'<a href="/bc/project/{bucket_id}/message_board/{self.message["parent"]["id"]}">back</a>'
-                             f'<br/><li><a href="/bc/project/{bucket_id}/message/{self.message["id"]}">'
-                             f'{self.message["id"]}</a> We won Leto! (db)</li>'.encode(response.charset))
+                             f'<br/>&lt;br/&gt;&lt;li&gt;&lt;a href=&quot;/bc/project/{bucket_id}/message/'
+                             f'{self.message["id"]}&quot;&gt;{self.message["id"]}&lt;/a&gt;'
+                             f' We won Leto! (db)&lt;/li&gt;<br/>'.encode(response.charset))
 
     def test_app_message_board_message_with_no_token(self):
 
@@ -918,8 +920,9 @@ class ViewsMessageTest(TestCase):
             self.assertEqual(response.content,
                              f'<a href="/bc/project/{bucket_id}/message_board/{self.message["parent"]["id"]}">back</a>'
                              f'<br/>total messages: {x_total_count}'
-                             f'<li><a href="/bc/project/{bucket_id}/message/{self.message["id"]}">{self.message["id"]}'
-                             f'</a> We won Leto! (db)</li>'.encode(response.charset))
+                             f'&lt;br/&gt;&lt;li&gt;&lt;a href=&quot;/bc/project/{bucket_id}/message/'
+                             f'{self.message["id"]}&quot;&gt;{self.message["id"]}&lt;/a&gt;'
+                             f' We won Leto! (db)&lt;/li&gt;<br/>'.encode(response.charset))
 
     def test_app_message_detail(self):
         with (
@@ -951,7 +954,7 @@ class ViewsMessageTest(TestCase):
             # print(response.content.decode(response.charset))
             self.assertEqual(response.content,
                              f'<a href="/bc/project/{bucket_id}">back</a><br/>'
-                             f'title: {self.message["title"]}<br/>type: {self.message["type"]}<br/>'
+                             f'title: {self.message["title"]}&lt;br/&gt;type: {self.message["type"]}&lt;br/&gt;'
                              f'comments_count: {self.message["comments_count"]}<br/>'.encode(response.charset))
 
     def test_app_message_detail_with_no_token(self):
@@ -1167,7 +1170,7 @@ class ViewsMessageTest(TestCase):
             # print(response.content.decode(response.charset))
             self.assertEqual(response.content,
                              f'<a href="/bc/project/{bucket_id}">back</a><br/>'
-                             f'title: {self.message["title"]}<br/>type: {self.message["type"]}<br/>'
+                             f'title: {self.message["title"]}&lt;br/&gt;type: {self.message["type"]}&lt;br/&gt;'
                              f'comments_count: {self.message["comments_count"]}<br/>'.encode(response.charset))
 
     def test_app_message_detail_with_not_exist_category(self):
@@ -1239,7 +1242,7 @@ class ViewsMessageTest(TestCase):
             # print(response.content.decode(response.charset))
             self.assertEqual(response.content,
                              f'<a href="/bc/project/{bucket_id}">back</a><br/>'
-                             f'title: {self.message["title"]}<br/>type: {self.message["type"]}<br/>'
+                             f'title: {self.message["title"]}&lt;br/&gt;type: {self.message["type"]}&lt;br/&gt;'
                              f'comments_count: {self.message["comments_count"]}<br/>'.encode(response.charset))
 
 
@@ -1277,6 +1280,9 @@ class ViewsCommentTest(TestCase):
             mock_request_get.return_value.status_code = 200
             mock_request_get.return_value.json.return_value = self.comment
 
+            _comment_bucket_id = self.comment["bucket"]["id"]
+            _comment_parent_id = self.comment["parent"]["id"]
+
             # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
             response = self.client.get(
                 reverse('app-comment-detail',
@@ -1289,8 +1295,10 @@ class ViewsCommentTest(TestCase):
             self.assertEqual(response.status_code, 200)
             # response.charset = utf-8
             self.assertEqual(response.content,
-                             '<a href="/bc/project/2085958499">back</a><br/>title: Re: We won Leto!<br/>parent: '
-                             '<a href="#" target="_black">Message 1069479351</a><br/>'.encode(response.charset))
+                             f'<a href="/bc/project/{_comment_bucket_id}">back</a><br/>'
+                             'title: Re: We won Leto!&lt;br/&gt;'
+                             'parent: &lt;a href=&quot;#&quot; target=&quot;_black&quot;&gt;'
+                             f'Message {_comment_parent_id}&lt;/a&gt;<br/>'.encode(response.charset))
 
     def test_app_comment_detail_with_no_token(self):
 
@@ -1473,6 +1481,9 @@ class ViewsCommentTest(TestCase):
             self.comment["id"] = 1
             mock_request_get.return_value.json.return_value = self.comment
 
+            _comment_bucket_id = self.comment["bucket"]["id"]
+            _comment_parent_id = self.comment["parent"]["id"]
+
             # response: https://docs.djangoproject.com/en/dev/ref/request-response/#django.http.HttpResponse
             response = self.client.get(
                 reverse('app-comment-detail',
@@ -1485,8 +1496,10 @@ class ViewsCommentTest(TestCase):
             self.assertEqual(response.status_code, 200)
             # response.charset = utf-8
             self.assertEqual(response.content,
-                             '<a href="/bc/project/2085958499">back</a><br/>title: Re: We won Leto!<br/>parent: '
-                             '<a href="#" target="_black">Message 1069479351</a><br/>'.encode(response.charset))
+                             f'<a href="/bc/project/{_comment_bucket_id}">back</a><br/>'
+                             'title: Re: We won Leto!&lt;br/&gt;'
+                             'parent: &lt;a href=&quot;#&quot; target=&quot;_black&quot;&gt;Message '
+                             f'{_comment_parent_id}&lt;/a&gt;<br/>'.encode(response.charset))
 
             # make sure the new comment created
             _comment = BcComment.objects.get(pk=self.comment["id"])

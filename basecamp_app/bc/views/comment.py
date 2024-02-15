@@ -6,7 +6,8 @@ from bc.utils import (session_get_token_and_identity, bc_api_get,
                       db_get_bucket, db_get_comment_parent, db_get_or_create_person,
                       api_comment_get_bucket_comment_uri,
                       static_get_comment_parent_uri, static_get_comment_parent_types,
-                      repr_http_response_template_string, repr_template_response_entity_creator_bucket_parent)
+                      repr_http_response_template_string, repr_template_response_entity_creator_bucket_parent,
+                      repr_template_response_simple_with_back)
 
 
 def app_comment_detail(request, bucket_id, comment_id):
@@ -70,8 +71,7 @@ def app_comment_detail(request, bucket_id, comment_id):
 
     _comment_title = _comment.title if _comment else comment["title"]
 
-    return HttpResponse(
-        '<a href="' + reverse('app-project-detail', kwargs={'project_id': bucket_id}) + '">back</a><br/>'
-        f'title: {_comment_title}<br/>'
-        f'{parent_str}<br/>'
-    )
+    _response = repr_template_response_simple_with_back(
+        back_href=reverse('app-project-detail', kwargs={'project_id': bucket_id}),
+        body=f'title: {_comment_title}<br/>{parent_str}')
+    return HttpResponse(_response)

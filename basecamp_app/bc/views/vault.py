@@ -9,7 +9,7 @@ from bc.utils import (session_get_token_and_identity, bc_api_get,
                       api_vault_get_bucket_vault_uploads_uri, api_document_get_bucket_upload_uri,
                       static_get_vault_parent_types,
                       repr_http_response_template_string, repr_template_response_entity_creator_bucket_parent,
-                      repr_template_response_entity_creator_bucket)
+                      repr_template_response_entity_creator_bucket, repr_template_response_simple_with_back)
 
 
 def app_vault_detail(request, bucket_id, vault_id):
@@ -71,18 +71,19 @@ def app_vault_detail(request, bucket_id, vault_id):
 
     _vault_title = _vault.title if _vault else vault["title"]
 
-    return HttpResponse(
-        '<a href="' + reverse('app-project-detail', kwargs={'project_id': bucket_id}) + '">back</a><br/>'
-        f'title: {_vault_title}<br/>'
-        f'<a href="' + reverse('app-vault-documents',
-                               kwargs={'bucket_id': bucket_id, 'vault_id': vault_id}) +
-        f'">{vault["documents_count"]} documents</a><br/>'
-        f'<a href="' + reverse('app-vault-uploads', kwargs={'bucket_id': bucket_id, 'vault_id': vault_id}) +
-        f'">{vault["uploads_count"]} uploads</a><br/>'
-        f'<a href="' + reverse('app-vault-vaults',
-                               kwargs={'bucket_id': bucket_id, 'vault_id': vault["id"]}) +
-        f'">{vault["vaults_count"]} vaults</a><br/>'
+    _response = repr_template_response_simple_with_back(
+        back_href=reverse('app-project-detail', kwargs={'project_id': bucket_id}),
+        body=f'title: {_vault_title}<br/>'
+             f'<a href="' + reverse('app-vault-documents',
+                                    kwargs={'bucket_id': bucket_id, 'vault_id': vault_id}) +
+             f'">{vault["documents_count"]} documents</a><br/>'
+             f'<a href="' + reverse('app-vault-uploads', kwargs={'bucket_id': bucket_id, 'vault_id': vault_id}) +
+             f'">{vault["uploads_count"]} uploads</a><br/>'
+             f'<a href="' + reverse('app-vault-vaults',
+                                    kwargs={'bucket_id': bucket_id, 'vault_id': vault["id"]}) +
+             f'">{vault["vaults_count"]} vaults</a>'
     )
+    return HttpResponse(_response)
 
 
 def app_vault_vaults(request, bucket_id, vault_id):
@@ -122,12 +123,10 @@ def app_vault_vaults(request, bucket_id, vault_id):
         total_count = int(response.headers["X-Total-Count"])
         total_count_str = f'shows {count}/{total_count} vaults'
 
-    return HttpResponse(
-        '<a href="' + reverse('app-vault-detail',
-                              kwargs={'bucket_id': bucket_id, 'vault_id': vault_id}) + '">back</a><br/>'
-        f'{total_count_str}<br/>'
-        f'{vault_list}<br/>'
-    )
+    _response = repr_template_response_simple_with_back(
+        back_href=reverse('app-vault-detail', kwargs={'bucket_id': bucket_id, 'vault_id': vault_id}),
+        body=f'{total_count_str}<br/>{vault_list}')
+    return HttpResponse(_response)
 
 
 def app_document_detail(request, bucket_id, document_id):
@@ -197,10 +196,10 @@ def app_document_detail(request, bucket_id, document_id):
 
     _document_title = _document.title if _document else document["title"]
 
-    return HttpResponse(
-        '<a href="' + reverse('app-project-detail', kwargs={'project_id': bucket_id}) + '">back</a><br/>'
-        f'title: {_document_title}<br/>'
-    )
+    _response = repr_template_response_simple_with_back(
+        back_href=reverse('app-project-detail', kwargs={'project_id': bucket_id}),
+        body=f'title: {_document_title}')
+    return HttpResponse(_response)
 
 
 def app_vault_documents(request, bucket_id, vault_id):
@@ -246,12 +245,10 @@ def app_vault_documents(request, bucket_id, vault_id):
         total_count = int(response.headers["X-Total-Count"])
         total_count_str = f'shows {count}/{total_count} documents'
 
-    return HttpResponse(
-        '<a href="' + reverse('app-vault-detail',
-                              kwargs={'bucket_id': bucket_id, 'vault_id': vault_id}) + '">back</a><br/>'
-        f'{total_count_str}<br/>'
-        f'{document_list}<br/>'
-    )
+    _response = repr_template_response_simple_with_back(
+        back_href=reverse('app-vault-detail', kwargs={'bucket_id': bucket_id, 'vault_id': vault_id}),
+        body=f'{total_count_str}<br/>{document_list}')
+    return HttpResponse(_response)
 
 
 def app_upload_detail(request, bucket_id, upload_id):
@@ -321,10 +318,10 @@ def app_upload_detail(request, bucket_id, upload_id):
 
     _upload_title = _upload.title if _upload else upload["title"]
 
-    return HttpResponse(
-        '<a href="' + reverse('app-project-detail', kwargs={'project_id': bucket_id}) + '">back</a><br/>'
-        f'title: {_upload_title}<br/>'
-    )
+    _response = repr_template_response_simple_with_back(
+        back_href=reverse('app-project-detail', kwargs={'project_id': bucket_id}),
+        body=f'title: {_upload_title}')
+    return HttpResponse(_response)
 
 
 def app_vault_uploads(request, bucket_id, vault_id):
@@ -370,9 +367,7 @@ def app_vault_uploads(request, bucket_id, vault_id):
         total_count = int(response.headers["X-Total-Count"])
         total_count_str = f'shows {count}/{total_count} uploads'
 
-    return HttpResponse(
-        '<a href="' + reverse('app-vault-detail',
-                              kwargs={'bucket_id': bucket_id, 'vault_id': vault_id}) + '">back</a><br/>'
-        f'{total_count_str}<br/>'
-        f'{upload_list}<br/>'
-    )
+    _response = repr_template_response_simple_with_back(
+        back_href=reverse('app-vault-detail', kwargs={'bucket_id': bucket_id, 'vault_id': vault_id}),
+        body=f'{total_count_str}<br/>{upload_list}')
+    return HttpResponse(_response)

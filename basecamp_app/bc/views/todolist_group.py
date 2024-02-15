@@ -3,7 +3,8 @@ from django.urls import reverse
 
 from bc.models import BcTodolist
 from bc.utils import (session_get_token_and_identity, bc_api_get, api_todolist_group_get_todolist_groups_uri,
-                      repr_http_response_template_string, repr_template_response_entity_creator_bucket_parent)
+                      repr_http_response_template_string, repr_template_response_entity_creator_bucket_parent,
+                      repr_template_response_simple_with_back)
 
 
 def app_todolist_group_main(request, bucket_id, todolist_id):
@@ -65,9 +66,7 @@ def app_todolist_group_main(request, bucket_id, todolist_id):
         total_count = int(response.headers["X-Total-Count"])
         total_count_str = f'shows {count}/{total_count} todolist_groups'
 
-    return HttpResponse(
-        '<a href="' + reverse('app-todolist-detail',
-                              kwargs={'bucket_id': bucket_id, 'todolist_id': todolist_id}) + '">back</a><br/>'
-        f'{total_count_str}<br/>'
-        f'{todolist_group_list}<br/>'
-    )
+    _response = repr_template_response_simple_with_back(
+        back_href=reverse('app-todolist-detail', kwargs={'bucket_id': bucket_id, 'todolist_id': todolist_id}),
+        body=f'{total_count_str}<br/>{todolist_group_list}')
+    return HttpResponse(_response)

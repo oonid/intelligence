@@ -5,7 +5,7 @@ from bc.models import BcTodoset, BcTodolist
 from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, db_get_or_create_person,
                       api_todolist_get_bucket_todoset_todolists_uri, api_todolist_get_bucket_todolist_uri,
                       repr_http_response_template_string, repr_template_response_entity_not_found,
-                      repr_template_response_entity_creator_bucket_parent)
+                      repr_template_response_entity_creator_bucket_parent, repr_template_response_simple_with_back)
 
 
 def app_todolist_main(request, bucket_id, todoset_id):
@@ -70,12 +70,10 @@ def app_todolist_main(request, bucket_id, todoset_id):
         total_count = int(response.headers["X-Total-Count"])
         total_count_str = f'shows {count}/{total_count} todolists'
 
-    return HttpResponse(
-        '<a href="' + reverse('app-todoset-detail',
-                              kwargs={'bucket_id': bucket_id, 'todoset_id': todoset_id}) + '">back</a><br/>'
-        f'{total_count_str}'
-        f'{todolist_list}'
-    )
+    _response = repr_template_response_simple_with_back(
+        back_href=reverse('app-todoset-detail', kwargs={'bucket_id': bucket_id, 'todoset_id': todoset_id}),
+        body=f'{total_count_str}<br/>{todolist_list}')
+    return HttpResponse(_response)
 
 
 def app_todolist_detail(request, bucket_id, todolist_id):
@@ -180,13 +178,13 @@ def app_todolist_detail(request, bucket_id, todolist_id):
             entity_type=todolist["type"], entity_title=todolist["title"], list_parent_types=["Todoset", "Todolist"])
         return HttpResponseBadRequest(_exception)
 
-    return HttpResponse(
-        '<a href="' + reverse('app-project-detail', kwargs={'project_id': bucket_id}) + '">back</a><br/>'
-        f'title: {todolist["title"]}<br/>'
+    _response = repr_template_response_simple_with_back(
+        back_href=reverse('app-project-detail', kwargs={'project_id': bucket_id}),
+        body=f'title: {todolist["title"]}<br/>'
         f'completed: {todolist["completed"]}<br/>'
         f'completed_ratio: {todolist["completed_ratio"]}<br/>'
         f'{todolist_group_str}'
         '<a href="'+reverse('app-todo-main',
                             kwargs={'bucket_id': bucket_id, 'todolist_id': todolist_id})+'">todos</a><br/>'
-        f'{todolist["comments_count"]} comment(s)<br/>'
-    )
+        f'{todolist["comments_count"]} comment(s)')
+    return HttpResponse(_response)
