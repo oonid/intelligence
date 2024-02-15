@@ -216,9 +216,12 @@ def app_schedule_entry_detail(request, bucket_id, schedule_entry_id):
         _schedule_entry.participants.set(participants)
 
     else:
-        return HttpResponseBadRequest(
-            f'question {schedule_entry["title"]} has no participants or creator or '
-            f'bucket type Project or parent type Schedule')
+        template_str = ('{{ entity_type }} {{ entity_title }} has no participants or creator or bucket type Project or '
+                        'parent type in {{ list_parent_types }}')
+        context_dict = {'entity_type': schedule_entry["type"], 'entity_title': schedule_entry["title"],
+                        'list_parent_types': ["Schedule"]}
+        _exception = repr_http_response_template_string(template_str=template_str, context_dict=context_dict)
+        return HttpResponseBadRequest(_exception)
 
     _response = repr_template_response_simple_with_back(
         back_href=reverse('app-project-detail', kwargs={'project_id': bucket_id}),

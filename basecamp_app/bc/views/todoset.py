@@ -4,7 +4,7 @@ from django.urls import reverse
 from bc.models import BcTodoset
 from bc.utils import (session_get_token_and_identity, bc_api_get, db_get_bucket, db_get_or_create_person,
                       api_todoset_get_bucket_todoset_uri,
-                      repr_template_response_simple_with_back)
+                      repr_template_response_entity_creator_bucket, repr_template_response_simple_with_back)
 
 
 def app_todoset_detail(request, bucket_id, todoset_id):
@@ -48,7 +48,9 @@ def app_todoset_detail(request, bucket_id, todoset_id):
             _todoset.save()
 
     else:
-        return HttpResponseBadRequest(f'todoset {todoset["title"]} has no creator or bucket with type Project')
+        _exception = repr_template_response_entity_creator_bucket(entity_type=todoset["type"],
+                                                                  entity_title=todoset["title"])
+        return HttpResponseBadRequest(_exception)
 
     _response = repr_template_response_simple_with_back(
         back_href=reverse('app-project-detail', kwargs={'project_id': bucket_id}),
