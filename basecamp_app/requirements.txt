@@ -1,5 +1,5 @@
 Django~=4.2
 djangorestframework
-gunicorn~=21.2
+gunicorn~=22.0
 requests~=2.31
 coverage~=7.3
